@@ -1,6 +1,5 @@
 #import "@preview/fletcher:0.5.2" as fletcher: diagram, node, edge
-// #import "@preview/ctheorems:1.1.2": *
-#import "theorems.typ": *
+#import "@preview/ctheorems:1.1.3": *
 
 #show: thmrules.with(qed-symbol: $square$)
 
