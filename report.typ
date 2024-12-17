@@ -36,6 +36,9 @@
 #let beh = math.sans("beh")
 #let Klp = $cal("Kl")(cal(P))$
 #let tr = beh
+#let lfp = text("lfp")
+#let Var = math.italic("Var")
+#let cons = math.sans("cons")
 
 
 // Title row.
@@ -60,8 +63,6 @@
 
 = Introduction
 
-// This document serves as the midterm report for Jorrit de Boer's research internship at the Fundamental Computing group at the Bernoulli Institute at Rijksuniversiteit Groningen. The document describes the literature studied thus far and plans for the rest of the internship. Specifically, the literature studied tries to answer the question of how to give a coalgebraic representation of Büchi automata. Towards this goal, also the coalgebraic representation of nondeterministic systems is studied.
-
 _Büchi automata_ and _nondeterministic systems_ are crucial in theoretical computer science for modeling and verifying systems with infinite behaviors @gradel2003automata@Vardi1996. Nondeterministic systems capture uncertainty and multiple outcomes, and are used in models like concurrent processes and nondeterministic Turing machines. Büchi automata, which are often also nondeterministic, handle infinite sequences of events, crucial for verifying systems that run indefinitely, such as operating systems or network protocols.
 
 _Coalgebra_ provides an effective framework for modeling state-based, dynamic systems. Techniques such as _coinduction_ allow for reasoning about infinite structures, while _bisimulation_ offers a formal way to establish behavioral equivalence between systems @rutten2000universal. By modeling Büchi automata coalgebraically, we unify these powerful tools for reasoning about infinite behaviors and nondeterminism.
@@ -71,10 +72,6 @@ The main goal of this report is to provide an understanding of the coalgebraic c
 Next to providing an overview of the available literature, we outline our plan for the rest of the internship. Our goal is to use _game semantics_ as an alternative framework to derive the coalgebraic representation of Büchi automata. Game semantics is a framework of describing a system in terms of a two-player game between a _verifier_ and a _refuter_ who want to verify, respectively refute, a statement @gradel2003automata. By utilizing game semantics we hope to provide a more intuitive proof of the existing results.
 
 The document is outlined as follows. In @sec:background we provide some background and relevant definitions for the rest of the report. In @chap:results we give the main results from the studied literature, which is divided into: modal mu-calculus in @sec:modal, coalgebraic model of nondeterministic systems in @sec:nd, and the coalgebraic model of Büchi automata in @results:buchi. Finally, in @sec:conclusion we summarize the results and give our plans for the rest of the internship.
-
-
-
-// This report details the literature and progress made toward this goal. The outline of the document is as follows. We describe some required preliminaries in @sec:background. Then, in @chap:results we describe the following topics in order from the studied literature: how modal mu-calculus can be used to verify properties of transition systems; a construction to describe nondeterministic systems coalgebraically; a construction to describe Büchi automata coalgebraically. Finally, in @sec:conclusion, we conclude the document and describe plans for the rest of the internship.
 
 // #outline(depth: 2)
 
@@ -156,7 +153,6 @@ which eventually stabilizes, giving the least fixed point, as stated by the foll
   The dual process, beginning from $top$ and moving downward, constructs the greatest fixed point of $f$.
 ] <th:knaster-tarski2>
 
-= Main Results <chap:results>
 == Modal Mu-Calculus <sec:modal>
 Modal mu-calculus is a powerful framework, used to verify properties of transition systems @gradel2003automata@arnold2001rudiments. We use it in @results:buchi to select the right accepting words for our coalgebraic system. In this section we give a concrete definition of modal mu-calculus formulas and provide intuition on how to use it to verify certain properties.
 
@@ -171,26 +167,22 @@ In this section we will consider _labeled transition systems_ (LTS) for which we
   where $P in italic("Prop")$ is an atomic proposition, $a in Sigma$ a label, and $Z in italic("Var")$ which is a set of second order variables. We require that in $nu Z.phi$ and $mu Z.phi$, every occurance of $Z$ in $phi$ is in the scope of an even number of negations, such that that $phi$ is a monotone function.
 ]
 
-Note that you could define the modal mu-calculus without the $or$, $angle.l a angle.r$, and $nu$ operators, and define these instead in terms of the other operators, but we include them in the definition for legibility.
+Note that you could define the modal mu-calculus without the $or$, $angle.l a angle.r$, and $nu$ operators, and define these instead in terms of the other operators, but we include them in the definition for legibility. _this time whole semantics?_
 
-// #definition[We define the semantics of a modal mu-calculus formula for an LTS T, and an assignment $V: italic("Var")->cal(P)(X)$:
-//   $
-//     ||P||^T_V & := rho(P)\
-//     ||Z||^T_V & := V(Z) \
-//     ||not phi||^T_V & := S \\ ||phi||^T_V\
-//     || phi_1 and phi_2 ||^T_V & := ||phi_1||^T_V sect ||phi_2||^T_V \
-//     || phi_1 or phi_2 ||^T_V & := ||phi_1||^T_V union ||phi_2||^T_V \
-//     || [a] phi ||^T_V &:= {x | forall y in X. x->^a y => y in ||phi||^T_V} \
-//     || angle.l a angle.r phi ||^T_V &:= {x | exists y in X. x->^a y => y in ||phi||^T_V} \
-//     || mu Z.phi ||^T_V &:= italic("lfp")(lambda U. ||phi||^T_(V[Z |-> U])) = sect.big {
-//       U subset.eq X | U subset.eq ||phi||^T_(V[Z |-> U])
-//     }\
-//     || nu Z.phi ||^T_V &:= italic("gfp")(lambda U. ||phi||^T_(V[Z |-> U])) = union.big {
-//       U subset.eq X | ||phi||^T_(V[Z |-> U])subset.eq U
-//     }
-//   $
-//   where $V[Z|->U]$ is the valuation $V$ except that $Z$ maps to $U$.
-// ]
+#definition[We define the semantics of a modal mu-calculus formula for an LTS T, and an assignment $V: italic("Var")->cal(P)(X)$:
+  $
+    ||P||^T_V & := rho(P)\
+    ||Z||^T_V & := V(Z) \
+    ||not phi||^T_V & := S \\ ||phi||^T_V\
+    || phi_1 and phi_2 ||^T_V & := ||phi_1||^T_V sect ||phi_2||^T_V \
+    || phi_1 or phi_2 ||^T_V & := ||phi_1||^T_V union ||phi_2||^T_V \
+    || [a] phi ||^T_V &:= {x | forall y in X. x->^a y => y in ||phi||^T_V} \
+    || angle.l a angle.r phi ||^T_V &:= {x | exists y in X. x->^a y => y in ||phi||^T_V} \
+    || mu Z.phi ||^T_V &:= italic("lfp")(lambda U. ||phi||^T_(V[Z |-> U])) = sect.big { U subset.eq X | U subset.eq ||phi||^T_(V[Z |-> U]) }\
+    || nu Z.phi ||^T_V &:= italic("gfp")(lambda U. ||phi||^T_(V[Z |-> U])) = union.big { U subset.eq X | ||phi||^T_(V[Z |-> U])subset.eq U }
+  $
+  where $V[Z|->U]$ is the valuation $V$ except that $Z$ maps to $U$.
+]
 
 We do not give a formal definition of the semantics of the formulas for an LTS, but rather give an informal and intuitive explanation, see @arnold2001rudiments@gradel2003automata for the formal definition. We want to say whether in an LTS $T$ a formula $phi$ holds in a state $x$, which we denote $x tack.r.double phi$. The semantics are then roughly as follows:
 - $x tack.r.double P$, if the atomic proposition $P$ holds in $x$;
@@ -244,6 +236,41 @@ Next we introduce a system of equations for alternating fixed points. We only sh
   The solution to the second equation is then given by $l^(sol):= eta_2 u_2. f_2(l^((1))_1(u_2), u_2)$, where again we take the lfp if $eta_2=mu$, and gfp if $eta_2=nu$. The solution to the first equation is then $l^sol_1 = l^((1))_1(l^sol_2)$.
 ] <def:eq>
 
+== Parity Games
+#definition("Parity Game")[
+  A parity game is a tuple $((V_1,V_2),E,Omega)$, where $V=V_1 union.sq V_2$ is the set of states, where $V_1$ are the states where player 1 can pick the next transition, and $V_2$ player 2. $E subset.eq V times V$ are transitions between the states. $Omega:V->bb(N)$ is the parity function, which determines the winner for infinite games.
+
+  A play of the game is a sequence of states $v_1,v_2,dots in V^infinity$ which conform to the transitions. A finite play is won by a player if the other player gets stuck, i.e. has no moves from a position. An infinite play $pi=v_1,v_2,dots$ is won by player 1 if $max{Omega(v) | v "occurs infinitely often in" pi}$ is even, else player 2 wins.
+]
+
+#definition([Parity Game for Modal $mu$-Calculus on Transition System. Definition 10.14, Remark 10.15 @gradel2003automata])[
+  For a transition system $T=(S,->,lambda)$ and a modal $mu$-calculus formula $phi$, we define the game $cal(G)(phi,T)=((V_1,V_2),E,Omega)$ where:
+  - #[$V=V_1 union.sq V_2= {phi' | phi' " is a subformula of " phi} times S$ where the formula determines whether player 1 or 2 can move. For a vertex $(psi,s) in V$:
+      - #[$(psi,s) in V_1$, i.e. player 1 can move if
+          - $psi= psi_1 or psi_2$
+          - $psi= diamond psi'$
+          - $psi= eta Z. psi'$ for $eta in {mu,nu}$
+          - $psi=Z$ for $Z subset.eq cal(P)(S)$ a fixed point variable
+          - $psi = p$ for $p$ a propositional variable with $p in lambda(s)$.
+        ]
+      - #[$(psi,s) in V_2$, i.e. player 2 can move if
+          - $psi=psi_1 and psi_2$
+          - $psi = p$ for $p$ a propositional variable with $p in.not lambda(s)$.
+        ]
+    ]
+  - Edges:
+    - $(psi_1 or psi_2,s)->(psi_1,s)$ and $(psi_1 or psi_2,s)->(psi_2,s)$
+    - $(psi_1 and psi_2,s)->(psi_1,s)$ and $(psi_1 and psi_2,s)->(psi_2,s)$
+    - $(diamond psi, s)->(psi,s')$ for any $s'$ such that $s -> s'$ in $T$.
+    - $(eta Z. psi, s)-> (psi, s)$ and $(Z,s)->(psi,s)$ for $eta in {mu,nu}$
+  - $Omega$: (more precise definition needed)
+    - $Omega((mu Z.psi,s))= $ the smallest odd number greater or equal than the (proper) alternated $mu slash nu$ operators in $psi$.
+    - $Omega((mu Z.psi,s))= $ the smallest even number greater or equal than the (proper) alternated $mu slash nu$ operators in $psi$.
+    - $Omega((psi,s))=0$ iff $psi$ is not a $mu$ or $nu$ formula.
+]
+
+
+= Coalgebraic Representation of Büchi Automata <chap:results>
 == Finite Behavior Nondeterministic Systems <sec:nd>
 In this section we present a coalgebraic representation of nondeterministic systems. The next section for Büchi automata builds upon this construction.
 
@@ -481,6 +508,53 @@ $
   u_2 &=_nu (J d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
 $ <eq:traces>
 
+#line(length: 100%)
+
+#lemma(numbering: "1")[
+  The traces
+  $
+    u_1 &=^mu (J d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_1 #h(3em)
+    u_2 &=^nu (J d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
+  $ //<eq:traces>
+
+  coincide with:
+
+  $
+    u_1 =^mu diamond_delta ([u_1, u_2]) harpoon.tr X_1 #h(3em) u_2 =^nu diamond_delta ([u_1,u_2]) harpoon.tr X_2
+  $
+
+  Where $diamond_delta: (cal(P)(Sigma^omega))^(X)->(cal(P)(Sigma^omega))^(X)$ is given by
+  $
+    diamond_delta (beh)(x) = {sigma dot w | x'in delta(x)(sigma) , w in beh(x')}.
+  $ <eq:diamond>
+] <lemma:0>
+
+#proof[
+  First we unfold some definitions:
+
+  $(J d)^(-1)= J (d^(-1))$ and $d^(-1)=cons$ and $J=eta_(Sigma^omega)$, so $J compose d^(-1) = eta_(Sigma^omega) compose cons$.
+
+  $overline(F)[u_1,dots,u_n]= lambda_(Sigma^omega) compose (id times (u_1 + dots + u_n))$ so let us call $u_1+dots+ u_n=beh$ and see that $id times beh: (Sigma times X) -> (Sigma times cal(P)(Sigma^omega))$, maps a pair $(sigma,x)$ to $(sigma,beh(x))$, i.e. $sigma$ and the language accepted by $x$. Combining with the natural transformation $lambda: (Sigma times cal(P(Sigma^omega)))-> cal(P)(Sigma times Sigma^omega)$ defined by $lambda(sigma,W)={(sigma,w)| w in W }$ we get $overline(F)[u_1,dots,u_n](sigma,x)={(sigma,w) | w in beh(x)}$
+
+  $c_i= c compose kappa_i: X_i -> cal(P)(Sigma times X)$ in terms of the automaton is defined as $c_(i)(x)={(sigma,x')| x' in X, sigma in Sigma, x' in delta(x)(sigma)}$ for $x in X_i$.
+
+  Combining these, and writing out the Kleisli composition in terms of functions in *Sets* we get:
+
+  $
+    (J d)^(-1) dot.circle overline(F)[u_1,dots,u_n] dot.circle c_i = mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) compose (mu_(Sigma times Sigma^omega) compose cal(P)(lambda compose (id times (u_1 + dots + u_n))) compose c_i).
+  $
+
+  Observing that $mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) = cal(P(cons))$, letting $u_1+dots+u_n=beh$ again and combining $cal(P)(lambda compose (id times beh))$ and $c_1$ by using our observations from above we obtain, for an $x in X_i$:
+
+  $
+    (mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) compose (mu_(Sigma times Sigma^omega) compose cal(P)(lambda compose (id times (u_1 + dots + u_n))) compose c_1))(x) \
+    = cal(P)(cons)({(sigma,w) | x' in X, x' in delta(x)(sigma), w in [u_1,dots,u_n](x') })\
+    = {sigma dot w | x' in delta(x)(sigma), w in beh(x') } = diamond_delta (beh)(x)
+  $
+
+]
+#line()
+
 By taking exactly those behavior mappings which are the solution to this system of equation, we take exactly those words that the Büchi automaton accepts. The proof that this works is mostly done in the following two lemmas.
 
 
@@ -518,6 +592,87 @@ After observing that @eq:traces in fact coincides with the definition of $diamon
 #theorem([#cite(<urabe2016coalgebraic>, supplement: "Theorem 4.6")])[
   Let $chi=((X_1,X_2), Sigma, delta, s)$ be a Büchi automaton. Then the behavior mappings $tr_1,tr_2$, which are the solution to the system of equations in @eq:traces coincide with the accepted language of $chi$: $tr(chi)=[tr_1,tr_2] dot.circle s (*) = "Lang"(chi)$. Where we interpret $s subset.eq X$ as $s: 1 -> cal(P)(X)$.
 ] <th>
+
+= Derivation of Coincidence Using Game Semantics
+In this section we prove @th using game semantics and in a very pretty way.
+
+#definition[
+  Let $A=(X_1 union X_2, Sigma, delta)$ be a Büchi automaton, with states $X=X_1 union X_2$ where $X_2$ are the accepting states, $Sigma$ is the alphabet, and $delta: X times Sigma -> cal(P)(X)$ the transition function. We define a Transition System (TS) over the set of propositional variables ${p_1,p_2}$ for this automaton, denoted as $T_A$, as follows:
+  - States are $(x,w)$ for $x in X$ and $w in Sigma^omega$
+  - Transition $(x,sigma w) -> (x', w)$ for $x,x'in X$, $sigma in Sigma$, $w in Sigma^omega$, iff $x'in delta(x)(sigma)$
+  - Labeling function given by $lambda((x,w))={p_i}$ iff $x in X_i$, i.e. the propositional variables denote for what $i$, we have $x in X_i$.
+]
+
+We observe how the formulas from @lemma:0 are built up and convert them. For example the closed formula for $beh_1: X_1 -> Sigma^omega$ for $n=2$ priorities, i.e. a Büchi automaton, $beh_1=nu u_2. diamond_delta [mu u_1. [u_1,u_2] arrow.t X_1, u_2] arrow.t X_2$. Let $phi$ be such a formula, then:
+- $phi=u$ a free variable, or
+- $phi=diamond_delta phi'$, or
+- $phi=eta u. phi'$ where $eta in {mu,nu}$, or
+- $phi = phi' arrow.t X_i $, or
+- $phi=[phi_1,dots,phi_n]$
+
+we also observe the implicit semantics of the formula $||phi||$: ...
+
+#definition[So we convert a formula $phi$, to our desired formula $overline(phi)$ to conform to Definition 10.2[]:
+  - $phi=u$ a free variable then $overline(phi)=u$ also a free variable
+  - $phi=diamond_delta phi'$ then $overline(phi)=diamond overline(phi')$
+  - $phi=eta u. phi'$ for $eta in {mu,nu}$ then $overline(phi)=eta u . overline(phi')$
+  - $phi = phi' arrow.t X_i $ then $overline(phi)=p_i and overline(phi')$
+  - $phi=[phi_1,dots,phi_n]$ then $overline(phi)=(p_1 and overline(phi_1)) or ... or (p_n and overline(phi_n))$
+]
+
+
+#lemma()[
+  For a modal $mu$-calculus formula $phi$ (a la paper 1) and a valuation $V: Var -> (X -> cal(P)(Sigma^omega))$, $x in X, w in Sigma^omega$:
+
+  $
+    w in ||phi||_(V) (x) <=> (x,w) in ||overline(phi)||^(T_A)_overline(V)
+  $
+
+  where $overline(V)(U)={(x,w)| x in X, w in V(U)(x)}$
+]
+#let ubar = $overline(U)$
+#let vbar = $overline(V)$
+#let wbar = $overline(W)$
+#let ybar = $overline(Y)$
+#let dd = $diamond_delta$
+#proof[
+  We prove this by induction on the formula $phi$. The base case is $phi=U$ a free variable:
+
+  $w in ||U||_(V)(x)=V(U)(x) <-> (x,w) in overline(V)(U) = ||U||^(T_A)_(overline(V))$
+
+  Induction step:
+
+  - $phi=mu U. phi'$:
+
+  We have to show $w in ||mu U. phi'||_(V)(x)=lfp(lambda u. ||phi'||_(V[U |-> u])) <=> (x,w) in ||mu U. overline(phi')||_(overline(V))=lfp (lambda u. ||overline(phi')||_(overline(V)[U |-> u]))$. Let $W= lfp(lambda u. ||phi'||_(V[U |-> u]))$. We define $overline(W)={(x,w) | x in X, w in W(x)}$ and show $W= lfp(lambda u. ||phi'||_(V[U |-> u]))<=>overline(W)= lfp(lambda u. ||overline(phi')||_(V[U |-> u]))$. For this we first prove that $W$ is a fixed point iff $overline(W)$ is a fixed point:
+
+  Assume $W$ is a fixed point, so $||phi'||_(V[U |-> W]) = W$. We observe that for a valuation $V$ and $V'$ where $V'=V[U|->W]$, we have the converted valuation $overline(V')=overline(V)[U |-> overline(W)]$. We use this to incite the IH to get $w in ||phi'||_(V[U|->W]) <=> (x,w) in ||overline(phi')||_(overline(V)[U |-> overline(W)])$. Using this we get $(x,w) in ||overline(phi')||_(overline(V)[U|-> overline(W)]) <=> w in ||phi'||_(V[U |-> W])(x)=W(x) <=> (x,w) in overline(W)$, so $||overline(phi')||_(overline(V)[U |->overline(W)])= wbar$, so $wbar$ is a fixed point.
+
+  Now assume $overline(W)$ is a fixed point, so $||overline(phi')||_(overline(V)[U |-> wbar]) = wbar$. Then, for $x in X$, $W(x)={w | (x,w) in overline(W)}$. Applying IH like the previous case again we obtain $w in ||phi'||_(V[U |-> W])(x) <=> (w,x) in ||overline(phi')||_(overline(V)[U |-> overline(W)])= W <=> w in W(x) $. So $w in ||phi'||_(V[U |-> W])(x) <=> w in W(x)$ for all $x in X$, so $||phi'||_(V[U |-> W])=W$, so $W$ is a fixed point.
+
+  Next, we show that $W$ is the _least_ fixed point iff $overline(W)$ is the _least_ fixed point:
+
+  Assume $W$ is a lfp, from above we know that $wbar$ is a fixed point. Take some other fixed point $ybar$, i.e. $||overline(phi')||_(overline(V)[U|->ybar])=ybar$. Now, again inciting what we showed above, we know $Y$ is a fixed point, so $||phi'||_(V[U|->ybar])=ybar$. So because $W$ is the lfp, for all $x$, $W(x)subset.eq Y(x)$. From this it follows that $(x,w) in wbar -> w in W(x) -> w in Y(x) -> (x,w) in ybar$, so $wbar subset.eq ybar$. So $wbar$ is the least fixed point.
+
+  For the other direction, assume $overline(W)$ is a least fixed point. Then $W$ is a fixed point. Take some other fixed point $Y$, i.e. $||phi'||_(V[U|->Y])=Y$, then $ybar$ is a fixed point. So because $wbar$ is the lfp, we have $wbar subset.eq ybar$. Now for any $w,x$ we have $w in W(x) -> (x,w) in wbar -> (x,w) in ybar -> w in Y(x)$. So $W subset.eq Y$.
+
+  - $phi=nu U. phi'$:
+
+  This case is a analagous to the $mu$ case. The first part proving $W$ is a fixed point iff $wbar$ is a fixed point, and for proving $W$ is a _greatest_ fixed point iff $wbar$ is too you reason in the opposite direction as for $mu$.
+
+  - $phi=diamond_delta phi'$: \
+  $w in & ||diamond_delta phi'||_(V)(x)
+    = {sigma w | exists x' in delta(x)(sigma)[ w in ||phi'||_(V)(x')] }
+    =^(I H){sigma w | exists x' in delta(x)(sigma)[ (x',w) in ||phi'||_(overline(V))] }
+    <-> (x,w) in {(x,sigma w) | exists x' in delta(x)(sigma)[ (x',w) in ||phi'||_(overline(V))] }
+    = ||diamond overline(phi')||^(T_A)_(overline(V))$
+  - $phi = phi' harpoon.tr X_i$: \
+  $w in ||phi' harpoon.tr X_i||_(V)(x) <-> x in X_i and w in ||phi'||_(V)(x) <->^(I H)x in X_i and (x,w) in ||overline(phi')||_(overline(V)) <-> (x,w) in ||p_i and overline(phi')||_(overline(V))$
+  - $phi= [phi_1,dots,phi_n]$:
+  $||phi||_(V)(x) = cases(||phi_1||_(V)(x) "if " x in X_1, dots.v, ||phi_n||_(V)(x) "if " x in X_n)$, so let $w in ||phi||_(V)(x)$ for $x in X_i$, then $w in ||phi_i||_(V)(x)$ so by IH $(x,w) in ||overline(phi_i)||_(overline(V))(x)$, and because $x in X_i$, $(x,w) in X_i$, $(x,w) in ||p_i and overline(phi_i)||_(overline(V))(x)$ and thus $(x,w) in ||(p_1 and phi_1) or ... or (p_n and phi_n)||_overline(V)=||overline(phi)||_overline(V)$.
+
+  Now $(x,w) in ||overline(phi)||_overline(V) = ||(p_1 and overline(phi_1)) or ... or (p_n and overline(phi_n))||_overline(V)$. Take $i$ such that $(x,w) in ||p_i and overline(phi_i)||_overline(V)$ then we have $x in X_i$ and (by IH) $w in ||phi_i||_(V)(x)$, and by definition of $||[phi_1,...,phi_n]||$ then $w in ||phi||_(V)(x)$.
+]
 
 
 
