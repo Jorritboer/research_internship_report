@@ -8,7 +8,7 @@
 
 #let theorem = mythmbox("theorem", "Theorem", base: "heading", base_level: 1)
 #let lemma = mythmbox("theorem", "Lemma", base: "heading", base_level: 1)
-#let definition = mythmbox("theorem", "Definition", base: "heading", base_level: 1, inset: 0em)
+#let definition = mythmbox("theorem", "Definition", base: "heading", base_level: 1, inset: 0em, breakable: true)
 #let proof = mythmproof("proof", "Proof")
 // #let theorem = thmbox("theorem", "Theorem", base:"heading", bodyfmt: body => [asdf])
 // #let lemma = thmbox("theorem", "Lemma", base:"heading", bodyfmt: body => [#align(left)[#body]])
@@ -38,6 +38,7 @@
 #let lfp = text("lfp")
 #let Var = math.italic("Var")
 #let cons = math.sans("cons")
+#let box = $square$
 
 
 // Title row.
@@ -57,12 +58,12 @@
   #set par(justify: false)
   // #set text(style: "italic")
   *Abstract.*
-  _We provide an explanation of existing literature for describing Büchi automata coalgebraically. To do this we also explain modal mu-calculus and a coalgebraic model of nondeterministic systems. Finally, we outline our plans for the rest of the research internship. _
+  _We provide an explanation of existing literature for describing Büchi automata coalgebraically using trace semantics. To do this we also explain the modal mu-calculus and a coalgebraic model of nondeterministic systems. Finally, we outline our plans for the rest of the research internship. _
 ]
 
 = Introduction
 
-_Büchi automata_ and _nondeterministic systems_ are crucial in theoretical computer science for modeling and verifying systems with infinite behaviors @gradel2003automata@Vardi1996. Nondeterministic systems capture uncertainty and multiple outcomes, and are used in models like concurrent processes and nondeterministic Turing machines. Büchi automata, which are often also nondeterministic, handle infinite sequences of events, crucial for verifying systems that run indefinitely, such as operating systems or network protocols.
+_Büchi automata_ and _nondeterministic systems_ are crucial in theoretical computer science for modeling and verifying systems with infinite behaviors @gradel2003automata@Vardi1996. Nondeterministic systems capture uncertainty and multiple outcomes, and are used in models like concurrent processes and nondeterministic Turing machines [ref needed]. Büchi automata, which are in general also nondeterministic, handle infinite sequences of events, crucial for verifying systems that run indefinitely, such as operating systems or network protocols.
 
 _Coalgebra_ provides an effective framework for modeling state-based, dynamic systems. Techniques such as _coinduction_ allow for reasoning about infinite structures, while _bisimulation_ offers a formal way to establish behavioral equivalence between systems @rutten2000universal. By modeling Büchi automata coalgebraically, we unify these powerful tools for reasoning about infinite behaviors and nondeterminism.
 
@@ -72,7 +73,7 @@ Next to providing an overview of the available literature, we outline our plan f
 
 The document is outlined as follows. In @sec:background we provide some background and relevant definitions for the rest of the report. In @chap:results we give the main results from the studied literature, which is divided into: modal mu-calculus in @sec:modal, coalgebraic model of nondeterministic systems in @sec:nd, and the coalgebraic model of Büchi automata in @results:buchi. Finally, in @sec:conclusion we summarize the results and give our plans for the rest of the internship.
 
-// #outline(depth: 2)
+#outline(depth: 2)
 
 // #show heading.where(depth: 1): body => {
 //   pagebreak(weak: true)
@@ -84,7 +85,7 @@ The document is outlined as follows. In @sec:background we provide some backgrou
 
 == Büchi Automata <sec:buchi>
 
-Let us consider a very simple motivating example for a Büchi automaton, shown in @img:buchi.
+Let us consider a very simple motivating example of a Büchi automaton, shown in @img:buchi.
 
 #text(size: 9pt)[
   #align(center)[
@@ -216,7 +217,6 @@ To observe that $mu$ incites finite looping, we look at the fact that $x_0 holds
 
 Next we look at $nu$, which can be used for infinite looping. We show that $x_0 holds nu Z. angle.l a angle.r Z$. This intuitively means that there exists an infinite path of $a$s. Indeed, we observe there are multiple such paths, also starting at $x_0$. We confirm by computing the gfp: $f^1=f(X)=angle.l a angle.r X=X$. Dually, observe that the lfp of this formula is $f^1(emptyset)=emptyset$. So we do not have $x_0 holds mu Z. angle.l a angle.r Z$. This confirms the intuition given above that $mu$ is for finite looping: there has to be some end point of the loop.
 
-We briefly discuss here the game semantics view of deciding whether $x holds phi$. We do not go into much detail, but this is to introduce the topic and show what we want to look into applying for the coalgebraic representation of the Büchi automaton as we describe in @sec:conclusion. We can construct a two player game between a verifier and a refuter, who want to verify, respectively, refute $x holds phi$. For example, if $phi=phi_1 or phi_2$, only one of the two options has to hold, so the verifier can choose which one they will verify. If $phi=phi_1 and phi_2$, only one of the two has to _not_ hold in order to refute $x holds phi$, so the refuter can pick which one the verifier has to verify holds, which the refuter thinks they cannot. Analogously for $angle.l sigma angle.r phi$ and $[a] phi$ where the verifier can pick a $sigma$ transition to verify for $angle.l sigma angle.r phi$, and the refuter can pick a transition to refute for $[sigma]phi$. If we work this out more, we can prove that $x holds phi$ iff there is a winning strategy for the verifier, and $x tack.r.double.not phi$ iff the refuter has a winning strategy, see @gradel2003automata for more details.
 
 === System of Equations
 
@@ -236,37 +236,66 @@ Next we introduce a system of equations for alternating fixed points. We only sh
 ] <def:eq>
 
 == Parity Games
-#definition("Parity Game")[
-  A parity game is a tuple $((V_1,V_2),E,Omega)$, where $V=V_1 union.sq V_2$ is the set of states, where $V_1$ are the states where player 1 can pick the next transition, and $V_2$ player 2. $E subset.eq V times V$ are transitions between the states. $Omega:V->bb(N)$ is the parity function, which determines the winner for infinite games.
+Next we introduce parity game and show how they can be used to give intuitive semantics for modal mu-calculus formulas. We use these semantics to prove the coincidence results in @sec:new.
 
-  A play of the game is a sequence of states $v_1,v_2,dots in V^infinity$ which conform to the transitions. A finite play is won by a player if the other player gets stuck, i.e. has no moves from a position. An infinite play $pi=v_1,v_2,dots$ is won by player 1 if $max{Omega(v) | v "occurs infinitely often in" pi}$ is even, else player 2 wins.
+A parity game is a two player game between $V$ (verifier) and $R$ (refuter), who want to verify, respectively refute, a statement. In our case, this statement is $s scripts(tack.double)^T phi$, i.e. that a modal mu-calculus formula holds in a state $s$ in LTS $T$. So $V$ wants to show $s scripts(tack.double)^T phi$ and $R$ wants to show $s scripts(tack.double.not)^T phi$. The game consists of states and transitions between these states. Every state 'belongs' to either $V$ or $R$, which determines what player picks the next transition is taken and thus the next state. A play of the game is then a (possibly infinite) sequence of states, and is won by either $V$ or $R$. Concretely we define:
+
+#definition([Parity Game @gradel2003automata])[
+  A parity game is a tuple $((S_V,S_R),E,Omega)$, where $S=S_V union.sq S_R$ is the set of states. From the states $S_V$ player $V$ picks the transition and for $S_R$ player $R$ does. $E subset.eq S times S$ are transitions between the states. $Omega:S->omega$ is the parity function, which determines the winner for infinite plays.
+
+  A play of the game is a (possibly infinite) sequence of states $s_1,s_2, dots$ such that $(s_i,s_(i+1)) in E$. A finite play is won by a player if the other player gets stuck, i.e. has no moves from a position. An infinite play $pi=s_1,s_2,dots$ is won by $V$ if $max{Omega(s) | s "occurs infinitely often in" pi}$ is even, and won by $R$ if it is odd.
 ]
 
-#definition([Parity Game for Modal $mu$-Calculus on Transition System. Definition 10.14, Remark 10.15 @gradel2003automata])[
-  For a transition system $T=(S,->,lambda)$ and a modal $mu$-calculus formula $phi$, we define the game $cal(G)(phi,T)=((V_1,V_2),E,Omega)$ where:
-  - #[$V=V_1 union.sq V_2= {phi' | phi' " is a subformula of " phi} times S$ where the formula determines whether player 1 or 2 can move. For a vertex $(psi,s) in V$:
-      - #[$(psi,s) in V_1$, i.e. player 1 can move if
+Next, we introduce the parity game for the modal mu-calculus. Consider the formula $phi=phi_1 or phi_2$. $V$ wants to verify $s scripts(tack.double)^T phi$, and to do so it suffices to show for either $phi_i$ that $s scripts(tack.double)^T phi_i$. Analagously for the formula $phi=phi_1 and phi_2$, $R$ can 'pick' the $phi_i$ such that $s scripts(tack.double.not)^T phi_i$, because if either $phi_1$ or $phi_2$ does not hold, $phi$ does not hold. This same duality is seen in $diamond phi$ and $box phi$ where for $diamond$ $V$ can show there is a transition for which $phi$ holds, and for $box phi$, $R$ can pick a transition such that $phi$ does not hold. This way the game arises between $V$ and $R$ to determine whether $s scripts(tack.double)^T phi_i$:
+
+
+#definition([Parity Game for Modal mu-Calculus@gradel2003automata])[
+  For a transition system $T=(S,->,lambda)$ and a modal mu-calculus formula $phi$, we define the game $cal(G)(phi,T)=((S_V,S_R),E,Omega)$ where:
+  - #[The states of the game $S_V union.sq S_R= {phi' | phi' " is a subformula of " phi} times S$ are pairs of a subformula of $phi$ and a state in the LTS. The subformula determines to what player the state belongs to. For a subformula $psi$ and a state $s$ of the LTS:
+      - #[$(psi,s) in S_V$ if
           - $psi= psi_1 or psi_2$
           - $psi= diamond psi'$
           - $psi= eta Z. psi'$ for $eta in {mu,nu}$
-          - $psi=Z$ for $Z subset.eq cal(P)(S)$ a fixed point variable
+          - $psi=Z$ for $Z$ a fixed point variable
           - $psi = p$ for $p$ a propositional variable with $p in lambda(s)$.
+          - $psi = not p$ for $p$ a propositional variable with $p in.not lambda(s)$.
         ]
-      - #[$(psi,s) in V_2$, i.e. player 2 can move if
+      - #[$(psi,s) in S_R$, if
           - $psi=psi_1 and psi_2$
+          - $psi = box psi'$
           - $psi = p$ for $p$ a propositional variable with $p in.not lambda(s)$.
+          - $psi = not p$ for $p$ a propositional variable with $p in lambda(s)$.
         ]
     ]
-  - Edges:
+  - Edges $E$:
     - $(psi_1 or psi_2,s)->(psi_1,s)$ and $(psi_1 or psi_2,s)->(psi_2,s)$
     - $(psi_1 and psi_2,s)->(psi_1,s)$ and $(psi_1 and psi_2,s)->(psi_2,s)$
     - $(diamond psi, s)->(psi,s')$ for any $s'$ such that $s -> s'$ in $T$.
+    - $(box psi, s)->(psi,s')$ for any $s'$ such that $s -> s'$ in $T$.
     - $(eta Z. psi, s)-> (psi, s)$ and $(Z,s)->(psi,s)$ for $eta in {mu,nu}$
-  - $Omega$: (more precise definition needed)
-    - $Omega((mu Z.psi,s))= $ the smallest odd number greater or equal than the (proper) alternated $mu slash nu$ operators in $psi$.
-    - $Omega((mu Z.psi,s))= $ the smallest even number greater or equal than the (proper) alternated $mu slash nu$ operators in $psi$.
+  - The priority function $Omega$ depends on the _alternation depth_ $alpha(psi)$ of the subformula $psi$, which is defined as follows:
+    - $alpha(p)=alpha(not p)=0$ for $p$ a propositional variable
+    - $alpha(psi_1 and psi_2)=alpha(psi_1 or psi_2)=max{alpha(psi_1),alpha(psi_2)}$
+    - $alpha(diamond psi)=alpha(box psi)=alpha(psi)$
+    - $alpha(mu Z.psi)=max({1,alpha(psi)} union {alpha(nu Z'.psi' +1) | nu Z'. psi' "is a subformula of" psi "and" Z "occurs free in " psi'} )$
+    - $alpha(nu Z.psi)=max({1,alpha(psi)} union {alpha(mu Z'.psi' +1) | mu Z'. psi' "is a subformula of" psi "and" Z "occurs free in " psi'} )$
+    Intuitively, the alternation depth of a formula is the maximum number of alternating $mu slash nu$ operators, where we only count those alternations where the free variable actually occurs freely in the subformula, meaning the fixed point operators are actually interdependent. $Omega$ is then:
+    - $Omega((mu Z.psi,s))= $ the smallest odd number greater or equal than $alpha(psi)-1$
+    - $Omega((mu Z.psi,s))= $ the smallest even number greater or equal than $alpha(psi)-1$
     - $Omega((psi,s))=0$ iff $psi$ is not a $mu$ or $nu$ formula.
 ]
+
+Where the intuition for operators like $or,and,box,diamond$ is quite straightforward, for the $mu slash nu$ operators it is less so. Briefly put, it follows from what was explained in @sec:modal that $mu$ incites finite looping, and $nu$ infinite looping. It can be seen from the definition for $Omega$ using the alternation depth, that outer $mu slash nu$ operators have higher priority than inner ones, and $mu$ is always even and $nu$ odd. Thus the highest priority occuring infinitely often in an infinite play indicates the outermost fixed point operator that is visited infinitely often. Thus, if this is even, we have an infinite loop through a $nu$ operator, which satisfies the formula. For a $mu$ operator, however, an infinite loop is undesired, and thus if the outermost fixed point operator which is visited infinitely often is $mu$, it is not a least fixed point, and $R$ has refuted the formula.
+
+Now, to use this game to give alternative semantics for the modal mu-calculus we need that if $s scripts(tack.double)^T phi$ then $V$ can verify this in the game $cal(G)(phi,T)$ by winning the game, and $R$ can not win. We call this that $V$ has a winning strategy: $V$ can always play (i.e. take the right transition if it is their turn) such that regardless of what $R$ plays, $V$ wins the play. We then have the theorem, which is crucial for our derivation of the concidence results in @sec:new:
+
+#theorem([Theorem 10.18 #cite(<gradel2003automata>)])[
+  $
+    s scripts(tack.double.r)^T phi <=> "V has a winning strategy in" cal(G)(phi,T) "starting in state" (phi,s)
+  $
+]
+
+The thorough explanation and rigorous proof are quite intricate, so to keep the presentation simple we limit ourselves to this intuition given above.
 
 
 = Coalgebraic Representation of Büchi Automata <chap:results>
@@ -592,7 +621,7 @@ After observing that @eq:traces in fact coincides with the definition of $diamon
   Let $chi=((X_1,X_2), Sigma, delta, s)$ be a Büchi automaton. Then the behavior mappings $tr_1,tr_2$, which are the solution to the system of equations in @eq:traces coincide with the accepted language of $chi$: $tr(chi)=[tr_1,tr_2] dot.circle s (*) = "Lang"(chi)$. Where we interpret $s subset.eq X$ as $s: 1 -> cal(P)(X)$.
 ] <th>
 
-= Derivation of Coincidence Using Game Semantics
+= Derivation of Coincidence Using Game Semantics <sec:new>
 In this section we prove @th using game semantics and in a very pretty way.
 
 #definition[
