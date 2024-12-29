@@ -31,6 +31,7 @@
 #let Run = text("Run")
 #let AccRun = text("AccRun")
 #let sol = text("sol")
+#let Tree = text("Tree")
 #let DelSt = text("DelSt")
 #let beh = math.sans("beh")
 #let Klp = $cal("Kl")(cal(P))$
@@ -106,20 +107,34 @@ Let us consider a very simple motivating example of a Büchi automaton, shown in
 
 This system represents some machine that takes requests, processes them, and returns some result. One might want to verify that this machine does not get stuck. In terms of the system shown, this would mean that the machine always ends up in the `idle` state again.
 
-This behavior can be modeled using a Büchi automaton. A Büchi automaton, namely, is an automaton which models infinite behavior, and accepts those words for which there is path through the automaton where the transitions are labeled by the letters of the words, an there is an accepting state that the path moves through infinitely many times. In this example, we make the `idle` state accepting, so the automaton accepts those words that always take the `return` transition again, and thus do not process indefinitely.
+This behavior can be modeled using a Büchi automaton. A Büchi automaton, namely, is an automaton which models infinite behavior, and accepts those words for which there is a path through the automaton where the transitions are labeled by the letters of the word, an there is an accepting state that the path moves through infinitely many times. In this example, we make the `idle` state accepting, so the automaton accepts those words that always take the `return` transition again, and thus do not process indefinitely.
 
 We can now give a formal definition of a Büchi automaton, and its _accepted language_:
 
 #definition[
-  A (nondeterministic) Büchi Automaton @gradel2003automata is a tuple $chi=angle.l X, Sigma, delta, s, F angle.r$, with $X$ a set of states, $Sigma$ the alphabet, $s subset.eq X$ the set of initial states, $delta : X times Sigma -> cal(P)(X)$ the transition function, $F subset.eq X$ the set of _final_ (or _accepting_) states.
+  A (nondeterministic) Büchi Automaton @gradel2003automata is a tuple $A=angle.l S, Sigma, delta, s_0, F angle.r$, with $S$ a finite set of states, $Sigma$ the alphabet, $s_0 in S$ the initial state, $delta : S times Sigma -> cal(P)(S)$ the transition function, $F subset.eq S$ the set of _final_ (or _accepting_) states.
 ]
 
-A run of a Büchi Automaton $chi$ is $(x_0,sigma_0)(x_1,sigma_1)... in (X times Sigma)^omega$, such that for every $n in omega$, $x_(n+1) in delta(x_n,sigma_n)$. We denote the set of runs of the Büchi Automaton $chi$ as $Run_chi$.
+A _run_ of a Büchi Automaton $A$ on an $omega$-word $w=sigma_0 sigma_1 dots in Sigma^omega$ is an infinite sequence of states $s_0,s_1,... in S^omega$, such that $s_0$ is the initial state and for every $n in omega$, $s_(n+1) in delta(s_n,sigma_n)$. A run is _accepting_ if it passes through an accepting state infinitely many times. Equivalently (because $F$ is finite), a run $rho=s_0,s_1,...$ is accepted if ${i | s_i in F}$ is an infinite set. A word $w$ is accepted by a a Büchi automaton $A$ if there is an acccepting run of $A$ on $w$. Finally, the accepted language $L(A)$ of a Büchi automaton, is the set of words accepted by $A$.
 
-A run is accepted if it passes through an accepting state infinitely many times. I.e. a run $rho=(x_0,sigma_0)(x_1,sigma_1)...$ is accepted if ${x_i | x_i in F}$ is an infinite set. $AccRun_chi$ is the set of accepted runs of $chi$. $Run_(chi,X')$ is the set of runs starting in $X'$, i.e. $(x_0,sigma_0)(x_1,sigma_1)... in Run_(chi,X)$ if $x_0 in X'$. The set $AccRun_(chi,X')$ is defined the same way. The map $DelSt: Run_chi -> Sigma^omega$ 'deletes' the states from a run and returns an $omega$-word. So $DelSt((x_0,sigma_0)(x_1,sigma_1)...)=sigma_0 sigma_1...$. Naturally, the set of accepted language of a Büchi Automaton can then be defined as $text("Lang")(chi)=DelSt(AccRun_(chi,s))$.
+Indeed we now see that the accepted language for the example automaton is $(mono("request") dot mono("process")^*dot mono("return"))^omega$. That is, the machine gets a request, processes for at most some _finite_ number of transitions and then returns some result. It does not get stuck processing indefinitely.
+
+== Parity Tree Automata
+Büchi automata are actually a specific instance of parity tree automata. In this section we introduce this more general automaton. The coincidence results presented in @results:buchi in fact not only hold for Büchi automata, but also for parity tree automata.
+
+Instead of the acceptence criterion for Büchi automaton, we can use the parity acceptence condition. In this case, the states are not divided into accepting and non-accepting. Instead, every state has a priority, determined by $Omega: S -> omega$. A run $rho=s_0,s_1,dots$ of an automaton $A$ on a word $w$ is then accepting if the maximum priority that occurs infinitely often is even. I.e., $max{Omega(s) | s "occurs infinitely often in" rho}$ is even. The Büchi acceptence criterion is the special case where non-accepting states have parity $1$ and accepting states have parity $2$.
+
+Secondly, instead of words we can run our automaton on trees. In this case the alphabet $Sigma$ is _ranked_ and has an arity function function $|\_\_|:Sigma -> omega$ indicating the number of branches a letter has. We denote the set of trees whose nodes are labeled with letters $sigma in Sigma$ and whose branching is consistent with the arity of the letters as $Tree_Sigma$. For example, if $|sigma|=2$ for all $sigma in Sigma$, a tree $T in Tree_Sigma$ is binary tree with labels $sigma in Sigma$. If $|sigma|=1$ for all $sigma in Sigma$, $Tree_Sigma$ is just the set of infinite words over $Sigma$.
+
+We can now define a parity tree automaton:
+
+#definition[
+  A (nondeterministic) Parity Tree Automaton @gradel2003automata@urabe2016coalgebraic is a tuple $A=angle.l S, Sigma, delta, s_0, Omega angle.r$, with $S$ a finite set of states, $Sigma$ a ranked alphabet with arity function $|\_\_|: Sigma -> omega$, $s_0 in S$ the initial state, $delta : S times Sigma -> cal(P)(S^*)$ the transition function where for each $sigma in Sigma$ if $|sigma|=n$ then $delta(s)(sigma)subset.eq S^n$, and $Omega: S -> omega$ that assigns a parity to each state.
+
+  A run $rho$ of the automaton $A$ on a tree $T in Tree_Sigma$ is the tree $T$ where the labels are replaced from letters $sigma in Sigma$ to states $s in S$ such that the root of the tree $rho_0=s_0$ is the initial state, and for a node in $T$ with label $sigma in Sigma$ the associated node in $rho$ with label $s in S$ has children $s_1,dots,s_(|sigma|)$ such that $(s_1,dots,s_(|sigma|)) in delta(s)(sigma)$. A run is accepted if for every branch of the tree, the maximum priority that occurs infinitely is even. A tree $T in Tree_Sigma$ is accepted by $A$ if there is an accepting run of $A$ on $T$. The accepted language of $A$ is the set of accepted trees.
+]
 
 
-Indeed we now see that the accepted language for the example automaton is $(mono("request") dot mono("process")^*dot mono("return"))^omega$. I.e. the machine gets a request, processes for at most some _finite_ number of transitions and then returns some result. It does not get stuck processing indefinitely.
 
 == Fixed Points
 // maybe iets over dat we niet in heel veel detail gaan?
@@ -129,7 +144,7 @@ Crucial for the next section, @sec:modal about modal mu-calculus, is reasoning a
   A _complete lattice_ is a partially ordered set $angle.l L, <= angle.r$ such that every subset $M subset.eq L$ has a least upper bound $or.big M$ and greatest lower bound $and.big M$. Specifically, the whole set $L$ has a least and greatest element, which we denote $and.big L = bot$ and $or.big L = top$, respectively.
 ]
 
-In this report we usually deal with the partially ordered set of the powerset of some set and ordering given by inclusion. Indeed, for a set $S$, $angle.l cal(P)(S), subset.eq angle.r$ is a complete lattice. For $U subset.eq cal(P)(S)$, $or.big U = union.big U$, and $and.big U = sect.big U$. The least and greatest elements are $emptyset$ and $S$, respectively.
+In this report we usually deal with the powerset of some set where subsets are ordered by inclusion. Indeed, for a set $S$, $angle.l cal(P)(S), subset.eq angle.r$ is a complete lattice. For $U subset.eq cal(P)(S)$, $or.big U = union.big U$, and $and.big U = sect.big U$. The least and greatest elements are $emptyset$ and $S$, respectively.
 
 #theorem([Knaster-Tarski Fixed Point Theorem #cite(<arnold2001rudiments>, supplement: "Theorem 1.2.8")])[
   Let $angle.l L, <= angle.r $ a complete lattice and $f:L->L$ monotone ($f(x) <= f(y)$ when $x<=y$). Then, the set of fixed points ${x in L|f(x)=x}$, is a complete lattice. Particularly, the function has a _least fixed point_ (lfp) and a _greatest fixed point_ (gfp).
@@ -488,7 +503,7 @@ $ <eq:infinite>
 Which is the same as in @eq:finite. However, because the domain is $Sigma^infinity$, we obtain different words when we take the maximal function satisfying these equations. Namely the finite words, in addition to the infinite ones! For the system in @img:nd we get the same words as before, but additionally ${a b^infinity, a c^infinity} subset.eq tr^infinity_c (x_0)$. Interestingly, taking the minimum morphism we again obtain just the finite words @hasuo2007generic@jacobs2004trace.
 
 == Coalgebraic Representation Büchi Automata <results:buchi>
-We can apply the previous framework for possibly infinite words to our initial exmample for a Büchi automaton, in @img:buchi. This would yield all infinite words through automaton: $(mono("request") dot mono("process")^infinity dot mono("return"))^omega$. This is not quite the desired outcome yet, because $mono("process")^infinity$ means it takes the $mono("process")$ transition zero, some finite number, or an infinite number of times. How do we eliminate those words that process indefinitely? I.e. only accept those words under the Büchi acceptance criterion of passing through an accepting state infinitely many times.
+We can apply the previous framework for possibly infinite words to our initial example for a Büchi automaton, in @img:buchi. This would yield all infinite words through automaton: $(mono("request") dot mono("process")^infinity dot mono("return"))^omega$. This is not quite the desired outcome yet, because $mono("process")^infinity$ means it takes the $mono("process")$ transition zero, some finite number, or an infinite number of times. How do we eliminate those words that process indefinitely? I.e. only accept those words under the Büchi acceptance criterion of passing through an accepting state infinitely many times.
 
 A way of solving this is given by @urabe2016coalgebraic. In short, the main idea of their paper is to divide the states into accepting and non-accepting states. Then, applying the previous construction using the final $F$-coalgebra in *Sets* we obtain two separate commuting diagrams for these disjoint sets of states. And finally, using greatest and least fixed points we can precisely pick exactly the accepting words for the Büchi automaton.
 
