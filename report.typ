@@ -38,6 +38,7 @@
 #let tr = beh
 #let lfp = text("lfp")
 #let Var = math.italic("Var")
+#let Prop = math.italic("Prop")
 #let cons = math.sans("cons")
 #let box = $square$
 
@@ -169,73 +170,74 @@ which eventually stabilizes, giving the least fixed point, as stated by the foll
 ] <th:knaster-tarski2>
 
 == Modal Mu-Calculus <sec:modal>
-Modal mu-calculus is a powerful framework, used to verify properties of transition systems @gradel2003automata@arnold2001rudiments. We use it in @results:buchi to select the right accepting words for our coalgebraic system. In this section we give a concrete definition of modal mu-calculus formulas and provide intuition on how to use it to verify certain properties.
+The modal mu-calculus is a powerful logic, used to verify properties of transition systems @gradel2003automata@arnold2001rudiments. We use it in @results:buchi to select the right accepting trees for our coalgebraic system. In this section we give a concrete definition of modal mu-calculus formulas and provide intuition on how to use the modal mu-calculus to verify certain properties. We verify these properties over _transition systems_, which we define first:
 
-In this section we will consider _labeled transition systems_ (LTS) for which we will verify some properties. These systems are a little bit different than those we consider in the rest of the report, but they are useful for explaining modal mu-calculus. Concretely, an LTS is a tuple $angle.l X,Sigma,delta, italic("Prop"), rho angle.r $. Here $X$ is the set of states, $Sigma$ the set of labels, $delta : X times Sigma -> cal(P)(X)$ the transition function (we write $x ->^a y$ for $y in delta(x)(a)$), _Prop_ the set of atomic propositions, and $rho:italic("Prop")->cal(P)(X)$ which interprets the atomic propositions. Note that you can see an LTS as a nondeterministic finite automaton without accepting states where the states are labeled by atomic propositions $cal(P)(italic("Prop"))$.
+#definition[
+  A transition system (TS) is a tuple $T=angle.l S, delta, italic("Prop"), lambda angle.r$ where $S$ is the set of states, $delta subset.eq S times S$ the transition relation (we sometimes write $s -> s'$ if $(s,s') in R$), $italic("Prop")$ the set of atomic propositions, and $lambda:italic("Prop")->cal(P)(S)$ which interprets the atomic propositions.
+]
 
+You can see a TS as a directed graph where the vertices are labeled by atomic propositions $cal(P)(Prop)$. Note that usually the modal mu-calculus is defined on _labeled_ transition systems, but to simplify things slightly, and because we only need transition systems in the rest of the report we stick to transition systems.
+
+Next we define the syntax of the modal mu-calculus:
 
 #definition[
   A modal mu-calculus formula is defined by the grammar:
   $
-    phi := P | Z | phi_1 and phi_2 | phi_1 or phi_2 | [a] phi | angle.l a angle.r phi | not phi | mu Z. phi | nu Z.phi
+    phi := P | not P | Z | phi_1 and phi_2 | phi_1 or phi_2 | box phi | diamond phi | mu Z. phi | nu Z.phi
   $
-  where $P in italic("Prop")$ is an atomic proposition, $a in Sigma$ a label, and $Z in italic("Var")$ which is a set of second order variables. We require that in $nu Z.phi$ and $mu Z.phi$, every occurance of $Z$ in $phi$ is in the scope of an even number of negations, such that that $phi$ is a monotone function.
+  where $P in italic("Prop")$ is an atomic proposition, $a in Sigma$ a label, and $Z in italic("Var")$ a _fixed point variable_.
 ]
 
-Note that you could define the modal mu-calculus without the $or$, $angle.l a angle.r$, and $nu$ operators, and define these instead in terms of the other operators, but we include them in the definition for legibility. _this time whole semantics?_
+Note that you could define the modal mu-calculus without the $or$, $angle.l a angle.r$, and $nu$ operators, and define these instead in terms of the other operators, but we include them in the definition for legibility.
 
-#definition[We define the semantics of a modal mu-calculus formula for an LTS T, and an assignment $V: italic("Var")->cal(P)(X)$:
+#definition[The semantics of a modal mu-calculus formula on a TS is a set of states where the formula holds, i.e. $|phi|subset.eq S$. For a modal mu-calculus formula $phi$, a transition system T, and an assignment $V: italic("Var")->cal(P)(S)$ we define:
   $
-    ||P||^T_V & := rho(P)\
+    ||P||^T_V & := lambda(P)\
+    ||not P||^T_V & := S backslash lambda(P)\
     ||Z||^T_V & := V(Z) \
-    ||not phi||^T_V & := S \\ ||phi||^T_V\
     || phi_1 and phi_2 ||^T_V & := ||phi_1||^T_V sect ||phi_2||^T_V \
     || phi_1 or phi_2 ||^T_V & := ||phi_1||^T_V union ||phi_2||^T_V \
-    || [a] phi ||^T_V &:= {x | forall y in X. x->^a y => y in ||phi||^T_V} \
-    || angle.l a angle.r phi ||^T_V &:= {x | exists y in X. x->^a y => y in ||phi||^T_V} \
+    || box phi ||^T_V &:= {s | forall t in S. "if" s-> t "then" t in ||phi||^T_V} \
+    || diamond phi ||^T_V &:= {s | exists t in S. "if" s-> t "then" t in ||phi||^T_V} \
     || mu Z.phi ||^T_V &:= italic("lfp")(lambda U. ||phi||^T_(V[Z |-> U])) = sect.big { U subset.eq X | U subset.eq ||phi||^T_(V[Z |-> U]) }\
     || nu Z.phi ||^T_V &:= italic("gfp")(lambda U. ||phi||^T_(V[Z |-> U])) = union.big { U subset.eq X | ||phi||^T_(V[Z |-> U])subset.eq U }
   $
   where $V[Z|->U]$ is the valuation $V$ except that $Z$ maps to $U$.
+
+  We write $s scripts(tack.r.double)^T phi$ if $s in |phi|^T_V$ for an empty valuation $V$, or just $s tack.r.double phi$ if $T$ is clear.
 ]
 
-We do not give a formal definition of the semantics of the formulas for an LTS, but rather give an informal and intuitive explanation, see @arnold2001rudiments@gradel2003automata for the formal definition. We want to say whether in an LTS $T$ a formula $phi$ holds in a state $x$, which we denote $x tack.r.double phi$. The semantics are then roughly as follows:
-- $x tack.r.double P$, if the atomic proposition $P$ holds in $x$;
-
-- $x tack.r.double phi_1 and phi_2$, $x tack.r.double phi_1 or phi_2$, if in state $x$ both or either, respectively, formulas $phi_1$ and $phi_2$ hold;
-- $x tack.r.double [a]phi$ if for all $a$ transitions taken from $x$, $phi$ holds in the next state;
-- $x tack.r.double angle.l a angle.r phi$ if there is some $a$ transition from $x$ where $phi$ holds after the transition;
-- $x tack.r.double mu Z. phi$, if $x in italic("lfp")(lambda U. ||phi||[Z |->U])$, i.e. $x$ is in the least fixed point of the monotone function that takes $U$ and replaces very occurance of $Z$ in $phi$ with $U$. Again, this is not a formal definition. The $nu$ operator is defined analogously for the greatest fixed point. We will see that, intuitively, the $mu$ operator is for finite looping and $nu$ is for infinite looping. To make this clear, let us look at the LTS given in @img:lts, and consider some examples of modal mu-calculus formulas.
+Let us briefly look at some intuition behind these definitions. We have $s scripts(tack.double)^T p$ if in $T$ at state $s$ the propositional variable $p$ holds. Conversely,$s scripts(tack.double)^T not p$ holds if $p$ does not hold in $s$. The $diamond$ and $box$ operators look at states reachable from $s$. For example, $s scripts(tack.double)^T diamond p$ is true if there is some state $s'$ such that $s -> s'$ and $s' scripts(tack.double)^T p$. Analagously, $s scripts(tack.double)^T box p$ is true if $p$ is true in all succesor states from $s$. Less intuitive are the $mu$ and $nu$ operators. Concretely, they identify least and greatest fixed points on functions from states to states. More intuitively, they can be used to define looping properties on transition systems, where $mu$ can be used for finite looping, and $nu$ for infinite looping. This will hopefully become more clear when looking at some examples:
 
 #figure(
   diagram({
     node((-0.5, 0), $emptyset$)
-    node((0, 0), [$x_0$], name: <x0>, shape: circle, stroke: .5pt)
-    node((1, -.5), [$x_1$], name: <x1>, shape: circle, stroke: .5pt)
+    node((0, 0), [$s_0$], name: <x0>, shape: circle, stroke: .5pt)
+    node((1, -.5), [$s_1$], name: <x1>, shape: circle, stroke: .5pt)
     node((1.5, -.5), ${p}$)
-    node((1, .5), $x_2$, name: <x2>, shape: circle, stroke: .5pt)
+    node((1, .5), $s_2$, name: <x2>, shape: circle, stroke: .5pt)
     node((1.5, .5), ${q}$)
 
-    edge(<x0>, <x1>, $a$, "->")
-    edge(<x1>, <x2>, $a$, "->")
-    edge(<x0>, <x2>, $a$, "->", bend: +15deg)
-    edge(<x2>, <x0>, $a$, "->", bend: +15deg)
+    edge(<x0>, <x1>, "->")
+    edge(<x1>, <x2>, "->")
+    edge(<x0>, <x2>, "->", bend: +15deg)
+    edge(<x2>, <x0>, "->", bend: +15deg)
   }),
-  caption: [Example of an LTS. The sets next to the states denote the atomic propositions that hold in that state.],
+  caption: [Example of a TS. The sets next to the states denote the atomic propositions that hold in that state.],
 ) <img:lts>
 
 #let holds = $tack.r.double$
 
-We have $x_0 tack.r.double angle.l a angle.r p$, because there is an $a$ transition that takes us to a state where $p$ holds, namely $x_0 ->^a x_1$, because $x_1 tack.r.double p$. We, however, do not have $x_0 holds [a]p$, because $x_0 ->^a x_2$ and $x_2 tack.r.double.not p$.
+Consider the transition system given in @img:lts. We have $s_0 tack.r.double diamond p$, because there is a transition from $s_0$ to a state where $p$ holds, namely $s_0 -> s_1$, because $s_1 tack.r.double p$. We, however, do not have $x_0 holds box p$, because $s_0 -> s_2$ and $s_2 tack.r.double.not p$.
 
-To observe that $mu$ incites finite looping, we look at the fact that $x_0 holds mu Z.q or [a]Z$. This roughly means that all $a$ paths have $q$ eventually, which we can see holds in @img:lts. To more formally show that this holds, we make use of the method of constructing least and greatest fixed points in @th:knaster-tarski2. The function we are calculating the lfp for is $f:= lambda U. ||q|| union ||[a]U||$. The first iteration yields $f^1=f(emptyset)={x_2}$, because $x_2 holds q$. Continuing, $f^2={x_1,x_2}$ and $f^3={x_0,x_1,x_2}=f^4$. So the lfp is the entire set of states $X$, and thus $x_0 holds mu Z. q or [a]Z$.
+To observe that $mu$ is associated with finite looping, we look at the fact that $s_0 holds mu Z.q or box Z$. This means that all finite paths from $s_0$ either reach a state with no outgoing transitions, or reach a state where $q$ is true. We can see in @img:lts that from $s_0$ every path reaches a state where $q$ is true in finitely many steps. To more formally show that this holds, we make use of the method of constructing least and greatest fixed points in @th:knaster-tarski2. The function we are calculating the lfp for is $f:= lambda U. ||q|| union ||box U||$. The first iteration yields $f^1=f(emptyset)={s_2}$, because $s_2 holds q$. Continuing, $f^2={s_1,s_2}$ and $f^3={s_0,s_1,s_2}=f^4$. So the lfp is the entire set of states $S$, and thus $s_0 holds mu Z. q or box Z$.
 
-Next we look at $nu$, which can be used for infinite looping. We show that $x_0 holds nu Z. angle.l a angle.r Z$. This intuitively means that there exists an infinite path of $a$s. Indeed, we observe there are multiple such paths, also starting at $x_0$. We confirm by computing the gfp: $f^1=f(X)=angle.l a angle.r X=X$. Dually, observe that the lfp of this formula is $f^1(emptyset)=emptyset$. So we do not have $x_0 holds mu Z. angle.l a angle.r Z$. This confirms the intuition given above that $mu$ is for finite looping: there has to be some end point of the loop.
+Next we look at $nu$, which can be used for infinite looping. We show that $s_0 holds nu Z. diamond Z$. This intuitively means that there exists an infinite path from $s_0$. Indeed, we observe there are multiple infinite paths starting from $s_0$. We confirm by computing the gfp: $f^1=f(S)=diamond S=S$. Dually, observe that the lfp of this formula is $f^1(emptyset)=emptyset$. So we do not have $s_0 holds mu Z. diamond Z$. This confirms the intuition that $mu$ is for finite looping: there has to be some end point of the loop.
 
 
 === System of Equations
 
-Next we introduce a system of equations for alternating fixed points. We only show how such a system works for two equations to save space and because that is all we use in the rest of the report. For more detail into this specific topic see @arnold2001rudiments@urabe2016coalgebraic.
+Next we introduce systems of equations with alternating fixed points. We only show how such a system works for two equations to save space and because that is all we use in the rest of the report. For more detail into this specific topic see @arnold2001rudiments@urabe2016coalgebraic.
 
 #definition[
   Let $L_1,L_2$ be partially ordered sets. An _equational system_ is a system of two equations
@@ -314,7 +316,7 @@ The thorough explanation and rigorous proof are quite intricate, so to keep the 
 
 
 = Coalgebraic Representation of Büchi Automata <chap:results>
-== Finite Behavior Nondeterministic Systems <sec:nd>
+== Finite Behavior of Nondeterministic Systems <sec:nd>
 In this section we present a coalgebraic representation of nondeterministic systems. The next section for Büchi automata builds upon this construction.
 
 === Deterministic Automata <sec:d>
