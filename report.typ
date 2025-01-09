@@ -45,9 +45,9 @@
 
 // Title row.
 #align(center)[
-  #text(20pt, weight: 700, "Coalgebraic Representation of Nondeterministic Systems and Büchi Automata")
+  #text(20pt, weight: 700, "Alternate Derivation of Coalgebraic Representation of Büchi Automata Using Game Semantics")
 
-  #text(14pt, weight: 600, "Midterm Report Research Internship")
+  #text(14pt, weight: 600, "Research Internship Report")
 
   Jorrit de Boer
 ]
@@ -60,20 +60,20 @@
   #set par(justify: false)
   // #set text(style: "italic")
   *Abstract.*
-  _We provide an explanation of existing literature for describing Büchi automata coalgebraically using trace semantics. To do this we also explain the modal mu-calculus and a coalgebraic model of nondeterministic systems. Finally, we outline our plans for the rest of the research internship. _
+  _We provide an explanation of existing literature for describing Büchi automata coalgebraically using trace semantics. To do this we also explain the modal mu-calculus and a coalgebraic model of nondeterministic systems. Finally, we present an alternate derivation of the coalgebraic model for Büchi automata using game semantics, which we believe is more intuitive than the one given in the original paper.  _
 ]
 
 = Introduction
 
-_Büchi automata_ and _nondeterministic systems_ are crucial in theoretical computer science for modeling and verifying systems with infinite behaviors @gradel2003automata@Vardi1996. Nondeterministic systems capture uncertainty and multiple outcomes, and are used in models like concurrent processes and nondeterministic Turing machines [ref needed]. Büchi automata, which are in general also nondeterministic, handle infinite sequences of events, crucial for verifying systems that run indefinitely, such as operating systems or network protocols.
+_Büchi automata_ and _nondeterministic systems_ are crucial in theoretical computer science for modeling and verifying systems with infinite behaviors @gradel2003automata@Vardi1996. Nondeterministic systems capture uncertainty and multiple outcomes, and are used in models like concurrent processes and nondeterministic Turing machines @martin1991introduction. Büchi automata, which are in general also nondeterministic, handle infinite sequences of events, crucial for verifying systems that run indefinitely, such as operating systems or network protocols.
 
-_Coalgebra_ provides an effective framework for modeling state-based, dynamic systems. Techniques such as _coinduction_ allow for reasoning about infinite structures, while _bisimulation_ offers a formal way to establish behavioral equivalence between systems @rutten2000universal. By modeling Büchi automata coalgebraically, we unify these powerful tools for reasoning about infinite behaviors and nondeterminism.
+_Coalgebra_ provides an effective framework for modeling state-based, dynamic systems. Techniques such as _coinduction_ allow for reasoning about infinite structures, while _bisimulation_ offers a formal way to establish behavioral equivalence between systems @rutten2000universal. By modeling Büchi automata coalgebraically, these powerful tools can be applied for reasoning about infinite behaviors and nondeterminism.
 
-The main goal of this report is to provide an understanding of the coalgebraic construction of Büchi automata described in @urabe2016coalgebraic. To do so we also explain _modal mu-calculus_, a system to verify properties of transition systems, and provide a coalgebraic model of nondeterministic systems, upon which the construction for the Büchi automata builds. By outlining these concepts we advance our first goal of the research internship, which is to gain an understanding of the current research into this topic.
+The first goal of this report is to provide an understanding of the coalgebraic semantics using _trace semantics_ of Büchi automata described in @urabe2016coalgebraic. To do so we also explain the _modal mu-calculus_, a system for verifying properties of transition systems, and provide a coalgebraic model of nondeterministic systems, upon which the construction for the Büchi automata builds. By outlining these concepts we advance our first goal of the research internship, which is to gain an understanding of the current research into this topic.
 
-Next to providing an overview of the available literature, we outline our plan for the rest of the internship. Our goal is to use _game semantics_ as an alternative framework to derive the coalgebraic representation of Büchi automata. Game semantics is a framework of describing a system in terms of a two-player game between a _verifier_ and a _refuter_ who want to verify, respectively refute, a statement @gradel2003automata. By utilizing game semantics we hope to provide a more intuitive proof of the existing results.
+Secondly we provide an alternate derivation of this coalgebraic representation using _game semantics_. Game semantics is a framework of describing a system in terms of a two-player game between a _verifier_ and a _refuter_ who want to verify, respectively refute, a statement @gradel2003automata. By interpreting the modal mu calculus formulas which occur in the coalgebraic representation to a game we are able to use established theorems from game semantics to derive the coincidence between the coalgebraic model and the traces of the Büchi automata. We think that our approach provides a more intuitive proof of the results than the one provided in @urabe2016coalgebraic, which is quite cumbersome. Additionally, this formulation using game semantics might reveal connections to coalgebra automata which is based on game theoretic techniques @kupke2008coalgebraic.
 
-The document is outlined as follows. In @sec:background we provide some background and relevant definitions for the rest of the report. In @chap:results we give the main results from the studied literature, which is divided into: modal mu-calculus in @sec:modal, coalgebraic model of nondeterministic systems in @sec:nd, and the coalgebraic model of Büchi automata in @results:buchi. Finally, in @sec:conclusion we summarize the results and give our plans for the rest of the internship.
+The document is outlined as follows. In @sec:background we provide some background and relevant definitions for the rest of the report, which includes the modal mu-calculus and game semantics. In @chap:results we provide the coalgebraic representations of nondeterministic systems and Büchi automata from @hasuo2007generic and @urabe2016coalgebraic, respectively. In @sec:new we present our alternate derivation of the coincidence result given in the section before. Finally, in @sec:conclusion we summarize the results and suggest directions for future work.
 
 #outline(depth: 2)
 
