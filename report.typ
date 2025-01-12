@@ -1,4 +1,4 @@
-#import "@preview/fletcher:0.5.2" as fletcher: diagram, node, edge
+#import "@preview/fletcher:0.5.4" as fletcher: diagram, node, edge
 #import "@preview/ctheorems:1.1.3": *
 
 #show: thmrules.with(qed-symbol: $square$)
@@ -118,7 +118,7 @@ We can now give a formal definition of a Büchi automaton, and its _accepted lan
 
 A _run_ of a Büchi Automaton $A$ on an $omega$-word $w=sigma_0 sigma_1 dots in Sigma^omega$ is an infinite sequence of states $s_0,s_1,... in S^omega$, such that $s_0$ is the initial state and for every $n in omega$, $s_(n+1) in delta(s_n,sigma_n)$. A run is _accepting_ if it passes through an accepting state infinitely many times. Equivalently (because $F$ is finite), a run $rho=s_0,s_1,...$ is accepted if ${i | s_i in F}$ is an infinite set. A word $w$ is accepted by a a Büchi automaton $A$ if there is an acccepting run of $A$ on $w$. Finally, the accepted language $L(A)$ of a Büchi automaton, is the set of words accepted by $A$.
 
-Indeed we now see that the accepted language for the example automaton is $(mono("request") dot mono("process")^*dot mono("return"))^omega$. That is, the machine gets a request, processes for at most some _finite_ number of transitions and then returns some result. It does not get stuck processing indefinitely.
+Indeed we now see that the accepted language for the example automaton is $(mono("request") dot mono("process")^*dot mono("return"))^omega$, where $*$ indicates repeating some set of letters/transitions some finite number of times (including zero) and $omega$ indicates repeating indefinitely. That is, the machine gets a request, processes for at most some _finite_ number of transitions and then returns some result. It does not get stuck processing indefinitely.
 
 == Parity Tree Automata
 Büchi automata are actually a specific instance of parity tree automata. In this section we introduce this more general automaton. The coincidence results presented in @results:buchi in fact not only hold for Büchi automata, but also for parity tree automata.
@@ -321,113 +321,93 @@ In this section we present a coalgebraic representation of nondeterministic syst
 
 === Deterministic Automata <sec:d>
 
-First we consider a deterministic finite automaton, $angle.l X, Sigma, delta, o angle.r $ with $X$ the states, $Sigma$ the alphabet, $delta: X times Sigma -> X$ the transition function, and $o: X -> 2$ with $2={0,1}$, the output function determining if a state is final. Such an automaton can be represented by a coalgebra $c: X -> 2 times X^Sigma$ for the functor $F(X)=2 times X^Sigma$. This a very useful construction because a final coalgebra for this functor is carried by $2^Sigma^*$, and the unique coalgebra homomorphism to this final coalgebra captures exactly the language accepted by a state @rutten2000universal. This is shown in the commuting diagram:
+First we consider a deterministic finite automaton, $angle.l S, Sigma, delta, o angle.r $ with $S$ the states, $Sigma$ the alphabet, $delta: S times Sigma -> S$ the transition function, and $o: S -> 2$ with $2={0,1}$, the output function determining if a state is final. We do not consider an initial state here because we just want to obtain the accepted words for each state. Such an automaton can be represented by a coalgebra $c: S -> 2 times S^Sigma$ for the functor $F(S)=2 times S^Sigma$. This is a very useful construction because a final coalgebra for this functor is carried by $2^Sigma^*$, and the unique coalgebra homomorphism $beh$ to this final coalgebra captures exactly the language accepted by a state @rutten2000universal. This is shown in the commuting diagram:
 
 $
   #diagram(
   // spacing: 2cm,
   {
-    node((0, 0), $2 times X^Sigma$, name: <FX>)
-    node((0, 1), $X$, name: <X>)
+    node((0, 0), $2 times S^Sigma$, name: <FX>)
+    node((0, 1), $S$, name: <X>)
     node((1, 0), $2times (2^Sigma^*)^Sigma$, name: <FZ>)
     node((1, 1), $2^Sigma^*$, name: <Z>)
 
     edge(<X>, <FX>, $angle.l o,delta angle.r$, "->", label-side: left)
-    edge(<Z>, <FZ>, $angle.l e,d angle.r$, "->")
-    edge(<X>, <Z>, $beh$, label-side: right, "->")
-    edge(<FX>, <FZ>, $id times beh^Sigma$)
+    edge(<Z>, <FZ>, $angle.l e,d angle.r$, "->", label-side: right)
+    edge(<X>, <Z>, $beh$, label-side: right, "-->")
+    edge(<FX>, <FZ>, $id times beh^Sigma$, "-->")
   },
 )
 $
 
+Here $e: 2^Sigma^*-> 2$ is given by $e(L) = L(epsilon)$, i.e., $e(L) = 1$ iff L contains the empty word. And $d: 2^Sigma^* -> (2^Sigma^*)^Sigma$ is the language derivative, given by $d(L)(a)=L_a$ where $L_(a)(w)=L(a w)$, so $w in d(L)(a)=L_a$ iff $a w in L$.
+
 Working out the paths through the diagram we obtain that
-- $beh(x)(epsilon)=o(x)$, and
-- $beh(x)(sigma w)=beh(delta(x)(sigma))(w)$,
+- $beh(s)(epsilon)=o(s)$, and
+- $beh(s)(sigma w)=beh(delta(s)(sigma))(w)$,
 
-for $x in X$, $sigma in Sigma$, $w in Sigma^*$. So $beh(x)$ accepts the empty word if $x$ is a final state, and accepts $sigma w$ if $delta(x)(sigma)$ accepts $w$. Which is precisely the language accepted by state $x$ in the deterministic finite automaton!
+for $s in S$, $sigma in Sigma$, $w in Sigma^*$. So $beh(s)$ contains the empty word iff $s$ is a final state, and accepts $sigma w$ iff $delta(s)(sigma)$ accepts $w$. Which is precisely the language accepted by state $x$ in the deterministic finite automaton!
 
-=== Finite Behavior Nondeterministic Systems <sec:finite>
+=== Finite Behavior Nondeterministic Automata <sec:finite>
 
-We would like to do the same thing for nondeterministic systems, but we run into a problem, which is highlighted by the following example, shown in @img:nd.
+Unfortunatley, extending this approach to nondeterministic systems is not possible, as we will illustrate by the following system, which we will use as a running example:
 
 // #align(center)[
 #figure(
   diagram(
     spacing: 2em,
-    node((0, 0), [$x_0$], name: <x0>, shape: circle, stroke: .5pt),
-    node((1, 0), [$x_1$], name: <x1>, stroke: .5pt, shape: circle),
-    node((0, 1), [$x_2$], name: <x2>, stroke: .5pt, shape: circle),
-    node((1, 1), [$checkmark$], name: <check>),
+    node((0, 0), [$s_0$], name: <x0>, shape: circle, stroke: .5pt),
+    node((1, 0), [$s_1$], name: <x1>, stroke: .5pt, shape: circle, extrude: (0, -5)),
+    node((0, 1), [$s_2$], name: <x2>, stroke: .5pt, shape: circle, extrude: (0, -5)),
+    // node((1, 1), [$checkmark$], name: <check>, stroke: .5pt),
     edge(<x0>, <x1>, [$a$], "->"),
     edge(<x0>, <x2>, [$a$], "->"),
     edge(<x2>, <x2>, [$c$], "->", bend: +130deg, loop-angle: 180deg),
     edge(<x1>, <x1>, [$b$], "->", bend: -130deg, loop-angle: 180deg),
-    edge(<x1>, <check>, "->"),
-    edge(<x2>, <check>, "->"),
+    // edge(<x1>, <check>, "->"),
+    // edge(<x2>, <check>, "->"),
   ),
-  caption: [Example of a nondeterministic system.],
+  caption: [Example of a nondeterministic automaton.],
 ) <img:nd>
 // ]
 
-The system is an LTS without atomic propositions but with termination, denoted by the transition to $checkmark$. It is a nondeterministic system because in $x_0$ there are two transitions for $a$, and in $x_1$ and $x_2$ the system can transition back to itself or to $checkmark$. Intuitively, the finite words accepted by the system from state $x_0$ should be
-$ tr(x_0) = {a, a b, a b b, ...} union {a, a c, a c c, ...}. $
+The automaton given in @img:nd is nondeterministic because in $s_0$ there are two transitions for $a$. Intuitively, the finite words accepted by the system from state $s_0$ should be
+$ tr(s_0) = {a, a b, a b b, ...} union {a, a c, a c c, ...}. $
 
-This transitions system might be modeled by a coalgebra $c: X -> cal(P)(1 + Sigma times X)$, i.e. for every state some subset of a terminating transition or reading a letter and transitioning to another state. The problem is that this functor $F X = cal(P)(1 + Sigma times X)$ does not have a final coalgebra. Because, by Lambek's lemma, such a final coalgebra $z: Z -> cal(P)(1+ Sigma times Z)$ for some carrying object $Z$, would have to be an isomorphism @awodey2010category. But an isomorphism $Z tilde.equiv cal(P)(1 + Sigma times Z)$ would imply a bijection between $Z$ and $cal(P)(Z)$, which cannot exist.
+This transitions system might be modeled by a coalgebra $c: S -> 2 times cal(P)(Sigma times S)$, i.e., for every state whether it is final, and a set of pairs $(sigma,s) in Sigma times S$ denoting a transition by taking letter $sigma$ and transitioning to state $s$. The problem is that this functor $F S = 2 times cal(P)(Sigma times S)$ does not have a final coalgebra, as Lambek's lemma implies that such a final coalgebra $z: Z -> 2 times cal(P)(Sigma times Z)$ for some carrier $Z$, would have to be an isomorphism @awodey2010category. But an isomorphism $Z tilde.equiv 2 times cal(P)(Sigma times Z)$ would imply a bijection between $Z$ and $cal(P)(Z)$, which cannot exist.
 
-The solution, as given by Hasuo et al. @hasuo2007generic, is to work in the Kleisli category for the monad $cal(P)$. For this to work we have to define some details regarding construction of the coalgebra in the Kleisli Category. We give the resulting commuting diagram to show what we are working towards:
-
-$
-  #diagram(
-    // spacing: 2cm,
-    {
-      node((0, 1), $X$, name: <X>)
-      node((0, 0), $overline(F) X$, name: <FX>)
-      node((1, 1), $A$, name: <A>)
-      node((1, 0), $overline(F) A$, name: <FA>)
-      edge(<X>, <FX>, $c$, "->", label-side: left)
-      edge(<A>, <FA>, $tilde.equiv$, "-", label-side: left, stroke: 0pt)
-      edge(<A>, <FA>, $J alpha^(-1)$, "->", label-side: right)
-      edge(<X>, <A>, $tr_c$, "-->", label-side: right)
-      edge(<FX>, <FA>, $overline(F)(text(tr)_c)$, "-->")
-      node((2, .5), $italic("in") cal("Kl")(cal(P)).$)
-    },
-  )
-$
-
-Here $c:X -> overline(F)X= cal(P)(1 + Sigma times X)$ will be the coalgebra our nondeterministic system, and $tr_c : X -> A$ in $cal("Kl")(cal(P))$ is the unique map from $X$ to $A$, which contains the finite accepting words in the nondeterministic system. Key here is that because we are working in the Kleisli category the map $tr_c$ is actually a map $tr_c: X -> cal(P)(A)$ in the category *Sets*, which captures exactly the desired finite words, thus solving the problem when trying to obtain the final coalgebra in the category *Sets* directly.
-
-So we need to define the Kleisli Category, and define the right functor in $Klp$ to give us the desired words.
+The solution, as given by Hasuo et al. @hasuo2007generic, is to work in the Kleisli category for the monad $cal(P)$. Recall that a map $f: X -> Y$ in the Kleisli category is a map $f: X -> cal(P)(Y)$ in *Sets*. Briefly put, this will solve our problem because we can have a final coalgebra $z: Z -> F Z$ that is a map $z: Z -> cal(P)(F Z)$ in *Sets*. Next, we will review the definition of the Kleisli category and define the appropriate functor, enabling us to construct the desired final coalgebra that characterizes the accepting finite words.
 
 The powerset monad $cal(P)$ is defined by the unit $eta_X : X -> cal(P)(X)$ which sends an element of $X$ to the singleton set, $eta_X (x)={x}$ for $x in X$, and the multiplication $mu_X: cal(P)(cal(P)(X)) -> cal(P)(X)$ which takes the union of the sets, i.e. $mu_X (A) = union.big_(a in A) a$. For a function $f: X -> Y$ we get $cal(P)(f): cal(P)(X) -> cal(P)(Y)$ by $cal(P)(f)(A)= {f(a) | a in A}$. The Kleisli category for this monad is defined as follows:
 - *objects*: the same as for *Sets*, sets
-- *morphisms*: a morphism $f$ from $X$ to $Y$ in $Klp$ is a maps $f:X-> cal(P)(Y)$ in *Sets*. For morphisms $f: X -> Y$ and $g: Y -> Z$ in $Klp$ (so $f: X-> cal(P)(Y)$ and $g: Y -> cal(Z)$ in *Sets*) we define $(g compose f)$ in $Klp$ as $(mu_Z compose cal(P)(g) compose f)$ in *Sets*. Indeed $(mu_Z compose cal(P)(g) compose f): X -> cal(P)(Z)$, so $(g compose f): X -> Z$ in $Klp$.
+- *morphisms*: a morphism $f$ from $X$ to $Y$ in $Klp$ is a map $f:X-> cal(P)(Y)$ in *Sets*. For morphisms $f: X -> Y$ and $g: Y -> Z$ in $Klp$ (so $f: X-> cal(P)(Y)$ and $g: Y -> cal(P)(Z)$ in *Sets*) we define $(g compose f)$ in $Klp$ as $(mu_Z compose cal(P)(g) compose f)$ in *Sets*. Indeed $(mu_Z compose cal(P)(g) compose f): X -> cal(P)(Z)$, so $(g compose f): X -> Z$ in $Klp$.
 
-Next, we construct our functor in $Klp$, which we call the lifting of $F$ in $Klp$, and denote $overline(F)$. The key here is that because we are working in the Kleisli category, if we use the functor $F X = 1 + Sigma times X$, the coalgebra map $c: X -> F X$, will be a map $c: X -> cal(P)(1 + Sigma times X)=overline(F)X$ in $Klp$, which is what we needed to model a nondeterministic transition.
+Next, we construct our functor in $Klp$, which we call the lifting of $F$ in $Klp$, and denote $overline(F)$. The key here is that because we are working in the Kleisli category, if we use the functor $overline(F) S = Sigma times S$, the coalgebra map $c: S -> Sigma times S$, will be a map $c: S -> cal(P)(Sigma times S)$ in *Sets*, which models nondeterministic transitions. In the previous section we used the functor $F S -> 2 times S ^ Sigma$ where $o: S -> 2$ denoted whether the state was final. Combining this with the functor $overline(F) S = Sigma times S$ in the Kleisli category we would get the functor $overline(F) S = 2 times Sigma times S$ and the coalgebra $c: S -> 2times Sigma times S$ which is $c: S -> cal(P)(2 times Sigma times S)$ in *Sets*, which would mean that every transition can be final or not, which is not what we want. For this reason we use the functor $overline(F) S = 1 + Sigma times S$ such that the coalgebra $c: S -> 1 + Sigma times S$ is the map $c: S -> cal(P)(1 + Sigma times S)$ where $s in S$ is final iff $* in c(s)$ (note that we use $1={*}$).
 
-This works easily on objects, $overline(F)X=F X$, because in the Kleisli category, the objects are the same. But for morphisms we have to do a little bit more work. Observe that because a map $f:X-> Y$ in $Klp$ is a map $f: X->cal(P)(X)$ in *Sets*, applying the functor on the map itself would yield $F f: F X -> F cal(P) (X)$. So what we need is a natural transformation $lambda: F cal(P) => cal(P) F$, such that $1+Sigma times (cal(P)(X)) ->^lambda cal(P)(1+Sigma times X)$. We define this as $* arrow.r.bar {*}$ (note that we use $1={*}$), and $(sigma,S)={(sigma,x)|x in S}$ for $sigma in Sigma$ and $S subset.eq X$. This follows intuitively if you observe that if from state $s$ taking transition $sigma$ takes you to ${x,y,z}$ ($(sigma,{x,y,z}) in c(s)$, or ${x,y,z} in delta(s)(sigma)$), you can also see this as transitions ${(sigma,x),(sigma,y),(sigma,z)}$.
+This works easily on objects, $overline(F)X=F X$, because in the Kleisli category, the objects are the same. But for morphisms we have to do a little bit more work. Observe that because a map $f:X-> Y$ in $Klp$ is a map $f: X->cal(P)(X)$ in *Sets*, applying the functor $F$ on the map itself would yield $F f: F X -> F cal(P) (Y)$. So what we need is a natural transformation $lambda: F cal(P) => cal(P) F$, i.e., a distributive law @hasuo2007generic, such that $1+Sigma times (cal(P)(S)) ->^lambda cal(P)(1+Sigma times X)$. We define this as $* arrow.r.bar {*}$, and $(sigma,S)={(sigma,x)|x in S}$ for $sigma in Sigma$ and $S subset.eq X$. This follows intuitively if you observe that if from state $s$ taking transition $sigma$ takes you to ${x,y,z}$ ($(sigma,{x,y,z}) in c(s)$, or ${x,y,z} in delta(s)(sigma)$), you can also see this as transitions ${(sigma,x),(sigma,y),(sigma,z)}$.
 
-Finally, the main theorem from @hasuo2007generic (Theorem 3.3), and the last ingredient to make the construction work is that the initial algebra for the functor $F$ in sets, gives us the final coalgebra for the lifted functor $overline(F)$ in $Klp$. Specifically, for this functor $F X= 1 + Sigma times X$ and its lifting as described above, the initial $F$-algebra $alpha: F A -> A$ in *Sets* yields a final $overline(F)$-coalgebra in $cal("Kl")(cal(P))$ by:
+Finally, the main theorem from @hasuo2007generic (Theorem 3.3), and the last ingredient to make the construction work is that the initial algebra for the functor $F$ in *Sets*, gives us the final coalgebra for the lifted functor $overline(F)$ in $Klp$. Specifically, for this functor $F S= 1 + Sigma times S$ and its lifting as described above, the initial $F$-algebra $alpha: F A -> A$ in *Sets* yields a final $overline(F)$-coalgebra in $cal("Kl")(cal(P))$ by:
 
-$ (J alpha)^(-1) = J (alpha^(-1)) = eta_(F A) alpha^(-1) : A -> overline(F)A italic("in") cal("Kl")(cal(P)) $
+$ (eta_(F A) alpha)^(-1) = eta_(F A) alpha^(-1) : A -> overline(F)A italic("in") cal("Kl")(cal(P)) $
 
-where $J=eta_(F A)$ is the canonical adjunction associated with the Kleisli category @hasuo2007generic@awodey2010category. This result holds more generally: for the lifting monad $cal(L)$, the subdistribution monad $cal(D)$, and any shapely functor $F$, see @hasuo2007generic for more details.
+In fact, this result holds more generally: for the lifting monad $cal(L)$, the subdistribution monad $cal(D)$, and any shapely functor $F$, see @hasuo2007generic for more details.
 
-Let us go back to our concrete example and instantiate the commuting diagram from before. The initial $F$-algebra for our functor $F X = 1 + Sigma times X$ in *Sets* is $[sans("nil"),sans("cons")]: 1 + Sigma times Sigma^* -> Sigma^*$. So we get the commuting diagram
+The initial $F$-algebra for our functor $F S = 1 + Sigma times S$ in *Sets* is $[sans("nil"),sans("cons")]: 1 + Sigma times Sigma^* -> Sigma^*$. So we get the commuting diagram
 
 $
   #diagram(
     spacing: 3.5em,
     {
-      node((0, 1), $X$, name: <X>)
-      node((0, 0), $1 + Sigma times X$, name: <FX>)
+      node((0, 1), $S$, name: <X>)
+      node((0, 0), $1 + Sigma times S$, name: <FX>)
       node((1, 1), $Sigma^*$, name: <A>)
       node((1, 0), $1 + Sigma times Sigma^*$, name: <FA>)
       edge(<X>, <FX>, $c$, "->", label-side: left)
       edge(<A>, <FA>, $tilde.equiv$, "-", label-side: left, stroke: 0pt)
-      edge(<A>, <FA>, $J [sans("nil"),sans("cons")]^(-1)$, "->", label-side: right)
-      edge(<X>, <A>, $text(tr)_c$, "-->", label-side: right)
-      edge(<FX>, <FA>, $1 + Sigma times tr_c$, "-->")
-      node((2, .5), $italic("in") cal("Kl")(cal(P)).$)
+      edge(<A>, <FA>, $eta_(1+Sigma times Sigma^*) compose [sans("nil"),sans("cons")]^(-1)$, "->", label-side: right)
+      edge(<X>, <A>, $text(tr)$, "-->", label-side: right)
+      edge(<FX>, <FA>, $1 + Sigma times tr$, "-->")
+      node((3, .5), $italic("in") cal("Kl")(cal(P)).$)
     },
   )
 $
@@ -435,11 +415,11 @@ $
 Following the paths within the diagram we obtain that
 
 $
-  epsilon in tr_c (x) <==> x -> checkmark \
-  sigma w in tr_c (x) <==> exists y. (x ->^sigma y and w in tr_c (y)).
+  epsilon in tr(s) <==> * in c(s) <==> "state" s "is accepting"\
+  sigma w in tr(s) <==> exists t. (s ->^sigma t and w in tr(t)).
 $ <eq:finite>
 
-Explained in words, a state accepts the empty word if it can transition to $checkmark$, and it accepts $sigma w$ for $sigma in Sigma$ and $w in Sigma^*$ if it can transition with $sigma$ to a state which accepts $w$. Which is exactly the desired words!
+Explained in words, a state accepts the empty word iff the state is accepting, and it accepts $sigma w$ for $sigma in Sigma$ and $w in Sigma^*$ iff it can transition with $sigma$ to a state which accepts $w$. Which is exactly the desired words!
 
 // _should be explained more_
 
@@ -450,35 +430,35 @@ Explained in words, a state accepts the empty word if it can transition to $chec
 === Possibly Infinite Behavior <sec:infinite>
 As a step towards infinite words in Büchi automata let us consider infinite words in @img:nd. We can slightly alter our previous construction to additionally obtain infinite words through this system. Concretely, the infinite words for the system in @img:nd for $x_0$ are $a b^omega$ and $a c^omega$.
 
-The intuition for this new construction is as follows. In the previous section we constructed the final coalgebra for the lifted functor $overline(F)$ using the initial $F$-algebra in *Sets*. In the example of the LTS with termination the initial algebra was carried by $Sigma^*$. The final coalgebra in *Sets* for $F$ is carried by $Sigma^infinity=Sigma^* union Sigma^omega$, the set of finite and infinite words. So if we use this final coalgebra instead of the initial algebra, do we obtain both the finite and infinite words?
+The intuition for this new construction is as follows. In the previous section we constructed the final coalgebra for the lifted functor $overline(F)$ using the initial $F$-algebra in *Sets*. In the example of the LTS with termination the initial algebra was carried by $Sigma^*$. The final coalgebra in *Sets* for $F$ is carried by $Sigma^infinity$ (where the $infinity$ operators means some finite number of times or indefinitely so $Sigma^infinity = Sigma^* union Sigma^omega$) the set of finite and infinite words. So if we use this final coalgebra instead of the initial algebra, do we obtain both the finite and infinite words?
 
-Consider again the monad $cal(P)$, our functor $F$ (this too holds more general, see @hasuo2007generic@jacobs2004trace), and its lifting in the Kleisli category $overline(F)$. For a final coalgebra $xi: Z-> F Z$, the coalgebra
+Consider again the monad $cal(P)$, our functor $F$ (this too holds more generally, see @hasuo2007generic@jacobs2004trace), and its lifting in the Kleisli category $overline(F)$. For a final coalgebra $xi: Z-> F Z$, the coalgebra
 
-$ J xi : Z -> overline(F) Z italic("in") Klp $
+$ eta_(F Z) compose xi : Z -> overline(F) Z italic("in") Klp $
 
-is _weakly final_. That means, for any coalgebra $c: X -> overline(F)X$, there is a morphism $tr:X -> Z$ in $Klp$ such that the following diagram commutes
+is _weakly final_. That means, for any coalgebra $c: S -> overline(F)S$, there is a morphism $tr:S -> Z$ in $Klp$ such that the following diagram commutes
 
 $
   #diagram(
     // spacing: 2cm,
     {
-      node((0, 1), $X$, name: <X>)
-      node((0, 0), $overline(F) X$, name: <FX>)
+      node((0, 1), $S$, name: <X>)
+      node((0, 0), $overline(F) S$, name: <FX>)
       node((1, 1), $Z$, name: <Z>)
       node((1, 0), $overline(F) Z$, name: <FZ>)
       edge(<X>, <FX>, $c$, "->", label-side: left)
       edge(<Z>, <FZ>, $tilde.equiv$, "-", label-side: left, stroke: 0pt)
-      edge(<Z>, <FZ>, $J xi$, "->", label-side: right)
-      edge(<X>, <Z>, $text(tr)_c$, "~>", label-side: right)
-      edge(<FX>, <FZ>, $overline(F)(text(tr)_c)$, "~>")
+      edge(<Z>, <FZ>, $eta_(F Z) compose xi$, "->", label-side: right)
+      edge(<X>, <Z>, $text(tr)$, "~>", label-side: right)
+      edge(<FX>, <FZ>, $overline(F)(text(tr))$, "~>")
       node((2, .5), $italic("in") cal("Kl")(cal(P)),$)
     },
   )
 $ <eq:possiblyinfinite>
 
-but this morphism is not necessarily unique. However, there is a canonical choice $tr^infinity_c$ among these morphisms, namely the one which is maximal with respect to inclusion. We call this function $tr^infinity_c : X -> cal(P)(Z)$ the _possibly-infinite_ behavior for $c$.
+but this morphism is not necessarily unique. However, there is a canonical choice $tr^infinity$ among these morphisms, namely the one which is maximal with respect to inclusion. We call this function $tr^infinity : S -> cal(P)(Z)$ (in *Sets*) the _possibly-infinite_ behavior for $c$.
 
-Indeed, if we consider our running example LTS with termination,
+Indeed, if we consider our running example @img:nd with termination,
 // $
 //   #diagram(
 //     // spacing: 2cm,
@@ -496,43 +476,43 @@ Indeed, if we consider our running example LTS with termination,
 //     },
 //   )
 // $
-$xi: Sigma^infinity -> 1 + Sigma times Sigma^infinity$ is the final $F$-coalgebra. Defined by $xi(epsilon)& =* in 1$ and $xi(sigma w)&= (sigma,w)$. Instantiating the diagram in @eq:possiblyinfinite, we obtain
+$xi: Sigma^infinity -> 1 + Sigma times Sigma^infinity$ is the final $F$-coalgebra, defined by $xi(epsilon)& =* in 1$ and $xi(sigma w)&= (sigma,w)$. Instantiating the diagram in @eq:possiblyinfinite, we obtain
 $
-  epsilon in tr_c (x) <==> x -> checkmark \
-  sigma w in tr_c (x) <==> exists y. (x ->^sigma y and w in tr_c (y)).
+  epsilon in tr^infinity (s) <==> * in c(s) <==> "state" s "is accepting" \
+  sigma w in tr^infinity (s) <==> exists t. (s ->^sigma t and w in tr^infinity (t)).
 $ <eq:infinite>
 
-Which is the same as in @eq:finite. However, because the domain is $Sigma^infinity$, we obtain different words when we take the maximal function satisfying these equations. Namely the finite words, in addition to the infinite ones! For the system in @img:nd we get the same words as before, but additionally ${a b^infinity, a c^infinity} subset.eq tr^infinity_c (x_0)$. Interestingly, taking the minimum morphism we again obtain just the finite words @hasuo2007generic@jacobs2004trace.
+Which is the same as in @eq:finite. However, because the domain is $Sigma^infinity$, we obtain different words when we take the maximal function satisfying these equations. Namely the finite words, in addition to the infinite ones! For the system in @img:nd we get the same words as before, but additionally ${a b^infinity, a c^infinity} subset.eq tr^infinity_c (s_0)$. Interestingly, taking the minimum morphism we again obtain just the finite words @hasuo2007generic@jacobs2004trace.
 
-== Coalgebraic Representation Büchi Automata <results:buchi>
-We can apply the previous framework for possibly infinite words to our initial example for a Büchi automaton, in @img:buchi. This would yield all infinite words through automaton: $(mono("request") dot mono("process")^infinity dot mono("return"))^omega$. This is not quite the desired outcome yet, because $mono("process")^infinity$ means it takes the $mono("process")$ transition zero, some finite number, or an infinite number of times. How do we eliminate those words that process indefinitely? I.e. only accept those words under the Büchi acceptance criterion of passing through an accepting state infinitely many times.
+== Coalgebraic Representation of Büchi Automata <results:buchi>
+We can apply the previous framework for possibly infinite words to our initial example for a Büchi automaton, in @img:buchi. This would yield all infinite words through the automaton, so also for example $mono("request") dot mono("process")^omega$), it does not take into account accepting states, only for ending finite words. How do we eliminate those words that process indefinitely? That is, only accept those words under the Büchi acceptance criterion of passing through an accepting state infinitely many times.
 
-A way of solving this is given by @urabe2016coalgebraic. In short, the main idea of their paper is to divide the states into accepting and non-accepting states. Then, applying the previous construction using the final $F$-coalgebra in *Sets* we obtain two separate commuting diagrams for these disjoint sets of states. And finally, using greatest and least fixed points we can precisely pick exactly the accepting words for the Büchi automaton.
+A way of solving this is given by @urabe2016coalgebraic. In short, the main idea of this paper is to divide the states into accepting and non-accepting states. Then, applying the previous construction using the final $F$-coalgebra in *Sets* we obtain two separate commuting diagrams for these disjoint sets of states. And finally, using greatest and least fixed points we can precisely pick exactly the accepting words for the Büchi automaton.
 
-We first give the commuting diagrams which govern the behavior mappings. We are now considering Büchi automata, so the functor we consider is $F X = Sigma times X$, the final coalgebra for this functor is $d: Sigma^omega -> Sigma times Sigma^omega$, defined by $d(sigma dot w) = (sigma,w)$, and the monad is still $cal(P)$. The lifting $overline(F)$ is effectively the same, just without a case for $*in 1$. We now consider the state space as a disjoint union $X=X_1 union X_2$ of non-accepting and accepting states, respectively. This gives rise to two separate coalgebras $c_i: X_i -> overline(F)X$, defined by the restriction $c compose kappa_i : X_i -> overline(F)X $ along the coprojection $kappa_i : X_i arrow.r.hook X$ for $i in {1,2}$. We then get the two commuting diagrams:
+We first give the commuting diagrams which govern the behavior mappings. We are now considering Büchi automata, so the functor we consider is $F S = Sigma times S$, the final coalgebra for this functor is $d: Sigma^omega -> Sigma times Sigma^omega$, defined by $d(sigma dot w) = (sigma,w)$, and the monad is still $cal(P)$. The lifting $overline(F)$ is effectively the same, just without a case for $*in 1$. We now consider the state space as a disjoint union $S=S_1 union S_2$ of non-accepting and accepting states, respectively. This gives rise to two separate coalgebras $c_i: S_i -> overline(F)X$, defined by the restriction $c compose kappa_i : S_i -> overline(F)X $ along the coprojection $kappa_i : S_i arrow.r.hook S$ for $i in {1,2}$. We then get the two commuting diagrams:
 
 $
   #diagram(
     spacing: 1.1cm,
     {
-      node((0, 0), [$Sigma times X$], name: <fx1>)
-      node((0, 1), [$X_1$], name: <x1>)
+      node((0, 0), [$Sigma times S$], name: <fx1>)
+      node((0, 1), [$S_1$], name: <x1>)
       node((1, 1), [$Sigma^omega$], name: <z1>)
       node((1, 0), [$Sigma times Sigma^omega$], name: <fz1>)
       edge(<x1>, <fx1>, $c_1$, "->", left)
       edge(<x1>, <z1>, $tr_1$, "~>", right)
       edge(<fx1>, <fz1>, $Sigma times [tr_1,tr_2]$, "~>")
-      edge(<z1>, <fz1>, $J d$, "->")
+      edge(<z1>, <fz1>, $eta_(Sigma^omega) compose  d$, right,"->")
       edge(<z1>, <fz1>, $tilde.equiv$, "-", left, stroke: 0pt)
 
-      node((2, 0), [$Sigma times X$], name: <fx2>)
-      node((2, 1), [$X_2$], name: <x2>)
+      node((2, 0), [$Sigma times S$], name: <fx2>)
+      node((2, 1), [$S_2$], name: <x2>)
       node((3, 1), [$Sigma^omega$], name: <z2>)
       node((3, 0), [$Sigma times Sigma^omega$], name: <fz2>)
       edge(<x2>, <fx2>, $c_2$, "->", left)
       edge(<x2>, <z2>, $tr_2$, "~>", right)
       edge(<fx2>, <fz2>, $Sigma times [tr_1,tr_2]$, "~>")
-      edge(<z2>, <fz2>, $J d$, "->")
+      edge(<z2>, <fz2>, $eta_(Sigma^omega) d$, "->")
       edge(<z2>, <fz2>, $tilde.equiv$, "-", left, stroke: 0pt)
 
       node((0.5,0.5), [$=_mu$])
@@ -544,98 +524,52 @@ $
 $ <eq:diagram>
 
 // What the $=_mu$ and $=_nu$ in the center of the diagrams mean we will see later.
-Where $=_mu$ and $=_nu$ mean that we take the lfp behavior mapping in the left diagram to obtain $beh_1$, and the gfp in the right diagram to obtain $beh_2$. More concretely, $beh_1: X_1 -> cal(P)(Sigma^omega)$ and $beh_2: X_2 -> cal(P)(Sigma^omega)$, are the solutions to the following system of equations:
+Where $=_mu$ and $=_nu$ mean that we take the least behavior mapping in the left diagram to obtain $beh_1$, and the greatest behavior mapping in the right diagram to obtain $beh_2$. More concretely, $beh_1: S_1 -> cal(P)(Sigma^omega)$ and $beh_2: S_2 -> cal(P)(Sigma^omega)$, are the solutions to the following system of equations:
 
 // Spelling out the paths within the diagram we obtain that our behavior mapping $tr_1: X_1 -> cal(P)(Sigma^omega)$, $tr_2: X_2 -> cal(P)(Sigma^omega)$ must conform to the following equations.
 
 $
-  u_1 &=_mu (J d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_1 \
-  u_2 &=_nu (J d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
+  u_1 &=_mu (eta_(Sigma^omega) compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_1 \
+  u_2 &=_nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
 $ <eq:traces>
 
-#line(length: 100%)
+We first rewrite this to something more clear and usable:
 
-#lemma(numbering: "1")[
-  The traces
-  $
-    u_1 &=^mu (J d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_1 #h(3em)
-    u_2 &=^nu (J d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
-  $ //<eq:traces>
-
-  coincide with:
+#lemma()[
+  The traces in @eq:traces coincide with:
 
   $
-    u_1 =^mu diamond_delta ([u_1, u_2]) harpoon.tr X_1 #h(3em) u_2 =^nu diamond_delta ([u_1,u_2]) harpoon.tr X_2
+    u_1 =^mu diamond_delta ([u_1, u_2]) harpoon.tr S_1 #h(3em) u_2 =^nu diamond_delta ([u_1,u_2]) harpoon.tr S_2
   $
 
-  Where $diamond_delta: (cal(P)(Sigma^omega))^(X)->(cal(P)(Sigma^omega))^(X)$ is given by
+  Where $diamond_delta: (cal(P)(Sigma^omega))^(S)->(cal(P)(Sigma^omega))^(S)$ is given by
   $
-    diamond_delta (beh)(x) = {sigma dot w | x'in delta(x)(sigma) , w in beh(x')}.
+    diamond_delta (beh)(s) = {sigma dot w | s'in delta(s)(sigma) , w in beh(s')}.
   $ <eq:diamond>
 ] <lemma:0>
 
-#proof[
-  First we unfold some definitions:
-
-  $(J d)^(-1)= J (d^(-1))$ and $d^(-1)=cons$ and $J=eta_(Sigma^omega)$, so $J compose d^(-1) = eta_(Sigma^omega) compose cons$.
-
-  $overline(F)[u_1,dots,u_n]= lambda_(Sigma^omega) compose (id times (u_1 + dots + u_n))$ so let us call $u_1+dots+ u_n=beh$ and see that $id times beh: (Sigma times X) -> (Sigma times cal(P)(Sigma^omega))$, maps a pair $(sigma,x)$ to $(sigma,beh(x))$, i.e. $sigma$ and the language accepted by $x$. Combining with the natural transformation $lambda: (Sigma times cal(P(Sigma^omega)))-> cal(P)(Sigma times Sigma^omega)$ defined by $lambda(sigma,W)={(sigma,w)| w in W }$ we get $overline(F)[u_1,dots,u_n](sigma,x)={(sigma,w) | w in beh(x)}$
-
-  $c_i= c compose kappa_i: X_i -> cal(P)(Sigma times X)$ in terms of the automaton is defined as $c_(i)(x)={(sigma,x')| x' in X, sigma in Sigma, x' in delta(x)(sigma)}$ for $x in X_i$.
-
-  Combining these, and writing out the Kleisli composition in terms of functions in *Sets* we get:
-
-  $
-    (J d)^(-1) dot.circle overline(F)[u_1,dots,u_n] dot.circle c_i = mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) compose (mu_(Sigma times Sigma^omega) compose cal(P)(lambda compose (id times (u_1 + dots + u_n))) compose c_i).
-  $
-
-  Observing that $mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) = cal(P(cons))$, letting $u_1+dots+u_n=beh$ again and combining $cal(P)(lambda compose (id times beh))$ and $c_1$ by using our observations from above we obtain, for an $x in X_i$:
-
-  $
-    (mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) compose (mu_(Sigma times Sigma^omega) compose cal(P)(lambda compose (id times (u_1 + dots + u_n))) compose c_1))(x) \
-    = cal(P)(cons)({(sigma,w) | x' in X, x' in delta(x)(sigma), w in [u_1,dots,u_n](x') })\
-    = {sigma dot w | x' in delta(x)(sigma), w in beh(x') } = diamond_delta (beh)(x)
-  $
-
-]
-#line()
-
-By taking exactly those behavior mappings which are the solution to this system of equation, we take exactly those words that the Büchi automaton accepts. The proof that this works is mostly done in the following two lemmas.
-
-
-// $Run_chi$ is a (possibly infinite) run in the NFA $chi=(X=X_1union X_2, Sigma, delta, s)$. Meaning: $(sigma_1,x_1)(sigma_2,x_2) in Run_chi$ if $x_(i+1) in delta(x_i)(sigma_1)$ for $x_i,x_(i+1) in X$ and $sigma in Sigma$. $AccRun_(chi,X_i)$ are the accepting runs in $chi$ which start in $X_i$. asdf
-
-#lemma([#cite(<urabe2016coalgebraic>, supplement: "Lemma 4.4")])[
-  Let $chi=((X_1,X_2), Sigma, delta, s)$ be a Büchi automaton. Let $l^sol_1, l^sol_2$ be the solutions to the following equational system, where the variables $u_1,u_2$ range over $cal(P)(Run_chi)$
-
-
-  $ u_1 =^mu diamond_chi^1 (u_1 union u_2) #h(3em) u_2 =^nu diamond_chi^2 (u_1 union u_2) $ <eq:runs>
-
-  Here: $diamond_chi^i : cal(P)(Run_chi) -> cal(P)(Run_(chi,X_i))$ is given by $diamond_chi^i R := {(sigma,x)dot rho  | sigma in Sigma,  x in X_i, rho=(sigma_1,x_1)(sigma_2,x_2)... in R, x_1 in delta(x,sigma)}.$ Then $l^sol_1=AccRun_(chi,X_1),l^sol_2=AccRun_(chi,X_2). $
-] <lemma:4.4>
-
-A formal proof is found in @appendix, but we can use the intuition from @sec:modal to gain an understanding as to why this lemma holds. Namely the fact that the $mu$ operator is for finite looping, it has to have some endpoint or exit out of the loop, and that $nu$ is for infinite looping. So the second equation makes sure the run passes through $X_2$ infinitely many times. Note that it can still move through $X_1$, but it has to move through $X_2$ infinitely many times. The first equation, with the $mu$ operator, makes sure that any run passing through $X_1$ passes to the second equation in some finite number of steps, where it passes through $X_2$ infinitely many times.
-
-Note that this is where we think a game semantic view could be applied. We think we might be able to define an intuitive correspondence between taking transitions in the Büchi automaton and the runs 'passing' through the equations in @lemma:4.4, and use that to characterize a game to decide which words belong to $"Lang"(chi)$.
-
-Of course @lemma:4.4 worked with Runs, instead of actual words. The next lemma is closer to our desired result:
+By taking exactly those behavior mappings which are the solution to this system of equation, we take exactly those words that the Büchi automaton accepts:
 
 #lemma([#cite(<urabe2016coalgebraic>, supplement: "Lemma 4.5")])[
-  Let $chi=((X_1,X_2), Sigma, delta, s)$ be a Büchi automaton. Let $l^sol_1, l^sol_2$ be the solutions to the following equational system, where the variables $u_1,u_2$ range over $(cal(P)(Sigma^omega))^(X_i)$
+  Let $A=(S, Sigma, delta, s_0, F)$ be a Büchi automaton, where we let $S=S_1 union S_2$ the disjunct union of the non-accepting and accepting states, respectively, so $S_1=S backslash F$, $S_2=F$. Let $l^sol_1, l^sol_2$ be the solutions to the following equational system, where the variables $u_1,u_2$ range over $(cal(P)(Sigma^omega))^(S_i)$
 
   $ u_1 =^mu diamond_delta^1 (u_1 union u_2) #h(3em) u_2 =^nu diamond_delta^2 (u_1 union u_2) $
 
-  Where $diamond^i_delta: (cal(P)(Sigma^omega))^(X)->(cal(P)(Sigma^omega))^(X_i)$ is given by
+  Where $diamond^i_delta: (cal(P)(Sigma^omega))^(S)->(cal(P)(Sigma^omega))^(S_i)$ is given by
   $
-    diamond^i_delta (tr)(x) = {sigma dot w | sigma in Sigma, x'in delta(x)(sigma) , w in tr(x')}.
+    diamond^i_delta (tr)(s) = {sigma dot w | sigma in Sigma, s'in delta(s)(sigma) , w in tr(s')}.
   $ <eq:diamond>
-  Then the solutions $l^sol_i  = DelSt (AccRun_(chi,X_i))$, i.e. the words accepted starting from $X_i$.
+  Then the solutions $l^sol_i : S_i -> Sigma^omega$ map $S_i$ to the accepted language from that state.
 ] <lemma:4.5>
 
-After observing that @eq:traces in fact coincides with the definition of $diamond_delta$, we obtain the final theorem:
+We provide a brief intuition here, utilizing what was observed in @sec:modal. Namely, that $mu$ is associated with finite looping, and $nu$ with infinite. So the second equation makes sure the run passes through $S_2$ infinitely many times. Note that it can still move through $S_1$, but it has to move through $S_2$ infinitely many times. The first equation, with the $mu$ operator, makes sure that any run passing through $S_1$ passes to the second equation in some finite number of steps, where it passes through $S_2$ infinitely many times. So the two equations make sure that a run passes through $S_2$ (the second equation) infinitely many times, and when it passes through $S_1$ it passes back to $S_2$ in a finite number of steps where it can pass through $S_2$ infinitely many times again.
+
+Regardless of this intuition, the proof of this lemma given in @urabe2016coalgebraic is rather complex. In the next section we provide our proof using game semantics, which we believe is a lot more comprehensive.
+
+Combining @lemma:0 and @lemma:4.5 we obtain the coincidence result:
 
 #theorem([#cite(<urabe2016coalgebraic>, supplement: "Theorem 4.6")])[
-  Let $chi=((X_1,X_2), Sigma, delta, s)$ be a Büchi automaton. Then the behavior mappings $tr_1,tr_2$, which are the solution to the system of equations in @eq:traces coincide with the accepted language of $chi$: $tr(chi)=[tr_1,tr_2] dot.circle s (*) = "Lang"(chi)$. Where we interpret $s subset.eq X$ as $s: 1 -> cal(P)(X)$.
+  Let $A=(S,Sigma,delta,s_0,F)$ be a Büchi automaton. Then the behavior mappings $tr_1,tr_2$, which are the solution to the system of equations in @eq:traces coincide with the accepted language of $A$: $beh(s_0)=[tr_1,tr_2](s_0) = L(A)$.
 ] <th>
 
 = Derivation of Coincidence Using Game Semantics <sec:new>
@@ -726,7 +660,7 @@ In this report we have shown a coalgebraic representation of Büchi automata. Th
 
 We explained the model in the Kleisli category in @sec:nd by showing how to construct a final coalgebra for finite words for a nondeterministic system. Subsequently we constructed a weakly final coalgebra to additionally obtain the infinite words within such a system. Building upon these ideas we derived the coalgebraic construction for Büchi automata in @results:buchi, making use of the modal mu-calculus explained in @sec:modal.
 
-We provided a proof for @lemma:4.4, but not for @lemma:4.5, which is crucial for coincidence result in @th, and thus understanding why the construction indeed provides the words accepted by the Büchi automaton. Therefore, the first next step in the internship will be understanding the proof provided by @urabe2016coalgebraic.
+We provided a proof for *lemma*, but not for @lemma:4.5, which is crucial for coincidence result in @th, and thus understanding why the construction indeed provides the words accepted by the Büchi automaton. Therefore, the first next step in the internship will be understanding the proof provided by @urabe2016coalgebraic.
 
 After understanding the full proof of the coincidence result, we can start to think about replacing it using a different framework. Our goal is to replace it using a game semantics framework, which we briefly explained in @sec:modal in relation to the modal mu-calculus. There, we showed how one can see the check whether a formula holds in a state as a two player game between a verifier and a refuter, who want to verify, respectively refute, that the formula holds. Our vision is that this view can be applied to whether a word is accepted by the coalgebraic model of a Büchi automaton, and that this could simplify the result.
 
@@ -735,47 +669,26 @@ After understanding the full proof of the coincidence result, we can start to th
 #show: appendix
 
 = Proofs <appendix>
-_Proof of @lemma:4.4 _:
-We prove this in three steps: we show some properties for the first intermediate solution $l^((1))_1$, subsequently we use that to show $l^sol_2 = AccRun_(chi,X_2)$, and finally we use both results to show $l^sol_1 = AccRun_(chi,X_1)$.
+_Proof of @lemma:0 _:
+First we unfold some definitions:
 
-Let $|rho|$ denote the length of the run $rho$.
+$(J d)^(-1)= J (d^(-1))$ and $d^(-1)=cons$ and $J=eta_(Sigma^omega)$, so $J compose d^(-1) = eta_(Sigma^omega) compose cons$.
 
-Let $k in omega$, $u_2 in cal(P)(Run_(chi,X_2))$, and any (possibly infinite) run $rho=(sigma_1,x_1)(sigma_2,x_2)dots in Run_chi$,
+$overline(F)[u_1,dots,u_n]= lambda_(Sigma^omega) compose (id times (u_1 + dots + u_n))$ so let us call $u_1+dots+ u_n=beh$ and see that $id times beh: (Sigma times X) -> (Sigma times cal(P)(Sigma^omega))$, maps a pair $(sigma,x)$ to $(sigma,beh(x))$, i.e. $sigma$ and the language accepted by $x$. Combining with the natural transformation $lambda: (Sigma times cal(P(Sigma^omega)))-> cal(P)(Sigma times Sigma^omega)$ defined by $lambda(sigma,W)={(sigma,w)| w in W }$ we get $overline(F)[u_1,dots,u_n](sigma,x)={(sigma,w) | w in beh(x)}$
 
-$ rho in [lambda u_1. diamond^1_chi (u_1 union u_2)]^k (emptyset) $ <l11>
+$c_i= c compose kappa_i: X_i -> cal(P)(Sigma times X)$ in terms of the automaton is defined as $c_(i)(x)={(sigma,x')| x' in X, sigma in Sigma, x' in delta(x)(sigma)}$ for $x in X_i$.
 
-if and only if
-// 1. For all $i<= |rho|$, $x_i in X_1$. Moreover, $|rho| <= k$, so the run is finite.
-there exists an $i <= k$, such that for all $j <= i$ we have $x_j in X_1$ and $(sigma_(i+1),x_(i+1))(sigma_(i+2),x_(i+2))... in u_2$. Meaning, for $i$ steps the run passes through $X_1$ and after that it moves into $u_2$.
-
-This is the case because when applying the function on $k$ times there occur at most $k$ steps in $X_1$ due to the $diamond$ operator. After this the run has to move into $u_2$. The other direction is obvious.
-
-Now we observe that
-$
-  l^((1))_1 (u_2) = mu u_1. diamond^1_chi (u_1 union u_2)= union.big_(k in omega) [ lambda u_1. diamond^1_chi (u_1 union u_2) ]^k (emptyset)
-$
-
-So $rho in mu u_1.diamond^1_chi (u_1 union u_2)$ if and only if the run $rho$ moves after some finite number of steps into $u_2$.
-
-Now for $k in omega$, and a (possibly infinite) run $rho=(sigma_1,x_1)(sigma_2,x_2)dots in Run_chi$,
-
-$ rho in [lambda u_2. diamond^2_chi (l^((1))_1(u_2) union u_2)]^k (Run_(chi,X_2)). $
-
-if and only $|{i | x_i in X_2}|>= k$, i.e. we have passed through $X_2$ at least $k$ times.
-
-This is because, again, we take some number of steps in $X_2$ due to the $diamond$ operator, and between these steps we can 'pass through' $l^((1))_1$ but then, as shown above, the run has to move back to $X_2$.
-
-Analogous to the least fixed point, we now observe that
+Combining these, and writing out the Kleisli composition in terms of functions in *Sets* we get:
 
 $
-  l^sol_2 = nu u_2. diamond^2_chi (l^((1))_1(u_2) union u_2) = sect.big_(k in omega) [ lambda u_2.
-    diamond^2_chi (l^((1))_1(u_2) union u_2) ]^k (Run_(chi,X_2)).
+  (J d)^(-1) dot.circle overline(F)[u_1,dots,u_n] dot.circle c_i = mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) compose (mu_(Sigma times Sigma^omega) compose cal(P)(lambda compose (id times (u_1 + dots + u_n))) compose c_i).
 $
 
-So $rho in nu u_2. diamond^2_chi (l^((1))_1(u_2) union u_2)$ if and only if for all $k$ $rho$ has moved through $X_2$ at least $k$ times. Meaning, $rho$ has passed through $X_2$ infinitely many times. So $l^sol_2 = AccRun_(chi,X_2)$.
+Observing that $mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) = cal(P(cons))$, letting $u_1+dots+u_n=beh$ again and combining $cal(P)(lambda compose (id times beh))$ and $c_1$ by using our observations from above we obtain, for an $x in X_i$:
 
-Finally,
+$
+  (mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) compose (mu_(Sigma times Sigma^omega) compose cal(P)(lambda compose (id times (u_1 + dots + u_n))) compose c_1))(x) \
+  = cal(P)(cons)({(sigma,w) | x' in X, x' in delta(x)(sigma), w in [u_1,dots,u_n](x') })\
+  = {sigma dot w | x' in delta(x)(sigma), w in beh(x') } = diamond_delta (beh)(x)
+$ #h(1fr) $square$
 
-$ l^(sol)_1 = l^((1))_1(l^(sol)_2). $
-
-So for $rho in l^(sol)_1$, in finitely many steps the run moves to $l^sol_2$, for which it passes infinitely many times through $X_2$. So $l^(sol)_1=AccRun_(chi,X_1)$. #h(1fr) $square$
