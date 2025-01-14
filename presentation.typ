@@ -144,10 +144,51 @@
   ]
 ]
 
-#slide(title: "Solution by Hasuo et al. 2007")[
-  Distributive law?
+#slide(title: "Lifted Functor in Kleisli Category")[
+  Model NDA $angle.l S, Sigma, delta, o angle.r$ by coalgebra $c: S -> 1 + Sigma times S$ for the functor $F S = 1 + Sigma times S$, which is $c: S -> cal(P)(1 + Sigma times S)$ in *Sets*.
 
-  Initial algebra in *Sets* is final coalgebra in $Klp$
+  #uncover("2-")[
+    Problem: a map $f: X -> Y$ in $Klp$ is $f: X -> cal(P)$ in *Sets* so $F f: F X -> F cal(P)(Y)$
+  ]
+
+  #uncover("3-")[
+    We need a natural transformation $lambda: F cal(P) => cal(P)F$ (distributive law):
+
+    $
+      1 + Sigma times (cal(P)(S)) ->^lambda cal(P)(1 + Sigma times X)
+    $
+  ]
+
+  #uncover("4-")[
+    - $* arrow.r.bar {*} (1 = {*})$
+    - $(sigma,S)={(sigma,x)|x in S}$ for $sigma in Sigma$ and $S subset.eq X$.
+
+    For example: $delta(s)(sigma)={x,y,z}$ then $(lambda compose c)(s) = {(sigma,x),(sigma,y),(sigma,z)}$.
+  ]
+
+  #uncover("5-")[
+    Call $overline(F) S = F S$ and $overline(F) f = lambda compose cal(P)(f)$ the _lifted functor_
+  ]
+
+]
+
+#slide(title: [Initial Algebra $=>$ Final Coalgebra])[
+  *Theorem* [Hasuo et al. 2007]: An initial algebra $alpha: F A -> A$ for the functor $F$ in *Sets* yields the final coalgebra for $overline(F)$ in $Klp$:
+  $
+    (eta_(F A)compose alpha^(-1)) : A -> overline(F) A italic("in") Klp
+  $
+
+  #uncover("2-")[
+    The initial algebra for $F S = 1 + Sigma times S$ is $[sans("nil"),sans("cons")]: 1 + Sigma times Sigma^* -> Sigma^* $:
+    - $sans("nil")(*)=epsilon$
+    - $sans("cons")(sigma, w)=sigma w$
+    so we get $(eta_(1 + Sigma times S) compose [sans("nil"),sans("cons")]^(-1)): Sigma^* -> 1 +Sigma times Sigma^*$ ($Sigma^* -> cal(P)(1 + Sigma times Sigma^*)$ in *Sets*)
+    - $(eta_(1 + Sigma times S) compose [sans("nil"),sans("cons")]^(-1))(epsilon)= {*}$
+    - $(eta_(1 + Sigma times S) compose [sans("nil"),sans("cons")]^(-1))(sigma w)= {(sigma, w)}$
+  ]
+]
+
+#slide(title: [Final Coalgebra Nondeterministic Automaton])[
 
   $
     #diagram(
@@ -158,7 +199,7 @@
       node((1, 1), $Sigma^*$, name: <A>)
       node((1, 0), $1 + Sigma times Sigma^*$, name: <FA>)
       edge(<X>, <FX>, $c$, "->", label-side: left)
-      edge(<A>, <FA>, $tilde.equiv$, "-", label-side: left, stroke: 0pt)
+      // edge(<A>, <FA>, $tilde.equiv$, "-", label-side: left, stroke: 0pt)
       edge(<A>, <FA>, $eta_(1+Sigma times Sigma^*) compose [sans("nil"),sans("cons")]^(-1)$, "->", label-side: right)
       edge(<X>, <A>, $text(tr)$, "-->", label-side: right)
       edge(<FX>, <FA>, $1 + Sigma times tr$, "-->")
@@ -167,16 +208,130 @@
   )
   $
 
-  $
-    epsilon in tr(s) <==> * in c(s) <==> "state" s "is accepting"\
-    sigma w in tr(s) <==> exists t. (s ->^sigma t and w in tr(t)).
-  $ <eq:finite>
-  Which are the right traces!
+  #uncover("2-")[
+    $
+      epsilon in tr(s) <==> * in c(s) <==> "state" s "is accepting"\
+      sigma w in tr(s) <==> (sigma,w) in ((Sigma times beh) compose c)(s)={(sigma, beh(t)) | (sigma,t) in c(s)} <==> exists t. (t in delta(s)(sigma) and w in tr(t)).
+    $ <eq:finite>
+  ]
 ]
 
-#slide(title: "Possibly Infinite Behavior")[ ]
+#slide(title: "Possibly Infinite Behavior")[
+  *Theorem* [Jacobs 2004]: A final coalgebra $xi: Z -> F Z$ yields a _weakly final_ coalgebra
+  $
+    (eta_(F Z) compose xi) : Z -> overline(F)(Z) italic("in") Klp
+  $
 
-#slide(title: "Büchi Automata final Coalg")[ ]
+  #uncover("2-")[
+    $
+      #diagram(
+    // spacing: 2cm,
+    {
+      node((0, 1), $S$, name: <X>)
+      node((0, 0), $overline(F) S$, name: <FX>)
+      node((1, 1), $Z$, name: <Z>)
+      node((1, 0), $overline(F) Z$, name: <FZ>)
+      edge(<X>, <FX>, $c$, "->", label-side: left)
+      // edge(<Z>, <FZ>, $tilde.equiv$, "-", label-side: left, stroke: 0pt)
+      edge(<Z>, <FZ>, $eta_(F Z) compose xi$, "->", label-side: right)
+      edge(<X>, <Z>, $text(tr)$, "~>", label-side: right)
+      edge(<FX>, <FZ>, $overline(F)(text(tr))$, "~>")
+      node((2, .5), $italic("in") cal("Kl")(cal(P)),$)
+    },
+  )
+    $
+    $beh$ is not unique. However, we can take $beh^infinity$, the maximal mapping with respect to inclusion.
+  ]
+]
+
+#slide(title: "")[
+  $xi: Sigma^infinity -> 1 + Sigma times Sigma^infinity$ is the final $F$-coalgebra, defined by $xi(epsilon)& =* in 1$ and $xi(sigma w)&= (sigma,w)$ \ ($Sigma^infinity=Sigma^* union Sigma^omega$).
+
+  #uncover("2-")[
+    $
+      #diagram(
+    // spacing: 2cm,
+    {
+      node((0, 1), $S$, name: <X>)
+      node((0, 0), $1 + Sigma times S$, name: <FX>)
+      node((1, 1), $Sigma^infinity$, name: <A>)
+      node((1, 0), [$1 + Sigma times Sigma^infinity$], name: <FA>)
+      edge(<X>, <FX>, $c$, "->", label-side: left)
+      edge(<A>, <FA>, $tilde.equiv$, "-", label-side: left, stroke: 0pt)
+      edge(<A>, <FA>, $J xi$, "->", label-side: right)
+      edge(<X>, <A>, $text(tr)^infinity_c$, "~>", label-side: right)
+      edge(<FX>, <FA>, $1 + Sigma times tr^infinity_c$, "~>")
+      node((2, .5), $italic("in") cal("Kl")(cal(P)).$)
+    },
+  )
+    $
+
+    $
+      epsilon in tr^infinity (s) <==> * in c(s) <==> "state" s "is accepting" \
+      sigma w in tr^infinity (s) <==> exists t. (s ->^sigma t and w in tr^infinity (t)).
+    $ <eq:infinite>
+
+  ]
+]
+
+#slide(title: "Büchi Automata Coalgebraically, Urabe et al. 2016")[
+  Idea: split $S=S_1 union S_2$ for $S_1$ non-accepting and $S_2$ accepting
+
+  #uncover((2, 3, 4))[
+    $
+      #diagram(
+    spacing: 2.0cm,
+    {
+      node((0, 0), [$Sigma times S$], name: <fx1>)
+      node((0, 1), [$S_1$], name: <x1>)
+      node((1, 1), [$Sigma^omega$], name: <z1>)
+      node((1, 0), [$Sigma times Sigma^omega$], name: <fz1>)
+      edge(<x1>, <fx1>, $c_1$, "->", left)
+      edge(<x1>, <z1>, $tr_1$, "~>", right)
+      edge(<fx1>, <fz1>, $Sigma times [tr_1,tr_2]$, "~>")
+      edge(<z1>, <fz1>, $eta_(Sigma^omega) compose  d$, right,"->")
+      // edge(<z1>, <fz1>, $tilde.equiv$, "-", left, stroke: 0pt)
+
+      node((2, 0), [$Sigma times S$], name: <fx2>)
+      node((2, 1), [$S_2$], name: <x2>)
+      node((3, 1), [$Sigma^omega$], name: <z2>)
+      node((3, 0), [$Sigma times Sigma^omega$], name: <fz2>)
+      edge(<x2>, <fx2>, $c_2$, "->", left)
+      edge(<x2>, <z2>, $tr_2$, "~>", right)
+      edge(<fx2>, <fz2>, $Sigma times [tr_1,tr_2]$, "~>")
+      edge(<z2>, <fz2>, $eta_(Sigma^omega) compose d$, "->")
+      // edge(<z2>, <fz2>, $tilde.equiv$, "-", left, stroke: 0pt)
+
+      node((0.5,0.5), [$=_mu$])
+      node((2.5,0.5), [$=_nu$])
+
+      node((4.5, .5), $italic("in") cal("Kl")(cal(P)).$)
+    },
+  )
+    $
+  ]
+  #only(3)[
+    $
+      u_1 &=_mu (eta_(Sigma^omega) compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_1 \
+      u_2 &=_nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
+    $
+  ]
+  #only(4)[
+    $
+      u_1 =^mu diamond_delta ([u_1, u_2]) harpoon.tr S_1 #h(3em) u_2 =^nu diamond_delta ([u_1,u_2]) harpoon.tr S_2
+    $
+
+    Where $diamond_delta: (cal(P)(Sigma^omega))^(S)->(cal(P)(Sigma^omega))^(S)$ is given by
+    $
+      diamond_delta (beh)(s) = {sigma dot w | s'in delta(s)(sigma) , w in beh(s')}.
+    $
+    *Theorem* [Urabe et al. 2016]: The solutions $beh_1,beh_2$ to the system of equations coincide with the accepted language of the Büchi Automaton $A$.
+  ]
+]
+
+#slide(title: [Büchi Automata Coalgebraically, Urabe et al. 2016])[
+
+]
 
 #slide(title: "Using Game Semantics to derive")[
   outline this? steps and saying these things are possible?
