@@ -310,9 +310,8 @@ Now, to use this game to give alternative semantics for the modal mu-calculus we
   $
     s scripts(tack.double.r)^T phi <=> "V has a winning strategy in" cal(G)(phi,T) "starting in state" (phi,s)
   $
-]
+] <th:game>
 
-The thorough explanation and rigorous proof are quite intricate, so to keep the presentation simple we limit ourselves to this intuition given above.
 
 
 = Coalgebraic Representation of Büchi Automata <chap:results>
@@ -548,18 +547,22 @@ We first rewrite this to something more clear and usable:
   $ <eq:diamond>
 ] <lemma:0>
 
+The proof can be found in @appendix.
+
 By taking exactly those behavior mappings which are the solution to this system of equation, we take exactly those words that the Büchi automaton accepts:
 
 #lemma([#cite(<urabe2016coalgebraic>, supplement: "Lemma 4.5")])[
   Let $A=(S, Sigma, delta, s_0, F)$ be a Büchi automaton, where we let $S=S_1 union S_2$ the disjunct union of the non-accepting and accepting states, respectively, so $S_1=S backslash F$, $S_2=F$. Let $l^sol_1, l^sol_2$ be the solutions to the following equational system, where the variables $u_1,u_2$ range over $(cal(P)(Sigma^omega))^(S_i)$
 
-  $ u_1 =^mu diamond_delta^1 (u_1 union u_2) #h(3em) u_2 =^nu diamond_delta^2 (u_1 union u_2) $
+  $
+    u_1 =^mu diamond_delta ([u_1, u_2]) harpoon.tr S_1 #h(3em) u_2 =^nu diamond_delta ([u_1,u_2]) harpoon.tr S_2
+  $ <eq:traces2>
 
   Where $diamond^i_delta: (cal(P)(Sigma^omega))^(S)->(cal(P)(Sigma^omega))^(S_i)$ is given by
   $
     diamond^i_delta (tr)(s) = {sigma dot w | sigma in Sigma, s'in delta(s)(sigma) , w in tr(s')}.
   $ <eq:diamond>
-  Then the solutions $l^sol_i : S_i -> Sigma^omega$ map $S_i$ to the accepted language from that state.
+  Then the solutions $l^sol_i : S_i -> Sigma^omega$ map $S_i$ to the accepted language from that state, that is, $l^sol_i (s) = L(A)(s)$ for $s in S_i$.
 ] <lemma:4.5>
 
 We provide a brief intuition here, utilizing what was observed in @sec:modal. Namely, that $mu$ is associated with finite looping, and $nu$ with infinite. So the second equation makes sure the run passes through $S_2$ infinitely many times. Note that it can still move through $S_1$, but it has to move through $S_2$ infinitely many times. The first equation, with the $mu$ operator, makes sure that any run passing through $S_1$ passes to the second equation in some finite number of steps, where it passes through $S_2$ infinitely many times. So the two equations make sure that a run passes through $S_2$ (the second equation) infinitely many times, and when it passes through $S_1$ it passes back to $S_2$ in a finite number of steps where it can pass through $S_2$ infinitely many times again.
@@ -573,29 +576,40 @@ Combining @lemma:0 and @lemma:4.5 we obtain the coincidence result:
 ] <th>
 
 = Derivation of Coincidence Using Game Semantics <sec:new>
-In this section we prove @th using game semantics and in a very pretty way.
+In this section we provide our derivation of the coincidence result @lemma:4.5. At the core of the derivation is @th:game, which relates a modal mu calculus formula on a transition system and a parity game. We can apply @th:game to derive the coincidence result with the following strategy:
+
+1. Derive from a formula $phi$ from the system of equations in @eq:traces2 a closed modal mu-calculus formula $overline(phi)$ and define a transition system $T_A$ from the Büchi automaton $A$ such that the $overline(phi)$ holds on a state in $T_A$ if and only if $phi$ holds in a related state on $A$.
+2. Apply @th:game to conclude that $overline(phi)$ holds in a state $s$ if and only if there exists a winning strategy for $V$ on $cal(G)(T_A,overline(phi))$ from state $s$.
+3. Prove that there exists a winning strategy for $V$ from state $(s,w)$ in $cal(G)(T_A,overline(phi))$ if and only if $w in L(A)(s)$
+
+
+So the first step is defining the transition system from the Büchi automaton.
 
 #definition[
-  Let $A=(X_1 union X_2, Sigma, delta)$ be a Büchi automaton, with states $X=X_1 union X_2$ where $X_2$ are the accepting states, $Sigma$ is the alphabet, and $delta: X times Sigma -> cal(P)(X)$ the transition function. We define a Transition System (TS) over the set of propositional variables ${p_1,p_2}$ for this automaton, denoted as $T_A$, as follows:
-  - States are $(x,w)$ for $x in X$ and $w in Sigma^omega$
-  - Transition $(x,sigma w) -> (x', w)$ for $x,x'in X$, $sigma in Sigma$, $w in Sigma^omega$, iff $x'in delta(x)(sigma)$
-  - Labeling function given by $lambda((x,w))={p_i}$ iff $x in X_i$, i.e. the propositional variables denote for what $i$, we have $x in X_i$.
+  Let $A=(S_1 union S_2, Sigma, delta)$ be a Büchi automaton, with states $S=S_1 union S_2$ where $S_2$ are the accepting states, $Sigma$ is the alphabet, and $delta: S times Sigma -> cal(P)(S)$ the transition function. We define a Transition System (TS) over the set of propositional variables ${p_1,p_2}$ for this automaton, denoted as $T_A$, as follows:
+  - States are $(s,w)$ for $s in S$ and $w in Sigma^omega$
+  - Transition $(s,sigma w) -> (s', w)$ for $s,s'in S$, $sigma in Sigma$, $w in Sigma^omega$, iff $s'in delta(s)(sigma)$
+  - Labeling function given by $lambda((s,w))={p_i}$ iff $s in S_i$, that is, the propositional variables denote for what $i$, we have $s in S_i$.
 ]
 
-We observe how the formulas from @lemma:0 are built up and convert them. For example the closed formula for $beh_1: X_1 -> Sigma^omega$ for $n=2$ priorities, i.e. a Büchi automaton, $beh_1=nu u_2. diamond_delta [mu u_1. [u_1,u_2] arrow.t X_1, u_2] arrow.t X_2$. Let $phi$ be such a formula, then:
+By defining the states of the transition system as state-word pairs on the Büchi automaton, we ensure that step 3 of the strategy succeeds: this setup allows for a clear correspondence between an infinite play in the parity game and an accepting run through the Büchi automaton.
+
+Next, we derive a closed modal mu-calculus formula from the system of equations. Deriving the solution from the system of equations, as explained in @def:eq, we obtain a closed formula. For example, the closed formula for $beh_1: S_1 -> Sigma^omega$ from @eq:traces2 is $beh_1=nu u_2. diamond_delta [mu u_1. [u_1,u_2] arrow.t S_1, u_2] arrow.t S_2$. We observe that the formula is bult up inductively. If $phi$ is a solution to @eq:traces2, then:
 - $phi=u$ a free variable, or
 - $phi=diamond_delta phi'$, or
 - $phi=eta u. phi'$ where $eta in {mu,nu}$, or
-- $phi = phi' arrow.t X_i $, or
+- $phi = phi' arrow.t S_i $, or
 - $phi=[phi_1,dots,phi_n]$
 
-we also observe the implicit semantics of the formula $||phi||$: ...
+Also observe that the semantics of $phi$ is defined as follows: ...
+
+So we convert the closed formula from the system of equations to a modal mu-calculus formula and prove that the semantics coincide:
 
 #definition[So we convert a formula $phi$, to our desired formula $overline(phi)$ to conform to Definition 10.2[]:
   - $phi=u$ a free variable then $overline(phi)=u$ also a free variable
   - $phi=diamond_delta phi'$ then $overline(phi)=diamond overline(phi')$
   - $phi=eta u. phi'$ for $eta in {mu,nu}$ then $overline(phi)=eta u . overline(phi')$
-  - $phi = phi' arrow.t X_i $ then $overline(phi)=p_i and overline(phi')$
+  - $phi = phi' arrow.t S_i $ then $overline(phi)=p_i and overline(phi')$
   - $phi=[phi_1,dots,phi_n]$ then $overline(phi)=(p_1 and overline(phi_1)) or ... or (p_n and overline(phi_n))$
 ]
 
@@ -608,52 +622,21 @@ we also observe the implicit semantics of the formula $||phi||$: ...
   $
 
   where $overline(V)(U)={(x,w)| x in X, w in V(U)(x)}$
-]
-#let ubar = $overline(U)$
-#let vbar = $overline(V)$
-#let wbar = $overline(W)$
-#let ybar = $overline(Y)$
-#let dd = $diamond_delta$
-#proof[
-  We prove this by induction on the formula $phi$. The base case is $phi=U$ a free variable:
+] <lemma:1>
 
-  $w in ||U||_(V)(x)=V(U)(x) <-> (x,w) in overline(V)(U) = ||U||^(T_A)_(overline(V))$
+The proof is relatively straightforward by performing induction on the formula $phi$ and can be found in @appendix.
 
-  Induction step:
+Next, we apply @th:game to obtain a winning strategy for $V$ on $cal(G)(T_A, overline(phi))$, so our final step is relating such a winning strategy with an accepting run on the Büchi automaton:
 
-  - $phi=mu U. phi'$:
+#lemma()[
+  For $s_i in S_i$, $phi_i=l^sol_i$:
 
-  We have to show $w in ||mu U. phi'||_(V)(x)=lfp(lambda u. ||phi'||_(V[U |-> u])) <=> (x,w) in ||mu U. overline(phi')||_(overline(V))=lfp (lambda u. ||overline(phi')||_(overline(V)[U |-> u]))$. Let $W= lfp(lambda u. ||phi'||_(V[U |-> u]))$. We define $overline(W)={(x,w) | x in X, w in W(x)}$ and show $W= lfp(lambda u. ||phi'||_(V[U |-> u]))<=>overline(W)= lfp(lambda u. ||overline(phi')||_(V[U |-> u]))$. For this we first prove that $W$ is a fixed point iff $overline(W)$ is a fixed point:
+  Player 1 has a winning strategy in the game $cal(G)(overline(phi),T_A)$ from $(overline(phi_i),(x_i,w))$ iff the Büchi automaton $A$ accepts the word $w$ from $x_i$, i.e. $w in L(A)(x_i)$.
+] <lemma:3>
 
-  Assume $W$ is a fixed point, so $||phi'||_(V[U |-> W]) = W$. We observe that for a valuation $V$ and $V'$ where $V'=V[U|->W]$, we have the converted valuation $overline(V')=overline(V)[U |-> overline(W)]$. We use this to incite the IH to get $w in ||phi'||_(V[U|->W]) <=> (x,w) in ||overline(phi')||_(overline(V)[U |-> overline(W)])$. Using this we get $(x,w) in ||overline(phi')||_(overline(V)[U|-> overline(W)]) <=> w in ||phi'||_(V[U |-> W])(x)=W(x) <=> (x,w) in overline(W)$, so $||overline(phi')||_(overline(V)[U |->overline(W)])= wbar$, so $wbar$ is a fixed point.
+The proof is relatively easy by observing ... and la die da die da. It is found concretely in @appendix.
 
-  Now assume $overline(W)$ is a fixed point, so $||overline(phi')||_(overline(V)[U |-> wbar]) = wbar$. Then, for $x in X$, $W(x)={w | (x,w) in overline(W)}$. Applying IH like the previous case again we obtain $w in ||phi'||_(V[U |-> W])(x) <=> (w,x) in ||overline(phi')||_(overline(V)[U |-> overline(W)])= W <=> w in W(x) $. So $w in ||phi'||_(V[U |-> W])(x) <=> w in W(x)$ for all $x in X$, so $||phi'||_(V[U |-> W])=W$, so $W$ is a fixed point.
-
-  Next, we show that $W$ is the _least_ fixed point iff $overline(W)$ is the _least_ fixed point:
-
-  Assume $W$ is a lfp, from above we know that $wbar$ is a fixed point. Take some other fixed point $ybar$, i.e. $||overline(phi')||_(overline(V)[U|->ybar])=ybar$. Now, again inciting what we showed above, we know $Y$ is a fixed point, so $||phi'||_(V[U|->ybar])=ybar$. So because $W$ is the lfp, for all $x$, $W(x)subset.eq Y(x)$. From this it follows that $(x,w) in wbar -> w in W(x) -> w in Y(x) -> (x,w) in ybar$, so $wbar subset.eq ybar$. So $wbar$ is the least fixed point.
-
-  For the other direction, assume $overline(W)$ is a least fixed point. Then $W$ is a fixed point. Take some other fixed point $Y$, i.e. $||phi'||_(V[U|->Y])=Y$, then $ybar$ is a fixed point. So because $wbar$ is the lfp, we have $wbar subset.eq ybar$. Now for any $w,x$ we have $w in W(x) -> (x,w) in wbar -> (x,w) in ybar -> w in Y(x)$. So $W subset.eq Y$.
-
-  - $phi=nu U. phi'$:
-
-  This case is a analagous to the $mu$ case. The first part proving $W$ is a fixed point iff $wbar$ is a fixed point, and for proving $W$ is a _greatest_ fixed point iff $wbar$ is too you reason in the opposite direction as for $mu$.
-
-  - $phi=diamond_delta phi'$: \
-  $w in & ||diamond_delta phi'||_(V)(x)
-    = {sigma w | exists x' in delta(x)(sigma)[ w in ||phi'||_(V)(x')] }
-    =^(I H){sigma w | exists x' in delta(x)(sigma)[ (x',w) in ||phi'||_(overline(V))] }
-    <-> (x,w) in {(x,sigma w) | exists x' in delta(x)(sigma)[ (x',w) in ||phi'||_(overline(V))] }
-    = ||diamond overline(phi')||^(T_A)_(overline(V))$
-  - $phi = phi' harpoon.tr X_i$: \
-  $w in ||phi' harpoon.tr X_i||_(V)(x) <-> x in X_i and w in ||phi'||_(V)(x) <->^(I H)x in X_i and (x,w) in ||overline(phi')||_(overline(V)) <-> (x,w) in ||p_i and overline(phi')||_(overline(V))$
-  - $phi= [phi_1,dots,phi_n]$:
-  $||phi||_(V)(x) = cases(||phi_1||_(V)(x) "if " x in X_1, dots.v, ||phi_n||_(V)(x) "if " x in X_n)$, so let $w in ||phi||_(V)(x)$ for $x in X_i$, then $w in ||phi_i||_(V)(x)$ so by IH $(x,w) in ||overline(phi_i)||_(overline(V))(x)$, and because $x in X_i$, $(x,w) in X_i$, $(x,w) in ||p_i and overline(phi_i)||_(overline(V))(x)$ and thus $(x,w) in ||(p_1 and phi_1) or ... or (p_n and phi_n)||_overline(V)=||overline(phi)||_overline(V)$.
-
-  Now $(x,w) in ||overline(phi)||_overline(V) = ||(p_1 and overline(phi_1)) or ... or (p_n and overline(phi_n))||_overline(V)$. Take $i$ such that $(x,w) in ||p_i and overline(phi_i)||_overline(V)$ then we have $x in X_i$ and (by IH) $w in ||phi_i||_(V)(x)$, and by definition of $||[phi_1,...,phi_n]||$ then $w in ||phi||_(V)(x)$.
-]
-
-
+The proof of @th now follows from @lemma:0, @lemma:1, @th:game and @lemma:3.
 
 = Conclusion and Future Work <sec:conclusion>
 In this report we have shown a coalgebraic representation of Büchi automata. The construction relies upon two key ideas: working in the Kleisli category for the monad $cal(P)$ and deriving two separate commuting diagrams for the accepting and non-accepting states and obtaining the right words by utilizing fixed point equations from these two mappings.
@@ -692,3 +675,61 @@ $
   = {sigma dot w | x' in delta(x)(sigma), w in beh(x') } = diamond_delta (beh)(x)
 $ #h(1fr) $square$
 
+#let ubar = $overline(U)$
+#let vbar = $overline(V)$
+#let wbar = $overline(W)$
+#let ybar = $overline(Y)$
+#let dd = $diamond_delta$
+
+
+_Proof of @lemma:1 _:
+We prove this by induction on the formula $phi$. The base case is $phi=U$ a free variable:
+
+$w in ||U||_(V)(x)=V(U)(x) <-> (x,w) in overline(V)(U) = ||U||^(T_A)_(overline(V))$
+
+Induction step:
+
+- $phi=mu U. phi'$:
+
+We have to show $w in ||mu U. phi'||_(V)(x)=lfp(lambda u. ||phi'||_(V[U |-> u])) <=> (x,w) in ||mu U. overline(phi')||_(overline(V))=lfp (lambda u. ||overline(phi')||_(overline(V)[U |-> u]))$. Let $W= lfp(lambda u. ||phi'||_(V[U |-> u]))$. We define $overline(W)={(x,w) | x in X, w in W(x)}$ and show $W= lfp(lambda u. ||phi'||_(V[U |-> u]))<=>overline(W)= lfp(lambda u. ||overline(phi')||_(V[U |-> u]))$. For this we first prove that $W$ is a fixed point iff $overline(W)$ is a fixed point:
+
+Assume $W$ is a fixed point, so $||phi'||_(V[U |-> W]) = W$. We observe that for a valuation $V$ and $V'$ where $V'=V[U|->W]$, we have the converted valuation $overline(V')=overline(V)[U |-> overline(W)]$. We use this to incite the IH to get $w in ||phi'||_(V[U|->W]) <=> (x,w) in ||overline(phi')||_(overline(V)[U |-> overline(W)])$. Using this we get $(x,w) in ||overline(phi')||_(overline(V)[U|-> overline(W)]) <=> w in ||phi'||_(V[U |-> W])(x)=W(x) <=> (x,w) in overline(W)$, so $||overline(phi')||_(overline(V)[U |->overline(W)])= wbar$, so $wbar$ is a fixed point.
+
+Now assume $overline(W)$ is a fixed point, so $||overline(phi')||_(overline(V)[U |-> wbar]) = wbar$. Then, for $x in X$, $W(x)={w | (x,w) in overline(W)}$. Applying IH like the previous case again we obtain $w in ||phi'||_(V[U |-> W])(x) <=> (w,x) in ||overline(phi')||_(overline(V)[U |-> overline(W)])= W <=> w in W(x) $. So $w in ||phi'||_(V[U |-> W])(x) <=> w in W(x)$ for all $x in X$, so $||phi'||_(V[U |-> W])=W$, so $W$ is a fixed point.
+
+Next, we show that $W$ is the _least_ fixed point iff $overline(W)$ is the _least_ fixed point:
+
+Assume $W$ is a lfp, from above we know that $wbar$ is a fixed point. Take some other fixed point $ybar$, i.e. $||overline(phi')||_(overline(V)[U|->ybar])=ybar$. Now, again inciting what we showed above, we know $Y$ is a fixed point, so $||phi'||_(V[U|->ybar])=ybar$. So because $W$ is the lfp, for all $x$, $W(x)subset.eq Y(x)$. From this it follows that $(x,w) in wbar -> w in W(x) -> w in Y(x) -> (x,w) in ybar$, so $wbar subset.eq ybar$. So $wbar$ is the least fixed point.
+
+For the other direction, assume $overline(W)$ is a least fixed point. Then $W$ is a fixed point. Take some other fixed point $Y$, i.e. $||phi'||_(V[U|->Y])=Y$, then $ybar$ is a fixed point. So because $wbar$ is the lfp, we have $wbar subset.eq ybar$. Now for any $w,x$ we have $w in W(x) -> (x,w) in wbar -> (x,w) in ybar -> w in Y(x)$. So $W subset.eq Y$.
+
+- $phi=nu U. phi'$:
+
+This case is a analagous to the $mu$ case. The first part proving $W$ is a fixed point iff $wbar$ is a fixed point, and for proving $W$ is a _greatest_ fixed point iff $wbar$ is too you reason in the opposite direction as for $mu$.
+
+- $phi=diamond_delta phi'$: \
+$w in & ||diamond_delta phi'||_(V)(x)
+  = {sigma w | exists x' in delta(x)(sigma)[ w in ||phi'||_(V)(x')] }
+  =^(I H){sigma w | exists x' in delta(x)(sigma)[ (x',w) in ||phi'||_(overline(V))] }
+  <-> (x,w) in {(x,sigma w) | exists x' in delta(x)(sigma)[ (x',w) in ||phi'||_(overline(V))] }
+  = ||diamond overline(phi')||^(T_A)_(overline(V))$
+- $phi = phi' harpoon.tr X_i$: \
+$w in ||phi' harpoon.tr X_i||_(V)(x) <-> x in X_i and w in ||phi'||_(V)(x) <->^(I H)x in X_i and (x,w) in ||overline(phi')||_(overline(V)) <-> (x,w) in ||p_i and overline(phi')||_(overline(V))$
+- $phi= [phi_1,dots,phi_n]$:
+$||phi||_(V)(x) = cases(||phi_1||_(V)(x) "if " x in X_1, dots.v, ||phi_n||_(V)(x) "if " x in X_n)$, so let $w in ||phi||_(V)(x)$ for $x in X_i$, then $w in ||phi_i||_(V)(x)$ so by IH $(x,w) in ||overline(phi_i)||_(overline(V))(x)$, and because $x in X_i$, $(x,w) in X_i$, $(x,w) in ||p_i and overline(phi_i)||_(overline(V))(x)$ and thus $(x,w) in ||(p_1 and phi_1) or ... or (p_n and phi_n)||_overline(V)=||overline(phi)||_overline(V)$.
+
+Now $(x,w) in ||overline(phi)||_overline(V) = ||(p_1 and overline(phi_1)) or ... or (p_n and overline(phi_n))||_overline(V)$. Take $i$ such that $(x,w) in ||p_i and overline(phi_i)||_overline(V)$ then we have $x in X_i$ and (by IH) $w in ||phi_i||_(V)(x)$, and by definition of $||[phi_1,...,phi_n]||$ then $w in ||phi||_(V)(x)$.
+
+
+_Proof of @lemma:3 _:
+First show (observe) that the transitions in the game for $diamond$ correspond exactly to those in the automaton ($<->$).
+
+A problem is as follows: assume you have an accepting run for a word (tree) in the automaton. That means the from the states that occur infinitely often, the maximum priority is even, say $n$. We can correspond this to a strategy in the game and consider an infinite play (show the finite games are winning for V). Now this will visit $u_n$ infinitely many times, and $u_k$ for $k<n$ maybe also, but $u_j$ for $j>n$ not infinitely. However, it is possible that some $u_k$ has a higher priority in the game $cal(G)$. And then when that is visited infinitely many times, it has a higher priority and thus the game could be lost. So, we solve this by
+
+I prove it now quickly for $phi_1= mu u_1.diamond^1_delta (
+    u_1 union nu u_2. diamond^2_delta ((mu u_1^'. diamond^1_delta (u_1^' union u_2)) union u_2)
+  )$, so $overline(phi_i)=mu u_1. p_1 and diamond (u_1 or nu u_2. (p_2 and diamond((mu u_1^'.p_1 and (u_1^' or u_2)) or u_2 )))$. We observe that $Omega(mu u_1. ...)=1$, $Omega(nu u_2. ...)=2$ and $Omega(mu u_1^'. ...)=1$.
+
+Assume player 1 has a winning strategy for $cal(G)(overline(phi_i),T_A)$ from $(overline(phi_i),(x_i,w))$. That means, for an infinite play (why does this exist?), we have some steps $(phi_j,(x_j,w_j))$ for $j in omega$. These $(x_j,w_j)$ (every time they change, i.e. for a $diamond$ transition) follow $x_1 in X_1$, and for $w_j=sigma w_j^'$ we have $x_(j+1) in delta(x_j)(sigma)$. This run passes through $nu u_2.$ infinitely many times, which it only does if $x in X_2$, so because $X_2$ is finite (right?), there exists a $x' in X_2$ that is visited infinitely often.
+
+Assume $w in L(A)(x)$. Then there is an accepting run $(x_1, sigma_1),(x_2,sigma_2)...$ which tells you what to do at each $diamond$, and we know from $x$ what to do in $or$. So because the accepting run passes through $X_2$ infinitely many times, the strategy will too for an infinite play.
