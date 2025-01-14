@@ -277,7 +277,7 @@
 #slide(title: "Büchi Automata Coalgebraically, Urabe et al. 2016")[
   Idea: split $S=S_1 union S_2$ for $S_1$ non-accepting and $S_2$ accepting
 
-  #uncover((2, 3, 4))[
+  #uncover("2-")[
     $
       #diagram(
     spacing: 2.0cm,
@@ -310,31 +310,111 @@
   )
     $
   ]
-  #only(3)[
+  #uncover("3-")[
     $
-      u_1 &=_mu (eta_(Sigma^omega) compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_1 \
-      u_2 &=_nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
+      beh_1 &=^mu (eta_(Sigma^omega) compose d)^(-1) dot.circle overline(F)[beh_1,beh_2] dot.circle c_1 \
+      beh_2 &=^nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[beh_1,beh_2] dot.circle c_2
     $
   ]
-  #only(4)[
+]
+
+#set text(size: 15pt)
+#slide(title: [Büchi Automata Coalgebraically, Urabe et al. 2016])[
+  #only((1, 2))[
     $
-      u_1 =^mu diamond_delta ([u_1, u_2]) harpoon.tr S_1 #h(3em) u_2 =^nu diamond_delta ([u_1,u_2]) harpoon.tr S_2
+      beh_1 &=^mu (eta_(Sigma^omega) compose d)^(-1) dot.circle overline(F)[beh_1,beh_2] dot.circle c_1 #h(3em)
+    beh_2 &=^nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[beh_1,beh_2] dot.circle c_2
+    $
+  ]
+  #uncover("2-")[
+    #only("2")[
+      Rewrite to:]
+    $
+      beh_1 =^mu diamond_delta ([beh_1, beh_2]) harpoon.tr S_1 #h(3em) beh_2 =^nu diamond_delta ([beh_1,beh_2]) harpoon.tr S_2
     $
 
     Where $diamond_delta: (cal(P)(Sigma^omega))^(S)->(cal(P)(Sigma^omega))^(S)$ is given by
     $
       diamond_delta (beh)(s) = {sigma dot w | s'in delta(s)(sigma) , w in beh(s')}.
     $
+  ]
+  #uncover("3-")[
+    *Definition*: The _solution_ to this _equational system_ is calculated as follows:
+    - Intermediate solution $l^((1))_1 := mu u_1. f_1(u_1,u_2)$
+    - $l^(sol):= nu u_2. f_2(l^((1))_1(u_2), u_2)$
+    - $l^sol_1 = l^((1))_1(l^sol_2)$
+  ]
+  #uncover("4-")[
+    Concretely:
+    - $l^((1))_1 := mu u_1. diamond_delta ([u_1, u_2]) harpoon.tr S_1$
+    - $l^(sol)_2:= nu u_2. u_2 =^nu diamond_delta ([mu u_1. diamond_delta ([u_1, u_2]) harpoon.tr S_1,u_2]) harpoon.tr S_2, u_2)$
+    - $l^sol_1 = mu u_1. diamond_delta ([u_1, nu u_2. u_2 =^nu diamond_delta ([mu u_1^'. diamond_delta ([u_1^', u_2]) harpoon.tr S_1,u_2]) harpoon.tr S_2, u_2)]) harpoon.tr S_1$
+  ]
+]
+#set text(size: 18pt)
+
+#set text(size: 16pt)
+#slide(title: "Büchi Automata Coalgebraically, Urabe et al. 2016")[
+  Let $A=angle.l S, Sigma, delta, s_0, F angle.r$ be a Büchi automaton. Take $S_1=S backslash F$, $S_2=F$. Model $delta$ by coalgebras $c_1: S_1 -> cal(P)(Sigma times S)$, $c_2: S_2 -> cal(P)(Sigma times S)$. Take the initial algebra $d: Sigma^omega -> Sigma times Sigma^omega$ defined by $d(sigma w)=(sigma,w)$ in *Sets*.
+  $
+    #diagram(
+    spacing: 2.0cm,
+    {
+      node((0, 0), [$Sigma times S$], name: <fx1>)
+      node((0, 1), [$S_1$], name: <x1>)
+      node((1, 1), [$Sigma^omega$], name: <z1>)
+      node((1, 0), [$Sigma times Sigma^omega$], name: <fz1>)
+      edge(<x1>, <fx1>, $c_1$, "->", left)
+      edge(<x1>, <z1>, $tr_1$, "~>", right)
+      edge(<fx1>, <fz1>, $Sigma times [tr_1,tr_2]$, "~>")
+      edge(<z1>, <fz1>, $eta_(Sigma^omega) compose  d$, right,"->")
+      // edge(<z1>, <fz1>, $tilde.equiv$, "-", left, stroke: 0pt)
+
+      node((2, 0), [$Sigma times S$], name: <fx2>)
+      node((2, 1), [$S_2$], name: <x2>)
+      node((3, 1), [$Sigma^omega$], name: <z2>)
+      node((3, 0), [$Sigma times Sigma^omega$], name: <fz2>)
+      edge(<x2>, <fx2>, $c_2$, "->", left)
+      edge(<x2>, <z2>, $tr_2$, "~>", right)
+      edge(<fx2>, <fz2>, $Sigma times [tr_1,tr_2]$, "~>")
+      edge(<z2>, <fz2>, $eta_(Sigma^omega) compose d$, "->")
+      // edge(<z2>, <fz2>, $tilde.equiv$, "-", left, stroke: 0pt)
+
+      node((0.5,0.5), [$=_mu$])
+      node((2.5,0.5), [$=_nu$])
+
+      node((4.5, .5), $italic("in") cal("Kl")(cal(P)).$)
+    },
+  )
+  $
+  $
+    beh_1 =^mu diamond_delta ([beh_1, beh_2]) harpoon.tr S_1 #h(3em) beh_2 =^nu diamond_delta ([beh_1,beh_2]) harpoon.tr S_2
+  $
+
+  Where $diamond_delta: (cal(P)(Sigma^omega))^(S)->(cal(P)(Sigma^omega))^(S)$ is given by
+  $
+    diamond_delta (beh)(s) = {sigma dot w | s'in delta(s)(sigma) , w in beh(s')}.
+  $
+
+  #uncover(2)[
     *Theorem* [Urabe et al. 2016]: The solutions $beh_1,beh_2$ to the system of equations coincide with the accepted language of the Büchi Automaton $A$.
   ]
 ]
+#set text(size: 18pt)
 
-#slide(title: [Büchi Automata Coalgebraically, Urabe et al. 2016])[
 
-]
+#slide(title: "Proof of Coincidence Result")[
+  Problem: system of fixed point equations is convoluted.
 
-#slide(title: "Using Game Semantics to derive")[
-  outline this? steps and saying these things are possible?
+  #uncover("2-")[
+    Alternate derivation using game semantics:\
+    *Game Semantics Theorem*: $s scripts(tack.r.double)^T phi <==> $ verifier has a winning strategy in $cal(G)(phi, T)$
+
+    Outline:
+    - Convert system of equations to modal mu-calculus formula
+    - Apply game semantics theorem
+    - Prove: $V$ has a winning strategy in $cal(G)(phi,T)$ from state $(x_i,w)$ $ <==> w in beh(x_i)$
+  ]
 ]
 
 #new-section-slide("Conclusion")
