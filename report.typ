@@ -321,7 +321,7 @@ In this section we present a coalgebraic representation of nondeterministic syst
 
 === Deterministic Automata <sec:d>
 
-First we consider a deterministic finite automaton, $angle.l S, Sigma, delta, o angle.r $ with $S$ the states, $Sigma$ the alphabet, $delta: S times Sigma -> S$ the transition function, and $o: S -> 2$ with $2={0,1}$, the output function determining if a state is final. We do not consider an initial state here because we just want to obtain the accepted words for each state. Such an automaton can be represented by a coalgebra $c: S -> 2 times S^Sigma$ for the functor $F(S)=2 times S^Sigma$. This is a very useful construction because a final coalgebra for this functor is carried by $2^Sigma^*$, and the unique coalgebra homomorphism $beh$ to this final coalgebra captures exactly the language accepted by a state @rutten2000universal. This is shown in the commuting diagram:
+First we consider a deterministic finite automaton, $angle.l S, Sigma, delta, o angle.r $ with $S$ the states, $Sigma$ the alphabet, $delta: S times Sigma -> S$ the transition function, and $o: S -> 2$ with $2={0,1}$, the output function determining if a state is final. We do not consider an initial state here because we just want to obtain the accepted words for each state. Such an automaton can be represented by a coalgebra $c: S -> 2 times S^Sigma$ for the functor $F S=2 times S^Sigma$. This is a very useful construction because a final coalgebra for this functor is carried by $2^Sigma^*$, and the unique coalgebra homomorphism $beh$ to this final coalgebra captures exactly the language accepted by a state @rutten2000universal. This is shown in the commuting diagram:
 
 $
   #diagram(
@@ -340,7 +340,7 @@ $
 )
 $
 
-Here $e: 2^Sigma^*-> 2$ is given by $e(L) = L(epsilon)$, i.e., $e(L) = 1$ iff L contains the empty word. And $d: 2^Sigma^* -> (2^Sigma^*)^Sigma$ is the language derivative, given by $d(L)(a)=L_a$ where $L_(a)(w)=L(a w)$, so $w in d(L)(a)=L_a$ iff $a w in L$.
+Here $e: 2^Sigma^*-> 2$ is given by $e(L) = L(epsilon)$, i.e., $e(L) = 1$ iff L contains the empty word. And $d: 2^Sigma^* -> (2^Sigma^*)^Sigma$ is the language derivative, given by $d(L)(sigma)=L_sigma$ where $L_(sigma)(w)=L(sigma w)$, so $w in d(L)(sigma)=L_sigma$ iff $sigma w in L$.
 
 Working out the paths through the diagram we obtain that
 - $beh(s)(epsilon)=o(s)$, and
@@ -348,7 +348,7 @@ Working out the paths through the diagram we obtain that
 
 for $s in S$, $sigma in Sigma$, $w in Sigma^*$. So $beh(s)$ contains the empty word iff $s$ is a final state, and accepts $sigma w$ iff $delta(s)(sigma)$ accepts $w$. Which is precisely the language accepted by state $x$ in the deterministic finite automaton!
 
-=== Finite Behavior Nondeterministic Automata <sec:finite>
+=== Nondeterministic Automata <sec:finite>
 
 Unfortunatley, extending this approach to nondeterministic systems is not possible, as we will illustrate by the following system, which we will use as a running example:
 
@@ -384,7 +384,7 @@ The powerset monad $cal(P)$ is defined by the unit $eta_X : X -> cal(P)(X)$ whic
 
 Next, we construct our functor in $Klp$, which we call the lifting of $F$ in $Klp$, and denote $overline(F)$. The key here is that because we are working in the Kleisli category, if we use the functor $overline(F) S = Sigma times S$, the coalgebra map $c: S -> Sigma times S$, will be a map $c: S -> cal(P)(Sigma times S)$ in *Sets*, which models nondeterministic transitions. In the previous section we used the functor $F S -> 2 times S ^ Sigma$ where $o: S -> 2$ denoted whether the state was final. Combining this with the functor $overline(F) S = Sigma times S$ in the Kleisli category we would get the functor $overline(F) S = 2 times Sigma times S$ and the coalgebra $c: S -> 2times Sigma times S$ which is $c: S -> cal(P)(2 times Sigma times S)$ in *Sets*, which would mean that every transition can be final or not, which is not what we want. For this reason we use the functor $overline(F) S = 1 + Sigma times S$ such that the coalgebra $c: S -> 1 + Sigma times S$ is the map $c: S -> cal(P)(1 + Sigma times S)$ where $s in S$ is final iff $* in c(s)$ (note that we use $1={*}$).
 
-This works easily on objects, $overline(F)X=F X$, because in the Kleisli category, the objects are the same. But for morphisms we have to do a little bit more work. Observe that because a map $f:X-> Y$ in $Klp$ is a map $f: X->cal(P)(X)$ in *Sets*, applying the functor $F$ on the map itself would yield $F f: F X -> F cal(P) (Y)$. So what we need is a natural transformation $lambda: F cal(P) => cal(P) F$, i.e., a distributive law @hasuo2007generic, such that $1+Sigma times (cal(P)(S)) ->^lambda cal(P)(1+Sigma times X)$. We define this as $* arrow.r.bar {*}$, and $(sigma,S)={(sigma,x)|x in S}$ for $sigma in Sigma$ and $S subset.eq X$. This follows intuitively if you observe that if from state $s$ taking transition $sigma$ takes you to ${x,y,z}$ ($(sigma,{x,y,z}) in c(s)$, or ${x,y,z} in delta(s)(sigma)$), you can also see this as transitions ${(sigma,x),(sigma,y),(sigma,z)}$.
+This works easily on objects, $overline(F)X=F X$, because in the Kleisli category, the objects are the same. But for morphisms we have to do a little bit more work. Observe that because a map $f:X-> Y$ in $Klp$ is a map $f: X->cal(P)(X)$ in *Sets*, applying the functor $F$ on the map itself would yield $F f: F X -> F cal(P) (Y)$. So what we need is a natural transformation $lambda: F cal(P) => cal(P) F$, i.e., a distributive law @hasuo2007generic, such that $1+Sigma times (cal(P)(S)) ->^lambda cal(P)(1+Sigma times S)$. We define this as $* arrow.r.bar {*}$, and $(sigma,S)={(sigma,x)|x in S}$ for $sigma in Sigma$ and $S subset.eq S$. This follows intuitively if you observe that if from state $s$ taking transition $sigma$ takes you to ${x,y,z}$ ($(sigma,{x,y,z}) in c(s)$, or ${x,y,z} in delta(s)(sigma)$), you can also see this as transitions ${(sigma,x),(sigma,y),(sigma,z)}$.
 
 Finally, the main theorem from @hasuo2007generic (Theorem 3.3), and the last ingredient to make the construction work is that the initial algebra for the functor $F$ in *Sets*, gives us the final coalgebra for the lifted functor $overline(F)$ in $Klp$. Specifically, for this functor $F S= 1 + Sigma times S$ and its lifting as described above, the initial $F$-algebra $alpha: F A -> A$ in *Sets* yields a final $overline(F)$-coalgebra in $cal("Kl")(cal(P))$ by:
 
