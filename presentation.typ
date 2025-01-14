@@ -419,6 +419,12 @@
 
 #new-section-slide("Conclusion")
 
-#slide(title: "wrap up")[
+#slide(title: "Conclusion")[
+
+  - Coalgebra DFA
+  - Coalgebra NFA
+  - Coalgebra Possibly Infinite Behavior NFA
+  - Coalgebra Büchi Automata
+  - Outline Derivation using Game Semantics
 
 ]
