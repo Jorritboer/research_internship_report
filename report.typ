@@ -75,12 +75,7 @@ Secondly we provide an alternate derivation of this coalgebraic representation u
 
 The document is outlined as follows. In @sec:background we provide some background and relevant definitions for the rest of the report, which includes the modal mu-calculus and game semantics. In @chap:results we provide the coalgebraic representations of nondeterministic systems and Büchi automata from @hasuo2007generic and @urabe2016coalgebraic, respectively. In @sec:new we present our alternate derivation of the coincidence result given in the section before. Finally, in @sec:conclusion we summarize the results and suggest directions for future work.
 
-#outline(depth: 2)
-
-// #show heading.where(depth: 1): body => {
-//   pagebreak(weak: true)
-//   body
-// }
+#pagebreak()
 
 = Background <sec:background>
 // In this section we present the relevant background and definitions required for the rest of the report.
@@ -120,7 +115,7 @@ A _run_ of a Büchi Automaton $A$ on an $omega$-word $w=sigma_0 sigma_1 dots in 
 
 Indeed we now see that the accepted language for the example automaton is $(mono("request") dot mono("process")^*dot mono("return"))^omega$, where $*$ indicates repeating some set of letters/transitions some finite number of times (including zero) and $omega$ indicates repeating indefinitely. That is, the machine gets a request, processes for at most some _finite_ number of transitions and then returns some result. It does not get stuck processing indefinitely.
 
-== Parity Tree Automata
+== Parity Tree Automata <sec:tree>
 Büchi automata are actually a specific instance of parity tree automata. In this section we introduce this more general automaton. The coincidence results presented in @results:buchi in fact not only hold for Büchi automata, but also for parity tree automata.
 
 Instead of the acceptence criterion for Büchi automaton, we can use the parity acceptence condition. In this case, the states are not divided into accepting and non-accepting. Instead, every state has a priority, determined by $Omega: S -> omega$. A run $rho=s_0,s_1,dots$ of an automaton $A$ on a word $w$ is then accepting if the maximum priority that occurs infinitely often is even. I.e., $max{Omega(s) | s "occurs infinitely often in" rho}$ is even. The Büchi acceptence criterion is the special case where non-accepting states have parity $1$ and accepting states have parity $2$.
@@ -186,7 +181,7 @@ Next we define the syntax of the modal mu-calculus:
     phi := P | not P | Z | phi_1 and phi_2 | phi_1 or phi_2 | box phi | diamond phi | mu Z. phi | nu Z.phi
   $
   where $P in italic("Prop")$ is an atomic proposition, $a in Sigma$ a label, and $Z in italic("Var")$ a _fixed point variable_.
-]
+] <def:modal>
 
 Note that you could define the modal mu-calculus without the $or$, $angle.l a angle.r$, and $nu$ operators, and define these instead in terms of the other operators, but we include them in the definition for legibility.
 
@@ -532,80 +527,104 @@ $
   u_2 &=_nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
 $ <eq:traces>
 
-We first rewrite this to something more clear and usable:
+At this point we note that this construction works for the more general parity tree automata from @sec:tree. A parity tree automata can be modeled by the lifted functor of the functor $F S = union.sq_(sigma in Sigma) S^(|sigma|)$ (where $union.sq$ is the coproduct). The final coalgebra of $F$ in *Sets* is $d: Tree_Sigma -> union.sq_(sigma in Sigma) Tree_Sigma^(|sigma|)$ where $d((sigma,(tau_1,dots,tau_(|sigma|))))=(tau-1,dots,tau_(|sigma|))$. We model the different parities by splitting the states into $S=S_1 union dots union S_n$ where for every $S_i$ we have $s in S_i -> Omega(s)=i$ and we have a seperate commuting diagram like in @eq:diagram for every parity, where the $mu$ and $nu$ alternate. We then get the following equations for a parity tree automata with $n$ parities:
+
+$
+  u_1 &=_mu (eta_(Tree_Sigma) compose d)^(-1) dot.circle overline(F)[u_1,dots,u_n] dot.circle c_1 \
+  u_2 &=_nu (eta_(Tree_Sigma)compose d)^(-1) dot.circle overline(F)[u_1,dots, u_n] dot.circle c_2\
+  & dots.v \
+  u_n &=_(eta_n) (eta_(Tree_Sigma)compose d)^(-1) dot.circle overline(F)[u_1,dots, u_n] dot.circle c_n\
+$ <eq:traces-parity>
+
+where $eta_i=mu$ if $i$ is odd and $eta_i=nu$ if $i$ is even. We confirm here that the Büchi case is a specific instance of the parity acceptence criterion by letting $n=2$ and just having one $mu$ and one $nu$ equation. Before continuing, we rewrite the equations to be more clear and usable:
 
 #lemma()[
-  The traces in @eq:traces coincide with:
+  The traces in @eq:traces-parity coincide with:
 
   $
-    u_1 =^mu diamond_delta ([u_1, u_2]) harpoon.tr S_1 #h(3em) u_2 =^nu diamond_delta ([u_1,u_2]) harpoon.tr S_2
+    u_1 =^mu diamond_delta ([u_1,dots, u_n]) harpoon.tr S_1, #h(1em) dots,  #h(1em) u_n =^(eta_n) diamond_delta ([u_1,dots,u_n]) harpoon.tr S_n
   $
 
-  Where $diamond_delta: (cal(P)(Sigma^omega))^(S)->(cal(P)(Sigma^omega))^(S)$ is given by
+  Where $diamond_delta: (cal(P)(Tree_Sigma))^(S)->(cal(P)(Tree_Sigma))^(S)$ is given by
   $
-    diamond_delta (beh)(s) = {sigma dot w | s'in delta(s)(sigma) , w in beh(s')}.
+    diamond_delta (beh)(s) = { (sigma,(tau_1,dots,tau_(|sigma|))) | (s^'_1,dots,s^'_(|sigma|)) in delta(s)(sigma), tau_i in beh(s^'_i)}.
   $ <eq:diamond>
 ] <lemma:0>
 
-The proof can be found in @appendix.
+The proof can be found in @appendix:lemma:0.
 
-By taking exactly those behavior mappings which are the solution to this system of equation, we take exactly those words that the Büchi automaton accepts:
+By taking exactly those behavior mappings which are the solution to this system of equation, we take exactly those words that the parity tree automaton accepts:
 
 #lemma([#cite(<urabe2016coalgebraic>, supplement: "Lemma 4.5")])[
-  Let $A=(S, Sigma, delta, s_0, F)$ be a Büchi automaton, where we let $S=S_1 union S_2$ the disjunct union of the non-accepting and accepting states, respectively, so $S_1=S backslash F$, $S_2=F$. Let $l^sol_1, l^sol_2$ be the solutions to the following equational system, where the variables $u_1,u_2$ range over $(cal(P)(Sigma^omega))^(S_i)$
+  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton, where we let $S=S_1 union dots union S_n$ the disjunct union of states with parity $1, dots, n$, respectively. Let $l^sol_i$ be the solutions to the following equational system, where the variables $u_1,dots,u_n$ range over $(cal(P)(Tree_Sigma))^(S_i)$
 
   $
-    u_1 =^mu diamond_delta ([u_1, u_2]) harpoon.tr S_1 #h(3em) u_2 =^nu diamond_delta ([u_1,u_2]) harpoon.tr S_2
+    u_1 =^mu diamond_delta ([u_1,dots, u_n]) harpoon.tr S_1, #h(1em) dots,  #h(1em) u_n =^(eta_n) diamond_delta ([u_1,dots,u_n]) harpoon.tr S_n
   $ <eq:traces2>
 
-  Where $diamond^i_delta: (cal(P)(Sigma^omega))^(S)->(cal(P)(Sigma^omega))^(S_i)$ is given by
+  Where $diamond_delta: (cal(P)(Tree_Sigma))^(S)->(cal(P)(Tree_Sigma))^(S)$ is given by
   $
-    diamond^i_delta (tr)(s) = {sigma dot w | sigma in Sigma, s'in delta(s)(sigma) , w in tr(s')}.
-  $ <eq:diamond>
-  Then the solutions $l^sol_i : S_i -> Sigma^omega$ map $S_i$ to the accepted language from that state, that is, $l^sol_i (s) = L(A)(s)$ for $s in S_i$.
+    diamond_delta (beh)(s) = { (sigma,(tau_1,dots,tau_(|sigma|))) | (s^'_1,dots,s^'_(|sigma|)) in delta(s)(sigma), tau_i in beh(s^'_i)}.
+  $
+  Then the solutions $l^sol_i : S_i -> cal(P)(Tree_Sigma)$ map $S_i$ to the accepted language from that state, that is, $l^sol_i (s) = L(A)(s)$ for $s in S_i$.
 ] <lemma:4.5>
 
-We provide a brief intuition here, utilizing what was observed in @sec:modal. Namely, that $mu$ is associated with finite looping, and $nu$ with infinite. So the second equation makes sure the run passes through $S_2$ infinitely many times. Note that it can still move through $S_1$, but it has to move through $S_2$ infinitely many times. The first equation, with the $mu$ operator, makes sure that any run passing through $S_1$ passes to the second equation in some finite number of steps, where it passes through $S_2$ infinitely many times. So the two equations make sure that a run passes through $S_2$ (the second equation) infinitely many times, and when it passes through $S_1$ it passes back to $S_2$ in a finite number of steps where it can pass through $S_2$ infinitely many times again.
+We provide a brief intuition here, utilizing what was observed in @sec:modal. Namely, that $mu$ is associated with finite looping, and $nu$ with infinite. So the even equation makes sure the run passes through even parities infinitely many times. Note that it can still move states with odd parities, but it has to move through those with even parities infinitely many times. Those odd equations make sure there is a finite loop back to an even equation.
 
 Regardless of this intuition, the proof of this lemma given in @urabe2016coalgebraic is rather complex. In the next section we provide our proof using game semantics, which we believe is a lot more comprehensive.
 
 Combining @lemma:0 and @lemma:4.5 we obtain the coincidence result:
 
 #theorem([#cite(<urabe2016coalgebraic>, supplement: "Theorem 4.6")])[
-  Let $A=(S,Sigma,delta,s_0,F)$ be a Büchi automaton. Then the behavior mappings $tr_1,tr_2$, which are the solution to the system of equations in @eq:traces coincide with the accepted language of $A$: $beh(s_0)=[tr_1,tr_2](s_0) = L(A)$.
+  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton. Then the behavior mappings $tr_1,dots,tr_n$, which are the solution to the system of equations in @eq:traces2 coincide with the accepted language of $A$: $beh(s_0)=[tr_1,dots,tr_n](s_0) = L(A)$.
 ] <th>
 
 = Derivation of Coincidence Using Game Semantics <sec:new>
 In this section we provide our derivation of the coincidence result @lemma:4.5. At the core of the derivation is @th:game, which relates a modal mu calculus formula on a transition system and a parity game. We can apply @th:game to derive the coincidence result with the following strategy:
 
-1. Derive from a formula $phi$ from the system of equations in @eq:traces2 a closed modal mu-calculus formula $overline(phi)$ and define a transition system $T_A$ from the Büchi automaton $A$ such that the $overline(phi)$ holds on a state in $T_A$ if and only if $phi$ holds in a related state on $A$.
+1. Derive from a formula $phi$ from the system of equations in @eq:traces2 a closed modal mu-calculus formula $overline(phi)$ and define a transition system $T_A$ from the parity tree automaton $A$ such that the $overline(phi)$ holds on a state in $T_A$ if and only if $phi$ holds in a related state on $A$.
 2. Apply @th:game to conclude that $overline(phi)$ holds in a state $s$ if and only if there exists a winning strategy for $V$ on $cal(G)(T_A,overline(phi))$ from state $s$.
 3. Prove that there exists a winning strategy for $V$ from state $(s,w)$ in $cal(G)(T_A,overline(phi))$ if and only if $w in L(A)(s)$
 
+Unfortunately, we have not been able to prove step 3 for the parity acceptance criterion, just for the Büchi case. We do solve steps 1 and 2 for the general case, and then provide the proof of step 3 for the Büchi automaton on trees. We discuss this further in @sec:conclusion.
 
-So the first step is defining the transition system from the Büchi automaton.
+So the first step is defining the transition system from the parity tree automaton.
 
 #definition[
-  Let $A=(S_1 union S_2, Sigma, delta)$ be a Büchi automaton, with states $S=S_1 union S_2$ where $S_2$ are the accepting states, $Sigma$ is the alphabet, and $delta: S times Sigma -> cal(P)(S)$ the transition function. We define a Transition System (TS) over the set of propositional variables ${p_1,p_2}$ for this automaton, denoted as $T_A$, as follows:
-  - States are $(s,w)$ for $s in S$ and $w in Sigma^omega$
-  - Transition $(s,sigma w) -> (s', w)$ for $s,s'in S$, $sigma in Sigma$, $w in Sigma^omega$, iff $s'in delta(s)(sigma)$
-  - Labeling function given by $lambda((s,w))={p_i}$ iff $s in S_i$, that is, the propositional variables denote for what $i$, we have $s in S_i$.
+  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton, where we let $S=S_1 union dots union S_n$ the disjunct union of states with parity $1, dots, n$, respectively, $Sigma$ is the alphabet, and $delta: S times Sigma -> cal(P)(S^*)$ the transition function. We define a Transition System (TS) over the set of propositional variables ${p_1,dots,p_n}$ for this automaton, denoted as $T_A$, as follows:
+  - States are either $(s,tau)$ for $s in S$ and $tau in Tree$ or $((s_1,dots,s_(|sigma|)), (tau_1,...,tau_(|sigma|)))$ for $s_i in S$, $tau_i in Tree$
+  - Transitions from state $(s,tau)$, for $s,s'in S, sigma in Sigma, tau in Tree_Sigma$:
+  $
+    (s,(sigma,(tau_1,dots,tau_(|sigma|)))) -> ((s_1^',dots, s_n^'), (tau_1,dots,tau_(|sigma|))) "for all" (s_(1)^',dots,s_(|sigma|)^') in delta(s)(sigma)
+  $ <eq:transition1>
+  - Transitions from state $((s_1,dots,s_(|sigma|)), (sigma, (tau_1,...,tau_(|sigma|))))$ for $s_i in S, sigma in Sigma, tau_i in Tree_Sigma$:
+  $
+    ((s_1,dots,s_(|sigma|)), (sigma, (tau_1,...,tau_(|sigma|)))) -> (s_i, tau_i) "for all" i in {1,...,|sigma|}
+  $ <eq:transition2>
+  - Labeling function given by $lambda((s,w))={p_i}$ iff $s in S_i$, i.e., the propositional variables denote for what $i$, we have $s in S_i$.
 ]
 
-By defining the states of the transition system as state-word pairs on the Büchi automaton, we ensure that step 3 of the strategy succeeds: this setup allows for a clear correspondence between an infinite play in the parity game and an accepting run through the Büchi automaton.
+By defining the states of the transition system as state-word pairs on the parity tree automaton, we ensure that step 3 of the strategy succeeds: this setup allows for a clear correspondence between an infinite play in the parity game and an accepting run through the parity tree automaton.
 
-Next, we derive a closed modal mu-calculus formula from the system of equations. Deriving the solution from the system of equations, as explained in @def:eq, we obtain a closed formula. For example, the closed formula for $beh_1: S_1 -> Sigma^omega$ from @eq:traces2 is $beh_1=nu u_2. diamond_delta [mu u_1. [u_1,u_2] arrow.t S_1, u_2] arrow.t S_2$. We observe that the formula is bult up inductively. If $phi$ is a solution to @eq:traces2, then:
-- $phi=u$ a free variable, or
+Next, we derive a closed modal mu-calculus formula from the system of equations. Deriving the solution from the system of equations, as explained in @def:eq, we obtain a closed formula. For example, for the Büchi case (two parities) the closed formula for $beh_1: S_1 -> cal(P)(Tree_Sigma)$ from @eq:traces2 is $beh_1=nu u_2. diamond_delta [mu u_1. [u_1,u_2] arrow.t S_1, u_2] arrow.t S_2$. We observe that the formula is bult up inductively. If $phi$ is a solution to @eq:traces2, then:
+- $phi=U$ a free variable, or
 - $phi=diamond_delta phi'$, or
-- $phi=eta u. phi'$ where $eta in {mu,nu}$, or
+- $phi=eta U. phi'$ where $eta in {mu,nu}$, or
 - $phi = phi' arrow.t S_i $, or
 - $phi=[phi_1,dots,phi_n]$
 
-Also observe that the semantics of $phi$ is defined as follows: ...
+We also observe how the semantics of $phi$ are defined. For a valuation $V: Var -> (S -> Sigma^omega)$, the semantics of a formula $||phi||_V: S -> cal(P)(Tree_Sigma)$ are:
+
+- $||U||_V= V(U)$ for $u$ a free variable,
+- $||diamond_delta phi||(s)={(sigma,(tau_1,dots,tau_(|sigma|))) | exists (s_1,dots,s_(|sigma|)) in delta(s)(sigma)[ forall i[ tau_i in ||phi'||_(V)(s_i)]] }$,
+- $||nu U. phi|| = lfp(lambda u. ||phi||_(V[U |-> u]))$,
+- $||mu U. phi|| = text("gfp")(lambda u. ||phi||_(V[U |-> u]))$,
+- $||phi arrow.t S_i||_V=||phi||_V arrow.t S_i$ (function restriction),
+- $||phi||_(V)(s) = cases(||phi_1||_(V)(s) "if " s in S_1, dots.v, ||phi_n||_(V)(s) "if " s in S_n)$
 
 So we convert the closed formula from the system of equations to a modal mu-calculus formula and prove that the semantics coincide:
 
-#definition[So we convert a formula $phi$, to our desired formula $overline(phi)$ to conform to Definition 10.2[]:
+#definition[For a closed formula $phi$ solution to @eq:traces2, we define the closed modal mu calculus formula (@def:modal) $overline(phi)$:
   - $phi=u$ a free variable then $overline(phi)=u$ also a free variable
   - $phi=diamond_delta phi'$ then $overline(phi)=diamond overline(phi')$
   - $phi=eta u. phi'$ for $eta in {mu,nu}$ then $overline(phi)=eta u . overline(phi')$
@@ -615,26 +634,26 @@ So we convert the closed formula from the system of equations to a modal mu-calc
 
 
 #lemma()[
-  For a modal $mu$-calculus formula $phi$ (a la paper 1) and a valuation $V: Var -> (X -> cal(P)(Sigma^omega))$, $x in X, w in Sigma^omega$:
+  For a closed formula $phi$ solution to @eq:traces2 and a valuation $V: Var -> (S -> cal(P)(Tree_Sigma))$, $s in S, tau in Tree_Sigma$:
 
   $
-    w in ||phi||_(V) (x) <=> (x,w) in ||overline(phi)||^(T_A)_overline(V)
+    tau in ||phi||_(V) (s) <=> (s,tau) in ||overline(phi)||^(T_A)_overline(V)
   $
 
-  where $overline(V)(U)={(x,w)| x in X, w in V(U)(x)}$
+  where $overline(V)(U)={(s,tau)| s in S, tau in V(U)(s)}$
 ] <lemma:1>
 
-The proof is relatively straightforward by performing induction on the formula $phi$ and can be found in @appendix.
+The proof is relatively straightforward by performing induction on the formula $phi$ and can be found in @appendix:lemma:1.
 
 Next, we apply @th:game to obtain a winning strategy for $V$ on $cal(G)(T_A, overline(phi))$, so our final step is relating such a winning strategy with an accepting run on the Büchi automaton:
 
 #lemma()[
-  For $s_i in S_i$, $phi_i=l^sol_i$:
-
-  Player 1 has a winning strategy in the game $cal(G)(overline(phi),T_A)$ from $(overline(phi_i),(x_i,w))$ iff the Büchi automaton $A$ accepts the word $w$ from $x_i$, i.e. $w in L(A)(x_i)$.
+  For a closed formula $phi$ solution to @eq:traces2, V has a winning strategy in the game $cal(G)(overline(phi),T_A)$ from $(overline(phi_i),(s,tau))$ iff the Büchi automaton $A$ accepts the tree $tau$ from $s$, i.e. $tau in L(A)(s)$.
 ] <lemma:3>
 
-The proof is relatively easy by observing ... and la die da die da. It is found concretely in @appendix.
+Problem here is, very briefly: this. (also in appendix!)
+
+The proof follows from a couple of key observations: the observation that the choices $V$ makes when $phi=diamond phi' $ correspond to what state to pick for the run $rho$ of $A$ on $tau$; the transition $R$ can pick when $phi= box phi'$ correspond to checking whether every infinite branch in the run has the maximum occuring priority even; and finally that the even priorities in the game correspond to the accepting states in the automaton. The concrete proof can be found in @appendix:lemma:3.
 
 The proof of @th now follows from @lemma:0, @lemma:1, @th:game and @lemma:3.
 
@@ -652,27 +671,27 @@ After understanding the full proof of the coincidence result, we can start to th
 #show: appendix
 
 = Proofs <appendix>
-_Proof of @lemma:0 _:
+== _Proof of @lemma:0 _ <appendix:lemma:0>
 First we unfold some definitions:
 
-$(J d)^(-1)= J (d^(-1))$ and $d^(-1)=cons$ and $J=eta_(Sigma^omega)$, so $J compose d^(-1) = eta_(Sigma^omega) compose cons$.
+$(eta_(Tree_Sigma) d)^(-1)= eta_(Tree_Sigma) (d^(-1))$ where $d^(-1)(tau_1,dots,tau_(|sigma|))= (sigma,(tau_1,dots,tau_(|sigma|))) in Tree_Sigma$.
 
-$overline(F)[u_1,dots,u_n]= lambda_(Sigma^omega) compose (id times (u_1 + dots + u_n))$ so let us call $u_1+dots+ u_n=beh$ and see that $id times beh: (Sigma times X) -> (Sigma times cal(P)(Sigma^omega))$, maps a pair $(sigma,x)$ to $(sigma,beh(x))$, i.e. $sigma$ and the language accepted by $x$. Combining with the natural transformation $lambda: (Sigma times cal(P(Sigma^omega)))-> cal(P)(Sigma times Sigma^omega)$ defined by $lambda(sigma,W)={(sigma,w)| w in W }$ we get $overline(F)[u_1,dots,u_n](sigma,x)={(sigma,w) | w in beh(x)}$
+Let us call $u_1+dots+ u_n=beh$ such that $overline(F)[u_1,dots,u_n]=overline(F)(beh)= lambda_(Tree_Sigma) compose (union.sq_(sigma in Sigma) beh^(|sigma|))$ so and see that $union.sq_(sigma in Sigma) beh^(|sigma|): (union.sq_(sigma in Sigma) S^(|sigma|)) -> (union.sq_(sigma in Sigma) (cal(P)(Tree_Sigma))^(|sigma|))$, maps a tuple of states $(s_1,dots,s_(|sigma|))$ to $(beh(s_1),dots,beh(s_(|sigma|)))$, i.e. to the languages accepted by every state $s_i$. Combining with the natural transformation $lambda: (union.sq_(sigma in Sigma) (cal(P)(Tree_Sigma))^(|sigma|))-> cal(P)(union.sq_(sigma in Sigma) Tree_Sigma^(|sigma|))$ defined by $lambda(Tau_1,dots,Tau_(|sigma|))={(tau_1,dots,tau_(|sigma|))| tau_i in Tau_i }$ we get $overline(F)[u_1,dots,u_n](s_1,dots,s_(|sigma|))={(tau_1,dots,tau_(|sigma|)) | tau_i in beh(s_i)}$
 
-$c_i= c compose kappa_i: X_i -> cal(P)(Sigma times X)$ in terms of the automaton is defined as $c_(i)(x)={(sigma,x')| x' in X, sigma in Sigma, x' in delta(x)(sigma)}$ for $x in X_i$.
+$c_i= c compose kappa_i: S_i -> cal(P)(union.sq_(sigma in Sigma) S^(|sigma|))$ in terms of the automaton is defined as $c_(i)(s)={S'| sigma in Sigma, S'=(s_1^',dots,s_(|sigma|)^') in delta(s)(sigma)} in cal(P)(union.sq_(sigma in Sigma) S^(|sigma|)) $ for $s in S_i$, i.e., tuples of succesor states for each $sigma$.
 
 Combining these, and writing out the Kleisli composition in terms of functions in *Sets* we get:
 
 $
-  (J d)^(-1) dot.circle overline(F)[u_1,dots,u_n] dot.circle c_i = mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) compose (mu_(Sigma times Sigma^omega) compose cal(P)(lambda compose (id times (u_1 + dots + u_n))) compose c_i).
+  (eta_(Tree_Sigma) d)^(-1) dot.circle overline(F)[u_1,dots,u_n] dot.circle c_i = mu_(Tree_Sigma) compose cal(P)(eta_(Tree_Sigma) compose d^(-1)) compose (mu_(union.sq_(sigma in Sigma) Tree_Sigma^(|sigma|)) compose cal(P)(lambda compose union.sq_(sigma in Sigma) beh^(|sigma|)) compose c_i).
 $
 
-Observing that $mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) = cal(P(cons))$, letting $u_1+dots+u_n=beh$ again and combining $cal(P)(lambda compose (id times beh))$ and $c_1$ by using our observations from above we obtain, for an $x in X_i$:
+Observing that $mu_(Tree_Sigma) compose cal(P)(eta_(Tree_Sigma) compose d^(-1)) = cal(P)(d^(-1)))$, letting $u_1+dots+u_n=beh$ again and combining $cal(P)(lambda compose (union.sq_(sigma in Sigma) beh^(|sigma|)))$ and $c_i$ by using our observations from above we obtain, for an $s in S_i$:
 
 $
-  (mu_(Sigma^omega) compose cal(P)(eta_(Sigma^omega) compose cons) compose (mu_(Sigma times Sigma^omega) compose cal(P)(lambda compose (id times (u_1 + dots + u_n))) compose c_1))(x) \
-  = cal(P)(cons)({(sigma,w) | x' in X, x' in delta(x)(sigma), w in [u_1,dots,u_n](x') })\
-  = {sigma dot w | x' in delta(x)(sigma), w in beh(x') } = diamond_delta (beh)(x)
+  mu_(Tree_Sigma) compose cal(P)(eta_(Tree_Sigma) compose d^(-1)) compose (mu_(union.sq_(sigma in Sigma) Tree_Sigma^(|sigma|)) compose cal(P)(lambda compose union.sq_(sigma in Sigma) beh^(|sigma|)) compose c_i)(s) \
+  = cal(P)(d^(-1))({(tau_1,dots,tau_(|sigma|)) | sigma in Sigma, (s^'_1,dots,s^'_(|sigma)) in delta(s)(sigma), tau_i in [beh](s^'_(i)) })\
+  = {(sigma,(tau_1,dots,tau_(|sigma|))) | sigma in Sigma, (s^'_1,dots,s^'_(|sigma)) in delta(s)(sigma), tau_i in [beh](s^'_(i)) } = diamond_delta (beh)(s)
 $ #h(1fr) $square$
 
 #let ubar = $overline(U)$
@@ -682,54 +701,61 @@ $ #h(1fr) $square$
 #let dd = $diamond_delta$
 
 
-_Proof of @lemma:1 _:
+== _Proof of @lemma:1 _ <appendix:lemma:1>
 We prove this by induction on the formula $phi$. The base case is $phi=U$ a free variable:
 
-$w in ||U||_(V)(x)=V(U)(x) <-> (x,w) in overline(V)(U) = ||U||^(T_A)_(overline(V))$
+$tau in ||U||_(V)(s)=V(U)(s) <-> (s,tau) in overline(V)(U) = ||U||^(T_A)_(overline(V))$
 
 Induction step:
 
 - $phi=mu U. phi'$:
 
-We have to show $w in ||mu U. phi'||_(V)(x)=lfp(lambda u. ||phi'||_(V[U |-> u])) <=> (x,w) in ||mu U. overline(phi')||_(overline(V))=lfp (lambda u. ||overline(phi')||_(overline(V)[U |-> u]))$. Let $W= lfp(lambda u. ||phi'||_(V[U |-> u]))$. We define $overline(W)={(x,w) | x in X, w in W(x)}$ and show $W= lfp(lambda u. ||phi'||_(V[U |-> u]))<=>overline(W)= lfp(lambda u. ||overline(phi')||_(V[U |-> u]))$. For this we first prove that $W$ is a fixed point iff $overline(W)$ is a fixed point:
+We have to show $tau in ||mu U. phi'||_(V)(s)=lfp(lambda u. ||phi'||_(V[U |-> u])) <=> (s,tau) in ||mu U. overline(phi')||_(overline(V))=lfp (lambda u. ||overline(phi')||_(overline(V)[U |-> u]))$. Let $W= lfp(lambda u. ||phi'||_(V[U |-> u]))$. We define $overline(W)={(s,tau) | s in S, tau in W(s)}$ and show $W= lfp(lambda u. ||phi'||_(V[U |-> u]))<=>overline(W)= lfp(lambda u. ||overline(phi')||_(V[U |-> u]))$. For this we first prove that $W$ is a fixed point iff $overline(W)$ is a fixed point:
 
-Assume $W$ is a fixed point, so $||phi'||_(V[U |-> W]) = W$. We observe that for a valuation $V$ and $V'$ where $V'=V[U|->W]$, we have the converted valuation $overline(V')=overline(V)[U |-> overline(W)]$. We use this to incite the IH to get $w in ||phi'||_(V[U|->W]) <=> (x,w) in ||overline(phi')||_(overline(V)[U |-> overline(W)])$. Using this we get $(x,w) in ||overline(phi')||_(overline(V)[U|-> overline(W)]) <=> w in ||phi'||_(V[U |-> W])(x)=W(x) <=> (x,w) in overline(W)$, so $||overline(phi')||_(overline(V)[U |->overline(W)])= wbar$, so $wbar$ is a fixed point.
+Assume $W$ is a fixed point, so $||phi'||_(V[U |-> W]) = W$. We observe that for a valuation $V$ and $V'$ where $V'=V[U|->W]$, we have the converted valuation $overline(V')=overline(V)[U |-> overline(W)]$. We use this to incite the IH to get $w in ||phi'||_(V[U|->W]) <=> (s,tau) in ||overline(phi')||_(overline(V)[U |-> overline(W)])$. Using this we get $(s,tau) in ||overline(phi')||_(overline(V)[U|-> overline(W)]) <=> w in ||phi'||_(V[U |-> W])(s)=W(s) <=> (s,tau) in overline(W)$, so $||overline(phi')||_(overline(V)[U |->overline(W)])= wbar$, so $wbar$ is a fixed point.
 
-Now assume $overline(W)$ is a fixed point, so $||overline(phi')||_(overline(V)[U |-> wbar]) = wbar$. Then, for $x in X$, $W(x)={w | (x,w) in overline(W)}$. Applying IH like the previous case again we obtain $w in ||phi'||_(V[U |-> W])(x) <=> (w,x) in ||overline(phi')||_(overline(V)[U |-> overline(W)])= W <=> w in W(x) $. So $w in ||phi'||_(V[U |-> W])(x) <=> w in W(x)$ for all $x in X$, so $||phi'||_(V[U |-> W])=W$, so $W$ is a fixed point.
+Now assume $overline(W)$ is a fixed point, so $||overline(phi')||_(overline(V)[U |-> wbar]) = wbar$. Then, for $s in S$, $W(s)={s | (s,tau) in overline(W)}$. Applying IH like the previous case again we obtain $w in ||phi'||_(V[U |-> W])(s) <=> (tau,s) in ||overline(phi')||_(overline(V)[U |-> overline(W)])= W <=> tau in W(s) $. So $w in ||phi'||_(V[U |-> W])(s) <=> tau in W(s)$ for all $s in S$, so $||phi'||_(V[U |-> W])=W$, so $W$ is a fixed point.
 
 Next, we show that $W$ is the _least_ fixed point iff $overline(W)$ is the _least_ fixed point:
 
-Assume $W$ is a lfp, from above we know that $wbar$ is a fixed point. Take some other fixed point $ybar$, i.e. $||overline(phi')||_(overline(V)[U|->ybar])=ybar$. Now, again inciting what we showed above, we know $Y$ is a fixed point, so $||phi'||_(V[U|->ybar])=ybar$. So because $W$ is the lfp, for all $x$, $W(x)subset.eq Y(x)$. From this it follows that $(x,w) in wbar -> w in W(x) -> w in Y(x) -> (x,w) in ybar$, so $wbar subset.eq ybar$. So $wbar$ is the least fixed point.
+Assume $W$ is a lfp, from above we know that $wbar$ is a fixed point. Take some other fixed point $ybar$, i.e. $||overline(phi')||_(overline(V)[U|->ybar])=ybar$. Now, again inciting what we showed above, we know $Y$ is a fixed point, so $||phi'||_(V[U|->ybar])=ybar$. So because $W$ is the lfp, for all $s$, $W(s)subset.eq Y(s)$. From this it follows that $(s,tau) in wbar -> tau in W(s) -> tau in Y(s) -> (s,tau) in ybar$, so $wbar subset.eq ybar$. So $wbar$ is the least fixed point.
 
-For the other direction, assume $overline(W)$ is a least fixed point. Then $W$ is a fixed point. Take some other fixed point $Y$, i.e. $||phi'||_(V[U|->Y])=Y$, then $ybar$ is a fixed point. So because $wbar$ is the lfp, we have $wbar subset.eq ybar$. Now for any $w,x$ we have $w in W(x) -> (x,w) in wbar -> (x,w) in ybar -> w in Y(x)$. So $W subset.eq Y$.
+For the other direction, assume $overline(W)$ is a least fixed point. Then $W$ is a fixed point. Take some other fixed point $Y$, i.e. $||phi'||_(V[U|->Y])=Y$, then $ybar$ is a fixed point. So because $wbar$ is the lfp, we have $wbar subset.eq ybar$. Now for any $tau,s$ we have $tau in W(s) -> (s,tau) in wbar -> (s,tau) in ybar -> tau in Y(s)$. So $W subset.eq Y$.
 
 - $phi=nu U. phi'$:
 
 This case is a analagous to the $mu$ case. The first part proving $W$ is a fixed point iff $wbar$ is a fixed point, and for proving $W$ is a _greatest_ fixed point iff $wbar$ is too you reason in the opposite direction as for $mu$.
 
 - $phi=diamond_delta phi'$: \
-$w in & ||diamond_delta phi'||_(V)(x)
-  = {sigma w | exists x' in delta(x)(sigma)[ w in ||phi'||_(V)(x')] }
-  =^(I H){sigma w | exists x' in delta(x)(sigma)[ (x',w) in ||phi'||_(overline(V))] }
-  <-> (x,w) in {(x,sigma w) | exists x' in delta(x)(sigma)[ (x',w) in ||phi'||_(overline(V))] }
-  = ||diamond overline(phi')||^(T_A)_(overline(V))$
-- $phi = phi' harpoon.tr X_i$: \
-$w in ||phi' harpoon.tr X_i||_(V)(x) <-> x in X_i and w in ||phi'||_(V)(x) <->^(I H)x in X_i and (x,w) in ||overline(phi')||_(overline(V)) <-> (x,w) in ||p_i and overline(phi')||_(overline(V))$
+$
+  tau &in ||diamond_delta phi'||_(V)(s)\
+  &= {(sigma,(tau_1,dots,tau_(|sigma|))) | exists (s_1,dots,s_(|sigma|)) in delta(s)(sigma)[ forall i[ tau_i in ||phi'||_(V)(s_i)]] }\
+  &=^(I H) {(sigma,(tau_1,dots,tau_(|sigma|))) | exists (s_1,dots,s_(|sigma|)) in delta(s)(sigma)[ forall i[ (s_i,tau_i) in ||overline(phi')||_(overline(V))]] }\
+  &=^* {(sigma,(tau_1,dots,tau_(|sigma|))) | exists (s_1,dots,s_(|sigma|)) in delta(s)(sigma)[ ((s_1,dots,s_(|sigma|)), (sigma,(tau_1,dots,tau_(|sigma|)))) in ||square overline(phi')||_(overline(V))] }\
+  &<-> (s,tau) in {(s,(sigma,(tau_1,dots,tau_(|sigma|)))) | exists (s_1,dots,s_(|sigma|)) in delta(s)(sigma)[ ((s_1,dots,s_(|sigma|)), (sigma,(tau_1,dots,tau_(|sigma|)))) in ||square overline(phi')||_(overline(V))] }\
+  &=^(**) ||diamond square overline(phi')||^(T_A)_(overline(V))
+$
+- $phi = phi' harpoon.tr S_i$: \
+$tau in ||phi' harpoon.tr S_i||_(V)(s) <-> s in S_i and tau in ||phi'||_(V)(s) <->^(I H)s in S_i and (s,tau) in ||overline(phi')||_(overline(V)) <-> (s,tau) in ||p_i and overline(phi')||_(overline(V))$
 - $phi= [phi_1,dots,phi_n]$:
-$||phi||_(V)(x) = cases(||phi_1||_(V)(x) "if " x in X_1, dots.v, ||phi_n||_(V)(x) "if " x in X_n)$, so let $w in ||phi||_(V)(x)$ for $x in X_i$, then $w in ||phi_i||_(V)(x)$ so by IH $(x,w) in ||overline(phi_i)||_(overline(V))(x)$, and because $x in X_i$, $(x,w) in X_i$, $(x,w) in ||p_i and overline(phi_i)||_(overline(V))(x)$ and thus $(x,w) in ||(p_1 and phi_1) or ... or (p_n and phi_n)||_overline(V)=||overline(phi)||_overline(V)$.
+$||phi||_(V)(s) = cases(||phi_1||_(V)(s) "if " s in S_1, dots.v, ||phi_n||_(V)(s) "if " s in S_n)$, so let $tau in ||phi||_(V)(s)$ for $s in S_i$, then $tau in ||phi_i||_(V)(s)$ so by IH $(s,tau) in ||overline(phi_i)||_(overline(V))(s)$, and because $s in S_i$, $(s,tau) in S_i$, $(s,tau) in ||p_i and overline(phi_i)||_(overline(V))(s)$ and thus $(s,tau) in ||(p_1 and phi_1) or ... or (p_n and phi_n)||_overline(V)=||overline(phi)||_overline(V)$.
 
-Now $(x,w) in ||overline(phi)||_overline(V) = ||(p_1 and overline(phi_1)) or ... or (p_n and overline(phi_n))||_overline(V)$. Take $i$ such that $(x,w) in ||p_i and overline(phi_i)||_overline(V)$ then we have $x in X_i$ and (by IH) $w in ||phi_i||_(V)(x)$, and by definition of $||[phi_1,...,phi_n]||$ then $w in ||phi||_(V)(x)$.
+Now $(s,tau) in ||overline(phi)||_overline(V) = ||(p_1 and overline(phi_1)) or ... or (p_n and overline(phi_n))||_overline(V)$. Take $i$ such that $(s,tau) in ||p_i and overline(phi_i)||_overline(V)$ then we have $s in S_i$ and (by IH) $w in ||phi_i||_(V)(s)$, and by definition of $||[phi_1,...,phi_n]||$ then $tau in ||phi||_(V)(s)$.
 
 
-_Proof of @lemma:3 _:
-First show (observe) that the transitions in the game for $diamond$ correspond exactly to those in the automaton ($<->$).
+== _Proof of @lemma:3 _ <appendix:lemma:3>
+// First show (observe) that the transitions in the game for $diamond$ correspond exactly to those in the automaton ($<->$).
 
-A problem is as follows: assume you have an accepting run for a word (tree) in the automaton. That means the from the states that occur infinitely often, the maximum priority is even, say $n$. We can correspond this to a strategy in the game and consider an infinite play (show the finite games are winning for V). Now this will visit $u_n$ infinitely many times, and $u_k$ for $k<n$ maybe also, but $u_j$ for $j>n$ not infinitely. However, it is possible that some $u_k$ has a higher priority in the game $cal(G)$. And then when that is visited infinitely many times, it has a higher priority and thus the game could be lost. So, we solve this by
+Observe the closed formulas for @eq:traces2 $l_sol^1$ and $l_sol^2$:
+- #[$l_sol^1 =  mu u_1.diamond^1_delta [u_1, nu u_2. diamond^2_delta [(mu u_1^'. diamond^1_delta [u_1^', u_2]), u_2]
+  )$,
 
-I prove it now quickly for $phi_1= mu u_1.diamond^1_delta (
-    u_1 union nu u_2. diamond^2_delta ((mu u_1^'. diamond^1_delta (u_1^' union u_2)) union u_2)
-  )$, so $overline(phi_i)=mu u_1. p_1 and diamond (u_1 or nu u_2. (p_2 and diamond((mu u_1^'.p_1 and (u_1^' or u_2)) or u_2 )))$. We observe that $Omega(mu u_1. ...)=1$, $Omega(nu u_2. ...)=2$ and $Omega(mu u_1^'. ...)=1$.
+    so $overline(phi_1)=mu u_1. p_1 and diamond ((p_1 and u_1) or (p_2 and nu u_2. (p_2 and diamond((mu u_1^'.p_1 and diamond((p_1 and u_1^') or (p_2 and u_2))) or (p_2 and u_2)))))$. We observe that $Omega(mu u_1. ...)=1$, $Omega(nu u_2. ...)=2$ and $Omega(mu u_1^'. ...)=1$.]
+- #[$l_sol^2 = nu u_2. diamond^2_delta [(mu u_1^'. diamond^1_delta [u_1^', u_2]), u_2]$
 
-Assume player 1 has a winning strategy for $cal(G)(overline(phi_i),T_A)$ from $(overline(phi_i),(x_i,w))$. That means, for an infinite play (why does this exist?), we have some steps $(phi_j,(x_j,w_j))$ for $j in omega$. These $(x_j,w_j)$ (every time they change, i.e. for a $diamond$ transition) follow $x_1 in X_1$, and for $w_j=sigma w_j^'$ we have $x_(j+1) in delta(x_j)(sigma)$. This run passes through $nu u_2.$ infinitely many times, which it only does if $x in X_2$, so because $X_2$ is finite (right?), there exists a $x' in X_2$ that is visited infinitely often.
+    so $overline(phi_2)=nu u_2. (p_2 and diamond((mu u_1^'.p_1 and diamond((p_1 and u_1^') or (p_2 and u_2))) or (p_2 and u_2))))$. We observe that $Omega(mu u_2. ...)=2$, $Omega(nu u_1. ...)=1$.
+  ]
 
-Assume $w in L(A)(x)$. Then there is an accepting run $(x_1, sigma_1),(x_2,sigma_2)...$ which tells you what to do at each $diamond$, and we know from $x$ what to do in $or$. So because the accepting run passes through $X_2$ infinitely many times, the strategy will too for an infinite play.
+Assume player $V$ has a winning strategy for $cal(G)(overline(phi_i),T_A)$ from $(overline(phi_i),(s,tau))$. Observe that through V's choices when $phi=diamond phi'$, $(diamond phi', (s,(sigma,(tau_1,dots,tau_(|sigma|)))) -> (phi', ((s_1^',dots, s_n^'), (tau_1,dots,tau_(|sigma|))))$ tell how to construct the run $rho$ on $A$. Because $V$ has a winning strategy, R can pick whatever transition it wants when $phi=box phi'$ and the play will be won by $V$, which means the maximal priority of the states in $cal(G)(overline(phi_i), T_A)$ is even. This corresponds to checking an infinite branch of the run $rho$ of $A$ on $tau$ and because the even parity in the game corresponds to $S_2$ in the automaton, the maximum priority of the states in $A$ occuring infinitely often in every infinite branch of the run $rho$ of $A$ on $tau$ is even, which means $tau$ is accepted by $T$ from state $s$.
+
+The other way is similar. We again osbserve that the choice $V$ has to make when $phi=diamond phi'$ is decided by the run of $A$ on $tau$, and the fact that regardless of the transitions $R$ picks when $phi = box phi'$ the play is winning by $V$ follows from the fact that for every infinite branch of the run the maximum priority of the states occuring infinitely often is even, which corresponds to the even parities in the game, and thus the play in the game is winning by $V$. Furthermore, note that the choice to pick at $(((p_1 and overline(phi_1)) or ... or (p_n and overline(phi_n))), (s, tau))$ simply depends on $i$ such that $s in S_i$, and that also makes sure that $R$ cannot pick the left formula in the formula $p_i and overline(phi_i)$ to win that way becasue $s in S_i$.
