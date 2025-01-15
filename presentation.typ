@@ -26,6 +26,18 @@
   date: "17 January 2025",
 )
 
+#slide(title: "Introduction")[
+  #uncover("2-")[
+    Outline:
+    + Büchi Automata
+    + Coalgebra Determinstic Finite Automata
+    + Coalgebra Nondeterministic Finite Automata
+    + Coalgebra Possibly Infinite Behavior Nondeterministic Finite Automata
+    + Coalgebra Büchi Automata
+    + Outline Derivation using Game Semantics
+  ]
+]
+
 #new-section-slide("Büchi Automata")
 
 #slide(title: "Büchi Automata")[
@@ -125,7 +137,7 @@
   ]
 ]
 
-#slide(title: "Solution by Hasuo et al. 2007")[
+#slide(title: "Solution by Hasuo, Jacobs, Sokolova 2007")[
   Kleisli Category of the monad $cal(P)$:
 
   A coalgebra $c: S -> Sigma times S$ in $Klp$ is $c: S -> cal(P)(Sigma times S)$ in *Sets*. #uncover("2-")[ Concretely:
@@ -145,10 +157,10 @@
 ]
 
 #slide(title: "Lifted Functor in Kleisli Category")[
-  Model NDA $angle.l S, Sigma, delta, o angle.r$ by coalgebra $c: S -> 1 + Sigma times S$ for the functor $F S = 1 + Sigma times S$, which is $c: S -> cal(P)(1 + Sigma times S)$ in *Sets*.
+  Model NFA $angle.l S, Sigma, delta, o angle.r$ by coalgebra $c: S -> 1 + Sigma times S$ for the functor $F S = 1 + Sigma times S$, which is $c: S -> cal(P)(1 + Sigma times S)$ in *Sets*.
 
   #uncover("2-")[
-    Problem: a map $f: X -> Y$ in $Klp$ is $f: X -> cal(P)$ in *Sets* so $F f: F X -> F cal(P)(Y)$
+    Problem: a map $f: X -> Y$ in $Klp$ is $f: X -> cal(P)(Y)$ in *Sets* so $F f: F X -> F cal(P)(Y)$
   ]
 
   #uncover("3-")[
@@ -173,7 +185,7 @@
 ]
 
 #slide(title: [Initial Algebra $=>$ Final Coalgebra])[
-  *Theorem* [Hasuo et al. 2007]: An initial algebra $alpha: F A -> A$ for the functor $F$ in *Sets* yields the final coalgebra for $overline(F)$ in $Klp$:
+  *Theorem* [Hasuo, Jacobs, Sokolova 2007]: An initial algebra $alpha: F A -> A$ for the functor $F$ in *Sets* yields the final coalgebra for $overline(F)$ in $Klp$:
   $
     (eta_(F A)compose alpha^(-1)) : A -> overline(F) A italic("in") Klp
   $
@@ -274,7 +286,7 @@
   ]
 ]
 
-#slide(title: "Büchi Automata Coalgebraically, Urabe et al. 2016")[
+#slide(title: "Büchi Automata Coalgebraically, Urabe, Shimizu, Hasuo 2016")[
   Idea: split $S=S_1 union S_2$ for $S_1$ non-accepting and $S_2$ accepting
 
   #uncover("2-")[
@@ -319,7 +331,7 @@
 ]
 
 #set text(size: 15pt)
-#slide(title: [Büchi Automata Coalgebraically, Urabe et al. 2016])[
+#slide(title: [Büchi Automata Coalgebraically, Urabe, Shimizu, Hasuo 2016])[
   #only((1, 2))[
     $
       beh_1 &=^mu (eta_(Sigma^omega) compose d)^(-1) dot.circle overline(F)[beh_1,beh_2] dot.circle c_1 #h(3em)
@@ -347,14 +359,14 @@
   #uncover("4-")[
     Concretely:
     - $l^((1))_1 := mu u_1. diamond_delta ([u_1, u_2]) harpoon.tr S_1$
-    - $l^(sol)_2:= nu u_2. u_2 =^nu diamond_delta ([mu u_1. diamond_delta ([u_1, u_2]) harpoon.tr S_1,u_2]) harpoon.tr S_2, u_2)$
+    - $l^(sol)_2:= nu u_2. u_2 diamond_delta ([mu u_1. diamond_delta ([u_1, u_2]) harpoon.tr S_1,u_2]) harpoon.tr S_2, u_2)$
     - $l^sol_1 = mu u_1. diamond_delta ([u_1, nu u_2. u_2 =^nu diamond_delta ([mu u_1^'. diamond_delta ([u_1^', u_2]) harpoon.tr S_1,u_2]) harpoon.tr S_2, u_2)]) harpoon.tr S_1$
   ]
 ]
 #set text(size: 18pt)
 
 #set text(size: 16pt)
-#slide(title: "Büchi Automata Coalgebraically, Urabe et al. 2016")[
+#slide(title: "Büchi Automata Coalgebraically, Urabe, Shimizu, Hasuo. 2016")[
   Let $A=angle.l S, Sigma, delta, s_0, F angle.r$ be a Büchi automaton. Take $S_1=S backslash F$, $S_2=F$. Model $delta$ by coalgebras $c_1: S_1 -> cal(P)(Sigma times S)$, $c_2: S_2 -> cal(P)(Sigma times S)$. Take the initial algebra $d: Sigma^omega -> Sigma times Sigma^omega$ defined by $d(sigma w)=(sigma,w)$ in *Sets*.
   $
     #diagram(
@@ -397,13 +409,12 @@
   $
 
   #uncover(2)[
-    *Theorem* [Urabe et al. 2016]: The solutions $beh_1,beh_2$ to the system of equations coincide with the accepted language of the Büchi Automaton $A$.
+    *Theorem* [Urabe, Shimizu, Hasuo 2016]: The solutions $beh_1,beh_2$ to the system of equations coincide with the accepted language of the Büchi Automaton $A$.
   ]
 ]
-#set text(size: 18pt)
 
 
-#slide(title: "Proof of Coincidence Result")[
+#slide(title: "Alternate Proof of Coincidence Result")[
   Problem: system of fixed point equations is convoluted.
 
   #uncover("2-")[
@@ -413,18 +424,45 @@
     Outline:
     - Convert system of equations to modal mu-calculus formula
     - Apply game semantics theorem
-    - Prove: $V$ has a winning strategy in $cal(G)(phi,T)$ from state $(x_i,w)$ $ <==> w in beh(x_i)$
+    - Prove: $V$ has a winning strategy in $cal(G)(phi,T)$ from state $(x_i,w)$ $ <==> w in beh(s_i)$
   ]
 ]
 
-#new-section-slide("Conclusion")
+#slide(title: "Proof Outline")[
+  #[Converting formula:
+    $ l_sol^2 = nu u_2. diamond^2_delta [(mu u_1^'. diamond^1_delta [u_1^', u_2]), u_2] $
+
+    $
+      overline(phi_2)=nu u_2. (p_2 and diamond((mu u_1^'.p_1 and diamond((p_1 and u_1^') or (p_2 and u_2))) or (p_2 and u_2))))
+    $
+  ]
+  #uncover("2-")[
+    Defining Transition System for Büchi Automaton $A$:
+
+    Let $A=(S_1 union S_2, Sigma, delta)$ be a Büchi automaton. Let Transition System (TS) over the set of propositional variables ${p_1,p_2}$, denoted as $T_A$, as follows:
+    - States: $(s,w)$ for $s in S$ and $w in Sigma^omega$
+    - Transition $(s,sigma w) -> (s', w)$ for $s,s'in S$, $sigma in Sigma$, $w in Sigma^omega$, iff $s'in delta(s)(sigma)$
+    - Labeling function: $lambda((s,w))={p_i}$ iff $s in S_i$
+  ]
+  #uncover("3-")[
+    *Game Semantics Theorem*: $(s,w) tack.r.double^T phi$ iff Verifier has a winning strategy in $cal(G)(phi,T_A)$ from state $(phi,(s,w))$
+  ]
+
+  #uncover("4-")[
+    *Lemma*: Verifier has a winning strategy in $cal(G)(phi,T_A)$ from state iff the Büchi automaton accepts $w$ from $s$.
+  ]
+]
+#set text(size: 18pt)
+
+// #new-section-slide("Conclusion")
 
 #slide(title: "Conclusion")[
 
-  - Coalgebra DFA
-  - Coalgebra NFA
-  - Coalgebra Possibly Infinite Behavior NFA
-  - Coalgebra Büchi Automata
-  - Outline Derivation using Game Semantics
+  + Büchi Automata
+  + Coalgebra Determinstic Finite Automata
+  + Coalgebra Nondeterministic Finite Automata
+  + Coalgebra Possibly Infinite Behavior Nondeterministic Finite Automata
+  + Coalgebra Büchi Automata
+  + Outline Derivation using Game Semantics
 
 ]
