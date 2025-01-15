@@ -295,7 +295,7 @@ Next, we introduce the parity game for the modal mu-calculus. Consider the formu
     - $Omega((mu Z.psi,s))= $ the smallest odd number greater or equal than $alpha(psi)-1$
     - $Omega((mu Z.psi,s))= $ the smallest even number greater or equal than $alpha(psi)-1$
     - $Omega((psi,s))=0$ iff $psi$ is not a $mu$ or $nu$ formula.
-]
+] <def:paritygame>
 
 Where the intuition for operators like $or,and,box,diamond$ is quite straightforward, for the $mu slash nu$ operators it is less so. Briefly put, it follows from what was explained in @sec:modal that $mu$ incites finite looping, and $nu$ infinite looping. It can be seen from the definition for $Omega$ using the alternation depth, that outer $mu slash nu$ operators have higher priority than inner ones, and $mu$ is always even and $nu$ odd. Thus the highest priority occuring infinitely often in an infinite play indicates the outermost fixed point operator that is visited infinitely often. Thus, if this is even, we have an infinite loop through a $nu$ operator, which satisfies the formula. For a $mu$ operator, however, an infinite loop is undesired, and thus if the outermost fixed point operator which is visited infinitely often is $mu$, it is not a least fixed point, and $R$ has refuted the formula.
 
@@ -651,20 +651,19 @@ Next, we apply @th:game to obtain a winning strategy for $V$ on $cal(G)(T_A, ove
   For a closed formula $phi$ solution to @eq:traces2, V has a winning strategy in the game $cal(G)(overline(phi),T_A)$ from $(overline(phi_i),(s,tau))$ iff the Büchi automaton $A$ accepts the tree $tau$ from $s$, i.e. $tau in L(A)(s)$.
 ] <lemma:3>
 
-Problem here is, very briefly: this. (also in appendix!)
+The proof follows from a couple of key observations: the observation that the choices $V$ makes when $phi=diamond phi' $ correspond to what state to pick for the run $rho$ of $A$ on $tau$; the transition $R$ can pick when $phi= box phi'$ correspond to checking whether every infinite branch in the run has the maximum occuring priority even; and finally that the even priorities in the game correspond to the accepting states in the automaton. The concrete proof can be found in @appendix:lemma:3. However, as noted before, the proof of this lemma is only for the Büchi case (two parities). The hard step for higher priorities is reasoning about parity of the subformulas of the closed formula from the system of equations because they get very big and complicated quickly. The parity then depends on the alternation depth of these formulas (see @def:paritygame) which is hard for these large and complicated formulas.
 
-The proof follows from a couple of key observations: the observation that the choices $V$ makes when $phi=diamond phi' $ correspond to what state to pick for the run $rho$ of $A$ on $tau$; the transition $R$ can pick when $phi= box phi'$ correspond to checking whether every infinite branch in the run has the maximum occuring priority even; and finally that the even priorities in the game correspond to the accepting states in the automaton. The concrete proof can be found in @appendix:lemma:3.
-
-The proof of @th now follows from @lemma:0, @lemma:1, @th:game and @lemma:3.
+The proof of @th (for Büchi automata on trees) now follows from @lemma:0, @lemma:1, @th:game and @lemma:3.
 
 = Conclusion and Future Work <sec:conclusion>
-In this report we have shown a coalgebraic representation of Büchi automata. The construction relies upon two key ideas: working in the Kleisli category for the monad $cal(P)$ and deriving two separate commuting diagrams for the accepting and non-accepting states and obtaining the right words by utilizing fixed point equations from these two mappings.
+In this report we have shown a coalgebraic representation of Büchi automata, and more generally, parity tree automata. The construction relies upon two key ideas: working in the Kleisli category for the monad $cal(P)$ and deriving separate commuting diagrams for states with different parities and then utilizing fixed point equations for these different mappings for each parity.
 
-We explained the model in the Kleisli category in @sec:nd by showing how to construct a final coalgebra for finite words for a nondeterministic system. Subsequently we constructed a weakly final coalgebra to additionally obtain the infinite words within such a system. Building upon these ideas we derived the coalgebraic construction for Büchi automata in @results:buchi, making use of the modal mu-calculus explained in @sec:modal.
+We explained the model in the Kleisli category in @sec:nd by showing how to construct a final coalgebra for finite words for a nondeterministic automaton. Subsequently we constructed a weakly final coalgebra to additionally obtain the infinite words within such a system. Building upon these ideas we derived the coalgebraic construction for parity tree automata in @results:buchi, making use of the modal mu-calculus explained in @sec:modal.
 
-We provided a proof for *lemma*, but not for @lemma:4.5, which is crucial for coincidence result in @th, and thus understanding why the construction indeed provides the words accepted by the Büchi automaton. Therefore, the first next step in the internship will be understanding the proof provided by @urabe2016coalgebraic.
+In @sec:new we presented our alternate derivation of the coincidence results in @results:buchi. By applying game semantics we were able to give a more comprehensive proof of the results. Additionally, looking at this result through this alternate angle of game semantics can provide new insights into the result.
 
-After understanding the full proof of the coincidence result, we can start to think about replacing it using a different framework. Our goal is to replace it using a game semantics framework, which we briefly explained in @sec:modal in relation to the modal mu-calculus. There, we showed how one can see the check whether a formula holds in a state as a two player game between a verifier and a refuter, who want to verify, respectively refute, that the formula holds. Our vision is that this view can be applied to whether a word is accepted by the coalgebraic model of a Büchi automaton, and that this could simplify the result.
+Seeing if this alternate derivation can shed new light onto the topic, for example connections to coalgebra automata which are based on game theoretic techniques @kupke2008coalgebraic, is one direction of future work that could build upon this report. Secondly, future work could look into proving @lemma:3 for parity automata. As explained in @sec:new, we were unable to prove this lemma for the most general case due to the complicated nature of the system of equations. Bridging this gap would complete the alternate derivation of the coincidence result for all parity tree automata.
+
 
 #bibliography("refs.bib", style: "association-for-computing-machinery")
 
