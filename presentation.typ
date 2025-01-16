@@ -30,10 +30,10 @@
   #uncover("2-")[
     Outline:
     + Büchi Automata
-    + Coalgebra Determinstic Finite Automata
-    + Coalgebra Nondeterministic Finite Automata
-    + Coalgebra Possibly Infinite Behavior Nondeterministic Finite Automata
-    + Coalgebra Büchi Automata
+    + Coalgebraic Representation Deterministic Finite Automata
+    + Coalgebraic Representation Nondeterministic Finite Automata
+    + Coalgebraic Representation Possibly Infinite Behavior Nondeterministic Finite Automata
+    + Coalgebraic Representation Büchi Automata
     + Outline Derivation using Game Semantics
   ]
 ]
@@ -80,13 +80,13 @@
 
 #new-section-slide("Coalgebra")
 
-#slide(title: "Final Coalgebra Deterministic Finite Automata")[
+#slide(title: "Coalgebraic Representation Deterministic Finite Automata")[
   $angle.l S, Sigma, delta, o angle.r $ with states $S$, alphabet $Sigma$, transition function $delta:S times Sigma -> S$, $o: S -> 2$ ($2 = {0,1}$). Can be represented by a coalgebra $angle.l o, delta angle.r: S -> 2 times S ^ Sigma$ for functor $F S = 2 times S^Sigma$
 
   #uncover("2-")[
     The final coalgebra for $F$ is $angle.l e,d angle.r : 2^Sigma^* -> 2 times (2^Sigma^*)^Sigma$. Where
-    - $e(L)=1$ iff $epsilon in L$
-    - $d(L)(a)=L_a$ where $L_a (w)=L(a w)$ so $w in d(L)(a)$ iff $a w in L$
+    - $e(L)=L(epsilon)$, i.e. $e(L)=1$ iff $epsilon in L$
+    - $d(L)(sigma)=L_sigma$ where $L_sigma (w)=L(sigma w)$ so $w in d(L)(sigma)$ iff $sigma w in L$
   ]
 
   #side-by-side()[
@@ -105,8 +105,8 @@
   },)$]][
     #uncover("4-")[
       Following the paths through the diagram we obtain:
-      - $beh(s)(epsilon)=o(s)$, and
-      - $beh(s)(sigma w)=beh(delta(s)(sigma))(w)$,
+      - $beh(s)(epsilon)=e(beh(s))=o(s)$, and
+      - $beh(s)(sigma w)=beh(s)_a (w)=d(beh(s))(sigma)=beh(delta(s)(sigma))(w)$,
 
       #uncover("5-")[
         So $beh$ captures exactly the accepted language of the automaton!]]
@@ -156,54 +156,26 @@
   ]
 ]
 
-#slide(title: "Lifted Functor in Kleisli Category")[
+#slide(title: [Initial Algebra $=>$ Final Coalgebra])[
   Model NFA $angle.l S, Sigma, delta, o angle.r$ by coalgebra $c: S -> 1 + Sigma times S$ for the functor $F S = 1 + Sigma times S$, which is $c: S -> cal(P)(1 + Sigma times S)$ in *Sets*.
 
-  #uncover("2-")[
-    Problem: a map $f: X -> Y$ in $Klp$ is $f: X -> cal(P)(Y)$ in *Sets* so $F f: F X -> F cal(P)(Y)$
-  ]
-
-  #uncover("3-")[
-    We need a natural transformation $lambda: F cal(P) => cal(P)F$ (distributive law):
-
-    $
-      1 + Sigma times (cal(P)(S)) ->^lambda cal(P)(1 + Sigma times X)
-    $
-  ]
-
-  #uncover("4-")[
-    - $* arrow.r.bar {*} (1 = {*})$
-    - $(sigma,S)={(sigma,x)|x in S}$ for $sigma in Sigma$ and $S subset.eq X$.
-
-    For example: $delta(s)(sigma)={x,y,z}$ then $(lambda compose c)(s) = {(sigma,x),(sigma,y),(sigma,z)}$.
-  ]
-
-  #uncover("5-")[
-    Call $overline(F) S = F S$ and $overline(F) f = lambda compose cal(P)(f)$ the _lifted functor_
-  ]
-
-]
-
-#slide(title: [Initial Algebra $=>$ Final Coalgebra])[
-  *Theorem* [Hasuo, Jacobs, Sokolova 2007]: An initial algebra $alpha: F A -> A$ for the functor $F$ in *Sets* yields the final coalgebra for $overline(F)$ in $Klp$:
-  $
-    (eta_(F A)compose alpha^(-1)) : A -> overline(F) A italic("in") Klp
-  $
+  Lift functor $F$ in *Sets* to $overline(F)$ in $Klp$
 
   #uncover("2-")[
-    The initial algebra for $F S = 1 + Sigma times S$ is $[sans("nil"),sans("cons")]: 1 + Sigma times Sigma^* -> Sigma^* $:
-    - $sans("nil")(*)=epsilon$
-    - $sans("cons")(sigma, w)=sigma w$
-    so we get $(eta_(1 + Sigma times S) compose [sans("nil"),sans("cons")]^(-1)): Sigma^* -> 1 +Sigma times Sigma^*$ ($Sigma^* -> cal(P)(1 + Sigma times Sigma^*)$ in *Sets*)
-    - $(eta_(1 + Sigma times S) compose [sans("nil"),sans("cons")]^(-1))(epsilon)= {*}$
-    - $(eta_(1 + Sigma times S) compose [sans("nil"),sans("cons")]^(-1))(sigma w)= {(sigma, w)}$
+    *Theorem* [Hasuo, Jacobs, Sokolova 2007]: An initial algebra $alpha: F A -> A$ for the functor $F$ in *Sets* yields the final coalgebra for $overline(F)$ in $Klp$:
+    $
+      (eta_(F A)compose alpha^(-1)) : A -> overline(F) A italic("in") Klp
+    $
   ]
 ]
 
-#slide(title: [Final Coalgebra Nondeterministic Automaton])[
+#slide(title: [Coalgebraic Representation Nondeterministic Automata])[
+  The initial algebra for $F S = 1 + Sigma times S$ is $[sans("nil"),sans("cons")]: 1 + Sigma times Sigma^* -> Sigma^* $:
+  - $sans("nil")(*)=epsilon #h(4em) sans("cons")(sigma, w)=sigma w$
 
-  $
-    #diagram(
+  #uncover("2-")[
+    $
+      #diagram(
     spacing: 3.5em,
     {
       node((0, 1), $S$, name: <X>)
@@ -218,9 +190,10 @@
       node((3, .5), $italic("in") cal("Kl")(cal(P)).$)
     },
   )
-  $
+    $
+  ]
 
-  #uncover("2-")[
+  #uncover("3-")[
     $
       epsilon in tr(s) <==> * in c(s) <==> "state" s "is accepting"\
       sigma w in tr(s) <==> (sigma,w) in ((Sigma times beh) compose c)(s)={(sigma, beh(t)) | (sigma,t) in c(s)} <==> exists t. (t in delta(s)(sigma) and w in tr(t)).
@@ -256,7 +229,7 @@
   ]
 ]
 
-#slide(title: "")[
+#slide(title: "Possibly Infinite Behavior")[
   $xi: Sigma^infinity -> 1 + Sigma times Sigma^infinity$ is the final $F$-coalgebra, defined by $xi(epsilon)& =* in 1$ and $xi(sigma w)&= (sigma,w)$ \ ($Sigma^infinity=Sigma^* union Sigma^omega$).
 
   #uncover("2-")[
@@ -332,15 +305,16 @@
 
 #set text(size: 15pt)
 #slide(title: [Büchi Automata Coalgebraically, Urabe, Shimizu, Hasuo 2016])[
-  #only((1, 2))[
-    $
-      beh_1 &=^mu (eta_(Sigma^omega) compose d)^(-1) dot.circle overline(F)[beh_1,beh_2] dot.circle c_1 #h(3em)
+  // #only((1, 2))[
+  $
+    beh_1 &=^mu (eta_(Sigma^omega) compose d)^(-1) dot.circle overline(F)[beh_1,beh_2] dot.circle c_1 #h(3em)
     beh_2 &=^nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[beh_1,beh_2] dot.circle c_2
-    $
-  ]
+  $
+  // ]
   #uncover("2-")[
-    #only("2")[
-      Rewrite to:]
+    // #only("2")[
+    Rewrite to:
+    // ]
     $
       beh_1 =^mu diamond_delta ([beh_1, beh_2]) harpoon.tr S_1 #h(3em) beh_2 =^nu diamond_delta ([beh_1,beh_2]) harpoon.tr S_2
     $
@@ -419,12 +393,12 @@
 
   #uncover("2-")[
     Alternate derivation using game semantics:\
-    *Game Semantics Theorem*: $s scripts(tack.r.double)^T phi <==> $ verifier has a winning strategy in $cal(G)(phi, T)$
+    *Game Semantics For Modal Mu-Calculus*: $s scripts(tack.r.double)^T phi <==> $ verifier has a winning strategy in $cal(G)(phi, T)$
 
     Outline:
     - Convert system of equations to modal mu-calculus formula
-    - Apply game semantics theorem
-    - Prove: $V$ has a winning strategy in $cal(G)(phi,T)$ from state $(x_i,w)$ $ <==> w in beh(s_i)$
+    - Apply game semantics of modal mu-calculus
+    - Prove: $V$ has a winning strategy in $cal(G)(phi,T)$ from state $(s_i,w)$ $ <==> w in beh(s_i)$
   ]
 ]
 
@@ -445,7 +419,7 @@
     - Labeling function: $lambda((s,w))={p_i}$ iff $s in S_i$
   ]
   #uncover("3-")[
-    *Game Semantics Theorem*: $(s,w) tack.r.double^T phi$ iff Verifier has a winning strategy in $cal(G)(phi,T_A)$ from state $(phi,(s,w))$
+    *Game Semantics For Modal Mu-Calculus*: $(s,w) tack.r.double^T phi$ iff Verifier has a winning strategy in $cal(G)(phi,T_A)$ from state $(phi,(s,w))$
   ]
 
   #uncover("4-")[
@@ -459,10 +433,21 @@
 #slide(title: "Conclusion")[
 
   + Büchi Automata
-  + Coalgebra Determinstic Finite Automata
-  + Coalgebra Nondeterministic Finite Automata
-  + Coalgebra Possibly Infinite Behavior Nondeterministic Finite Automata
-  + Coalgebra Büchi Automata
-  + Outline Derivation using Game Semantics
-
+    - Modeling infinite behavior
+  + #[
+      Coalgebraic Representation Nondeterministic Finite Automata
+      - Work in $Klp$
+      - Initial coalgebra in *Sets* yields final coalgebra in $Klp$
+    ]
+  + #[Coalgebraic Representation Possibly Infinite Behavior Nondeterministic Finite Automata
+      - Final coalgebra in *Sets* yields weakly final coalgebra in $Klp$
+      - This adds infinite behavior
+    ]
+  + #[Coalgebraic Representation Büchi Automata
+      - Split $S=S_1 union S_2$
+      - Take those traces which are solution to system of fixed point equations
+    ]
+  + #[Outline Derivation using Game Semantics
+      - Use game semantics for modal mu-calculus to obtain more comprehensive proof of coincidence
+    ]
 ]
