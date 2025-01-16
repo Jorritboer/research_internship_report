@@ -71,7 +71,7 @@ _Coalgebra_ provides an effective framework for modeling state-based, dynamic sy
 
 The first goal of this report is to provide an understanding of the coalgebraic semantics using _trace semantics_ of Büchi automata described in @urabe2016coalgebraic. To do so we also explain the _modal mu-calculus_, a system for verifying properties of transition systems, and provide a coalgebraic model of nondeterministic systems, upon which the construction for the Büchi automata builds. By outlining these concepts we advance our first goal of the research internship, which is to gain an understanding of the current research into this topic.
 
-Secondly we provide an alternate derivation of this coalgebraic representation using _game semantics_. Game semantics is a framework of describing a system in terms of a two-player game between a _verifier_ and a _refuter_ who want to verify, respectively refute, a statement @gradel2003automata. By interpreting the modal mu calculus formulas which occur in the coalgebraic representation to a game we are able to use established theorems from game semantics to derive the coincidence between the coalgebraic model and the traces of the Büchi automata. We think that our approach provides a more intuitive proof of the results than the one provided in @urabe2016coalgebraic, which is quite cumbersome. Additionally, this formulation using game semantics might reveal connections to coalgebra automata which is based on game theoretic techniques @kupke2008coalgebraic.
+Secondly, we provide an alternate derivation of this coalgebraic representation using _game semantics_. Game semantics is a framework of describing a system in terms of a two-player game between a _verifier_ and a _refuter_ who want to verify, respectively refute, a statement @gradel2003automata. By interpreting the modal mu calculus formulas which occur in the coalgebraic representation to a game we are able to use established theorems from game semantics to derive the coincidence between the coalgebraic model and the traces of the Büchi automata. We think that our approach provides a more intuitive proof of the results than the cumbersome proof given in @urabe2016coalgebraic. Additionally, this formulation using game semantics might reveal connections to coalgebra automata which is based on game theoretic techniques @kupke2008coalgebraic.
 
 The document is outlined as follows. In @sec:background we provide some background and relevant definitions for the rest of the report, which includes the modal mu-calculus and game semantics. In @chap:results we provide the coalgebraic representations of nondeterministic systems and Büchi automata from @hasuo2007generic and @urabe2016coalgebraic, respectively. In @sec:new we present our alternate derivation of the coincidence result given in the section before. Finally, in @sec:conclusion we summarize the results and suggest directions for future work.
 
@@ -111,23 +111,23 @@ We can now give a formal definition of a Büchi automaton, and its _accepted lan
   A (nondeterministic) Büchi Automaton @gradel2003automata is a tuple $A=angle.l S, Sigma, delta, s_0, F angle.r$, with $S$ a finite set of states, $Sigma$ the alphabet, $s_0 in S$ the initial state, $delta : S times Sigma -> cal(P)(S)$ the transition function, $F subset.eq S$ the set of _final_ (or _accepting_) states.
 ]
 
-A _run_ of a Büchi Automaton $A$ on an $omega$-word $w=sigma_0 sigma_1 dots in Sigma^omega$ is an infinite sequence of states $s_0,s_1,... in S^omega$, such that $s_0$ is the initial state and for every $n in omega$, $s_(n+1) in delta(s_n,sigma_n)$. A run is _accepting_ if it passes through an accepting state infinitely many times. Equivalently (because $F$ is finite), a run $rho=s_0,s_1,...$ is accepted if ${i | s_i in F}$ is an infinite set. A word $w$ is accepted by a a Büchi automaton $A$ if there is an acccepting run of $A$ on $w$. Finally, the accepted language $L(A)$ of a Büchi automaton, is the set of words accepted by $A$.
+A _run_ of a Büchi Automaton $A$ on an $omega$-word $w=sigma_0 sigma_1 dots in Sigma^omega$ is an infinite sequence of states $s_0,s_1,... in S^omega$, such that $s_0$ is the initial state and for every $n in omega$, $s_(n+1) in delta(s_n,sigma_n)$. A run is _accepting_ if it passes through an accepting state infinitely many times. Equivalently (because $F$ is finite), a run $rho=s_0,s_1,...$ is accepted if ${i | s_i in F}$ is an infinite set. A word $w$ is accepted by a a Büchi automaton $A$ if there is an acccepting run of $A$ on $w$. Finally, the accepted language $L(A)$ of a Büchi automaton, is the set of words accepted by $A$, and $L(A)(s)$ is the set of words accepted by $A$ starting in state $s$.
 
 Indeed we now see that the accepted language for the example automaton is $(mono("request") dot mono("process")^*dot mono("return"))^omega$, where $*$ indicates repeating some set of letters/transitions some finite number of times (including zero) and $omega$ indicates repeating indefinitely. That is, the machine gets a request, processes for at most some _finite_ number of transitions and then returns some result. It does not get stuck processing indefinitely.
 
 == Parity Tree Automata <sec:tree>
-Büchi automata are actually a specific instance of parity tree automata. In this section we introduce this more general automaton. The coincidence results presented in @results:buchi in fact not only hold for Büchi automata, but also for parity tree automata.
+Büchi automata are actually a specific instance of parity tree automata. In this section we introduce this more general automaton. Although we mainly discuss Büchi automata in the report, we mention parity tree automata because the coincidence results presented in @results:buchi also hold for parity tree automata, as discuss further in @results:buchi.
 
 Instead of the acceptence criterion for Büchi automaton, we can use the parity acceptence condition. In this case, the states are not divided into accepting and non-accepting. Instead, every state has a priority, determined by $Omega: S -> omega$. A run $rho=s_0,s_1,dots$ of an automaton $A$ on a word $w$ is then accepting if the maximum priority that occurs infinitely often is even. I.e., $max{Omega(s) | s "occurs infinitely often in" rho}$ is even. The Büchi acceptence criterion is the special case where non-accepting states have parity $1$ and accepting states have parity $2$.
 
-Secondly, instead of words we can run our automaton on trees. In this case the alphabet $Sigma$ is _ranked_ and has an arity function function $|\_\_|:Sigma -> omega$ indicating the number of branches a letter has. We denote the set of trees whose nodes are labeled with letters $sigma in Sigma$ and whose branching is consistent with the arity of the letters as $Tree_Sigma$. For example, if $|sigma|=2$ for all $sigma in Sigma$, a tree $T in Tree_Sigma$ is binary tree with labels $sigma in Sigma$. If $|sigma|=1$ for all $sigma in Sigma$, $Tree_Sigma$ is just the set of infinite words over $Sigma$.
+Secondly, instead of words we can run our automaton on trees. In this case the alphabet $Sigma$ is _ranked_ and has an arity function function $|\_\_|:Sigma -> omega$ indicating the number of branches a letter has. We denote the set of trees whose nodes are labeled with letters $sigma in Sigma$ and whose branching is consistent with the arity of the letters as $Tree_Sigma$. For example, if $|sigma|=2$ for all $sigma in Sigma$, a tree $tau in Tree_Sigma$ is binary tree with labels $sigma in Sigma$. If $|sigma|=1$ for all $sigma in Sigma$, $Tree_Sigma$ is just the set of infinite words over $Sigma$.
 
 We can now define a parity tree automaton:
 
 #definition[
   A (nondeterministic) Parity Tree Automaton @gradel2003automata@urabe2016coalgebraic is a tuple $A=angle.l S, Sigma, delta, s_0, Omega angle.r$, with $S$ a finite set of states, $Sigma$ a ranked alphabet with arity function $|\_\_|: Sigma -> omega$, $s_0 in S$ the initial state, $delta : S times Sigma -> cal(P)(S^*)$ the transition function where for each $sigma in Sigma$ if $|sigma|=n$ then $delta(s)(sigma)subset.eq S^n$, and $Omega: S -> omega$ that assigns a parity to each state.
 
-  A run $rho$ of the automaton $A$ on a tree $T in Tree_Sigma$ is the tree $T$ where the labels are replaced from letters $sigma in Sigma$ to states $s in S$ such that the root of the tree $rho_0=s_0$ is the initial state, and for a node in $T$ with label $sigma in Sigma$ the associated node in $rho$ with label $s in S$ has children $s_1,dots,s_(|sigma|)$ such that $(s_1,dots,s_(|sigma|)) in delta(s)(sigma)$. A run is accepted if for every branch of the tree, the maximum priority that occurs infinitely is even. A tree $T in Tree_Sigma$ is accepted by $A$ if there is an accepting run of $A$ on $T$. The accepted language of $A$ is the set of accepted trees.
+  A run $rho$ of the automaton $A$ on a tree $tau in Tree_Sigma$ is the tree $tau$ where the labels are replaced from letters $sigma in Sigma$ to states $s in S$ such that the root of the tree $rho_0=s_0$ is the initial state, and for a node in $tau$ with label $sigma in Sigma$ the associated node in $rho$ with label $s in S$ has children $s_1,dots,s_(|sigma|)$ such that $(s_1,dots,s_(|sigma|)) in delta(s)(sigma)$. A run is accepted if for every branch of the tree, the maximum priority that occurs infinitely is even. A tree $tau in Tree_Sigma$ is accepted by $A$ if there is an accepting run of $A$ on $tau$. The accepted language of $A$ is the set of accepted trees.
 ]
 
 
@@ -299,7 +299,7 @@ Next, we introduce the parity game for the modal mu-calculus. Consider the formu
 
 Where the intuition for operators like $or,and,box,diamond$ is quite straightforward, for the $mu slash nu$ operators it is less so. Briefly put, it follows from what was explained in @sec:modal that $mu$ incites finite looping, and $nu$ infinite looping. It can be seen from the definition for $Omega$ using the alternation depth, that outer $mu slash nu$ operators have higher priority than inner ones, and $mu$ is always even and $nu$ odd. Thus the highest priority occuring infinitely often in an infinite play indicates the outermost fixed point operator that is visited infinitely often. Thus, if this is even, we have an infinite loop through a $nu$ operator, which satisfies the formula. For a $mu$ operator, however, an infinite loop is undesired, and thus if the outermost fixed point operator which is visited infinitely often is $mu$, it is not a least fixed point, and $R$ has refuted the formula.
 
-Now, to use this game to give alternative semantics for the modal mu-calculus we need that if $s scripts(tack.double)^T phi$ then $V$ can verify this in the game $cal(G)(phi,T)$ by winning the game, and $R$ can not win. We call this that $V$ has a winning strategy: $V$ can always play (i.e. take the right transition if it is their turn) such that regardless of what $R$ plays, $V$ wins the play. We then have the theorem, which is crucial for our derivation of the concidence results in @sec:new:
+Now, to use this game to give alternative semantics for the modal mu-calculus we need that if $s scripts(tack.double)^T phi$ then $V$ can verify this in the game $cal(G)(phi,T)$ by winning the game, and $R$ can not win. We call this that $V$ has a winning strategy: $V$ can always play (i.e. take the right transition if it is their turn) such that regardless of what $R$ plays, $V$ wins the play. We then have the crucial theorem for our derivation of the concidence results in @sec:new:
 
 #theorem([Theorem 10.18 #cite(<gradel2003automata>)])[
   $
@@ -344,7 +344,7 @@ for $s in S$, $sigma in Sigma$, $w in Sigma^*$. So $beh(s)$ contains the empty w
 
 === Nondeterministic Automata <sec:finite>
 
-Unfortunatley, extending this approach to nondeterministic systems is not possible, as we will illustrate by the following system, which we will use as a running example:
+Unfortunately, extending this approach to nondeterministic automata is not possible, as we will illustrate by the following system, which we will use as a running example:
 
 // #align(center)[
 #figure(
@@ -527,7 +527,7 @@ $
   u_2 &=_nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
 $ <eq:traces>
 
-At this point we note that this construction works for the more general parity tree automata from @sec:tree. A parity tree automata can be modeled by the lifted functor of the functor $F S = union.sq_(sigma in Sigma) S^(|sigma|)$ (where $union.sq$ is the coproduct). The final coalgebra of $F$ in *Sets* is $d: Tree_Sigma -> union.sq_(sigma in Sigma) Tree_Sigma^(|sigma|)$ where $d((sigma,(tau_1,dots,tau_(|sigma|))))=(tau-1,dots,tau_(|sigma|))$. We model the different parities by splitting the states into $S=S_1 union dots union S_n$ where for every $S_i$ we have $s in S_i -> Omega(s)=i$ and we have a seperate commuting diagram like in @eq:diagram for every parity, where the $mu$ and $nu$ alternate. We then get the following equations for a parity tree automata with $n$ parities:
+At this point we note that this construction works for the more general parity tree automata from @sec:tree. A parity tree automata can be modeled by the lifted functor of the functor $F S = union.sq_(sigma in Sigma) S^(|sigma|)$ (where $union.sq$ is the coproduct). The final coalgebra of $F$ in *Sets* is $d: Tree_Sigma -> union.sq_(sigma in Sigma) Tree_Sigma^(|sigma|)$ where $d((sigma,(tau_1,dots,tau_(|sigma|))))=(tau_1,dots,tau_(|sigma|))$. We model the different parities by splitting the states into $S=S_1 union dots union S_n$ where for every $S_i$ we have $s in S_i -> Omega(s)=i$ and we have a seperate commuting diagram like in @eq:diagram for every parity, where the $mu$ and $nu$ alternate. We then get the following equations for a parity tree automata with $n$ parities:
 
 $
   u_1 &=_mu (eta_(Tree_Sigma) compose d)^(-1) dot.circle overline(F)[u_1,dots,u_n] dot.circle c_1 \
@@ -564,7 +564,7 @@ By taking exactly those behavior mappings which are the solution to this system 
 
   Where $diamond_delta: (cal(P)(Tree_Sigma))^(S)->(cal(P)(Tree_Sigma))^(S)$ is given by
   $
-    diamond_delta (beh)(s) = { (sigma,(tau_1,dots,tau_(|sigma|))) | (s^'_1,dots,s^'_(|sigma|)) in delta(s)(sigma), tau_i in beh(s^'_i)}.
+    diamond_delta (beh)(s) = { (sigma,(tau_1,dots,tau_(|sigma|))) | sigma in Sigma, (s^'_1,dots,s^'_(|sigma|)) in delta(s)(sigma), tau_i in beh(s^'_i)}.
   $
   Then the solutions $l^sol_i : S_i -> cal(P)(Tree_Sigma)$ map $S_i$ to the accepted language from that state, that is, $l^sol_i (s) = L(A)(s)$ for $s in S_i$.
 ] <lemma:4.5>
@@ -586,7 +586,7 @@ In this section we provide our derivation of the coincidence result @lemma:4.5. 
 2. Apply @th:game to conclude that $overline(phi)$ holds in a state $s$ if and only if there exists a winning strategy for $V$ on $cal(G)(T_A,overline(phi))$ from state $s$.
 3. Prove that there exists a winning strategy for $V$ from state $(s,w)$ in $cal(G)(T_A,overline(phi))$ if and only if $w in L(A)(s)$
 
-Unfortunately, we have not been able to prove step 3 for the parity acceptance criterion, just for the Büchi case. We do solve steps 1 and 2 for the general case, and then provide the proof of step 3 for the Büchi automaton on trees. We discuss this further in @sec:conclusion.
+Unfortunately, we have not been able to prove step 3 for the parity acceptance criterion, just for the Büchi case. We do solve steps 1 and 2 for the general case, and then provide the proof of step 3 for the Büchi automaton on trees. // We discuss this further below and in @sec:conclusion.
 
 So the first step is defining the transition system from the parity tree automaton.
 
@@ -595,18 +595,18 @@ So the first step is defining the transition system from the parity tree automat
   - States are either $(s,tau)$ for $s in S$ and $tau in Tree$ or $((s_1,dots,s_(|sigma|)), (tau_1,...,tau_(|sigma|)))$ for $s_i in S$, $tau_i in Tree$
   - Transitions from state $(s,tau)$, for $s,s'in S, sigma in Sigma, tau in Tree_Sigma$:
   $
-    (s,(sigma,(tau_1,dots,tau_(|sigma|)))) -> ((s_1^',dots, s_n^'), (tau_1,dots,tau_(|sigma|))) "for all" (s_(1)^',dots,s_(|sigma|)^') in delta(s)(sigma)
+    (s,(sigma,(tau_1,dots,tau_(|sigma|)))) -> ((s_1^',dots, s_(|sigma|)^'), (tau_1,dots,tau_(|sigma|))) "for all" (s_(1)^',dots,s_(|sigma|)^') in delta(s)(sigma)
   $ <eq:transition1>
-  - Transitions from state $((s_1,dots,s_(|sigma|)), (sigma, (tau_1,...,tau_(|sigma|))))$ for $s_i in S, sigma in Sigma, tau_i in Tree_Sigma$:
+  - Transitions from state $((s_1,dots, s_(|sigma|)), (tau_1,dots,tau_(|sigma|)))$ for $s_i in S, sigma in Sigma, tau_i in Tree_Sigma$:
   $
-    ((s_1,dots,s_(|sigma|)), (sigma, (tau_1,...,tau_(|sigma|)))) -> (s_i, tau_i) "for all" i in {1,...,|sigma|}
+    ((s_1,dots, s_(|sigma|)), (tau_1,dots,tau_(|sigma|))) -> (s_i, tau_i) "for all" i in {1,...,|sigma|}
   $ <eq:transition2>
-  - Labeling function given by $lambda((s,w))={p_i}$ iff $s in S_i$, i.e., the propositional variables denote for what $i$, we have $s in S_i$.
+  - Labeling function given by $lambda((s,tau))={p_i}$ iff $s in S_i$, i.e., the propositional variables denote for what $i$, we have $s in S_i$.
 ]
 
-By defining the states of the transition system as state-word pairs on the parity tree automaton, we ensure that step 3 of the strategy succeeds: this setup allows for a clear correspondence between an infinite play in the parity game and an accepting run through the parity tree automaton.
+By defining the states of the transition system as state-tree pairs on the parity tree automaton, we ensure that step 3 of the strategy succeeds: this setup allows for a clear correspondence between an infinite play in the parity game and an accepting run through the parity tree automaton.
 
-Next, we derive a closed modal mu-calculus formula from the system of equations. Deriving the solution from the system of equations, as explained in @def:eq, we obtain a closed formula. For example, for the Büchi case (two parities) the closed formula for $beh_1: S_1 -> cal(P)(Tree_Sigma)$ from @eq:traces2 is $beh_1=nu u_2. diamond_delta [mu u_1. [u_1,u_2] arrow.t S_1, u_2] arrow.t S_2$. We observe that the formula is bult up inductively. If $phi$ is a solution to @eq:traces2, then:
+Next, we derive a closed modal mu-calculus formula from the system of equations. Deriving the solution from the system of equations, as explained in @def:eq, obtains a closed formula. For example, for the Büchi case (two parities) the closed formula for $beh_1: S_1 -> cal(P)(Tree_Sigma)$ from @eq:traces2 is $beh_1=nu u_2. diamond_delta [mu u_1. [u_1,u_2] arrow.t S_1, u_2] arrow.t S_2$. We observe that the formula is bult up inductively. If $phi$ is a solution to @eq:traces2, then:
 - $phi=U$ a free variable, or
 - $phi=diamond_delta phi'$, or
 - $phi=eta U. phi'$ where $eta in {mu,nu}$, or
@@ -651,7 +651,7 @@ Next, we apply @th:game to obtain a winning strategy for $V$ on $cal(G)(T_A, ove
   For a closed formula $phi$ solution to @eq:traces2, V has a winning strategy in the game $cal(G)(overline(phi),T_A)$ from $(overline(phi_i),(s,tau))$ iff the Büchi automaton $A$ accepts the tree $tau$ from $s$, i.e. $tau in L(A)(s)$.
 ] <lemma:3>
 
-The proof follows from a couple of key observations: the observation that the choices $V$ makes when $phi=diamond phi' $ correspond to what state to pick for the run $rho$ of $A$ on $tau$; the transition $R$ can pick when $phi= box phi'$ correspond to checking whether every infinite branch in the run has the maximum occuring priority even; and finally that the even priorities in the game correspond to the accepting states in the automaton. The concrete proof can be found in @appendix:lemma:3. However, as noted before, the proof of this lemma is only for the Büchi case (two parities). The hard step for higher priorities is reasoning about parity of the subformulas of the closed formula from the system of equations because they get very big and complicated quickly. The parity then depends on the alternation depth of these formulas (see @def:paritygame) which is hard for these large and complicated formulas.
+The proof follows from a couple of key observations: the observation that the choices $V$ makes when $phi=diamond phi' $ correspond to what state to pick for the run $rho$ of $A$ on $tau$; the transition $R$ can pick when $phi= box phi'$ correspond to checking whether every infinite branch in the run has the maximum occuring priority even; and finally that the even priorities in the game correspond to the accepting states in the automaton. The concrete proof can be found in @appendix:lemma:3. However, as noted before, the proof of this lemma is only for the Büchi case (two parities). The hard step for higher priorities is reasoning about parity of the subformulas of the closed formula from the system of equations because they get big and convoluted quickly. The parity then depends on the alternation depth of these formulas (see @def:paritygame) which is hard for these large and complicated formulas.
 
 The proof of @th (for Büchi automata on trees) now follows from @lemma:0, @lemma:1, @th:game and @lemma:3.
 
@@ -660,7 +660,7 @@ In this report we have shown a coalgebraic representation of Büchi automata, an
 
 We explained the model in the Kleisli category in @sec:nd by showing how to construct a final coalgebra for finite words for a nondeterministic automaton. Subsequently we constructed a weakly final coalgebra to additionally obtain the infinite words within such a system. Building upon these ideas we derived the coalgebraic construction for parity tree automata in @results:buchi, making use of the modal mu-calculus explained in @sec:modal.
 
-In @sec:new we presented our alternate derivation of the coincidence results in @results:buchi. By applying game semantics we were able to give a more comprehensive proof of the results. Additionally, looking at this result through this alternate angle of game semantics can provide new insights into the result.
+In @sec:new we presented our alternate derivation of the coincidence results in @results:buchi. By applying game semantics we were able to give a more comprehensive proof of the results. Additionally, looking at this result through this alternate angle of game semantics can provide new insights.
 
 Seeing if this alternate derivation can shed new light onto the topic, for example connections to coalgebra automata which are based on game theoretic techniques @kupke2008coalgebraic, is one direction of future work that could build upon this report. Secondly, future work could look into proving @lemma:3 for parity automata. As explained in @sec:new, we were unable to prove this lemma for the most general case due to the complicated nature of the system of equations. Bridging this gap would complete the alternate derivation of the coincidence result for all parity tree automata.
 
