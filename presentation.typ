@@ -23,7 +23,7 @@
   title: "Coalgebraic Representation of Büchi Automata",
   subtitle: "Research Internship Presentation",
   author: "Jorrit de Boer",
-  date: "17 January 2025",
+  date: "30 January 2025",
 )
 
 #slide(title: "Introduction")[
@@ -67,9 +67,7 @@
       - $F subset.eq S$: set of _final_ (or _accepting_) states.\
     ]][
     #uncover((3, 4))[
-      A _run_ of $A$ on an $omega$-word $w=sigma_0 sigma_1... in Sigma^omega$ is an infinite sequence of states $s_0,s_1,... in S^omega$ such that for all $n$, $s_(n+1)in delta(s_n,sigma_n)$
-
-      A run is _accepted_ if it visits $F$ infinitly often.
+      Word $w in L(A)$ iff there is a run through the automaton following $w$ that visits $F$ infinitely often.
 
       #uncover(4)[
         Accepted language: $(mono("request") dot mono("process")^*dot mono("return"))^omega$
@@ -106,7 +104,7 @@
     #uncover("4-")[
       Following the paths through the diagram we obtain:
       - $beh(s)(epsilon)=e(beh(s))=o(s)$, and
-      - $beh(s)(sigma w)=beh(s)_a (w)=d(beh(s))(sigma)=beh(delta(s)(sigma))(w)$,
+      - $beh(s)(sigma w)=beh(s)_sigma (w)=d(beh(s))(sigma)=beh(delta(s)(sigma))(w)$,
 
       #uncover("5-")[
         So $beh$ captures exactly the accepted language of the automaton!]]
@@ -140,12 +138,9 @@
 #slide(title: "Solution by Hasuo, Jacobs, Sokolova 2007")[
   Kleisli Category of the monad $cal(P)$:
 
-  A coalgebra $c: S -> Sigma times S$ in $Klp$ is $c: S -> cal(P)(Sigma times S)$ in *Sets*. #uncover("2-")[ Concretely:
-    - $eta_X : X -> cal(P)(X)$: $eta_X (x)={x}$
-    - $mu_X: cal(P)(cal(P)(X)) -> cal(P)(X)$: $mu_X (A) = union.big_(a in A) a$.
-
-  For $f: X -> Y$, $cal(P)(f): cal(P)(X) -> cal(P)(Y)$ by $cal(P)(f)(A)= {f(a) | a in A}$
-
+  A coalgebra $c: S -> Sigma times S$ in $Klp$ is $c: S -> cal(P)(Sigma times S)$ in *Sets*.
+  #uncover("2-")[
+    Concretely:
     - *objects*: the same as for *Sets*, sets
     - #[*morphisms*: $f: X -> Y$ in $Klp$ is $f:X-> cal(P)(Y)$ in *Sets*. \
         For morphisms $f: X -> Y$ and $g: Y -> Z$ in $Klp$ we define
@@ -195,8 +190,11 @@
 
   #uncover("3-")[
     $
-      epsilon in tr(s) <==> * in c(s) <==> "state" s "is accepting"\
-      sigma w in tr(s) <==> (sigma,w) in ((Sigma times beh) compose c)(s)={(sigma, beh(t)) | (sigma,t) in c(s)} <==> exists t. (t in delta(s)(sigma) and w in tr(t)).
+      epsilon in tr(s) &<==> * in c(s) <==> "state" s "is accepting"\
+      #v(1em)
+      sigma w in tr(s) &<==> (sigma,w) in ((Sigma times beh) compose c)(s)\
+      &={(sigma, beh(t)) | (sigma,t) in c(s)}\
+      & <==> exists t. (t in delta(s)(sigma) and w in tr(t)).
     $ <eq:finite>
   ]
 ]
@@ -243,7 +241,7 @@
       node((1, 0), [$1 + Sigma times Sigma^infinity$], name: <FA>)
       edge(<X>, <FX>, $c$, "->", label-side: left)
       edge(<A>, <FA>, $tilde.equiv$, "-", label-side: left, stroke: 0pt)
-      edge(<A>, <FA>, $J xi$, "->", label-side: right)
+      edge(<A>, <FA>, $eta_(1 + Sigma times Sigma^infinity) compose xi$, "->", label-side: right)
       edge(<X>, <A>, $text(tr)^infinity_c$, "~>", label-side: right)
       edge(<FX>, <FA>, $1 + Sigma times tr^infinity_c$, "~>")
       node((2, .5), $italic("in") cal("Kl")(cal(P)).$)
@@ -274,7 +272,7 @@
       edge(<x1>, <fx1>, $c_1$, "->", left)
       edge(<x1>, <z1>, $tr_1$, "~>", right)
       edge(<fx1>, <fz1>, $Sigma times [tr_1,tr_2]$, "~>")
-      edge(<z1>, <fz1>, $eta_(Sigma^omega) compose  d$, right,"->")
+      edge(<z1>, <fz1>, $eta_(Sigma times Sigma^omega) compose  d$, right,"->")
       // edge(<z1>, <fz1>, $tilde.equiv$, "-", left, stroke: 0pt)
 
       node((2, 0), [$Sigma times S$], name: <fx2>)
@@ -284,7 +282,7 @@
       edge(<x2>, <fx2>, $c_2$, "->", left)
       edge(<x2>, <z2>, $tr_2$, "~>", right)
       edge(<fx2>, <fz2>, $Sigma times [tr_1,tr_2]$, "~>")
-      edge(<z2>, <fz2>, $eta_(Sigma^omega) compose d$, "->")
+      edge(<z2>, <fz2>, $eta_(Sigma times Sigma^omega) compose d$, "->")
       // edge(<z2>, <fz2>, $tilde.equiv$, "-", left, stroke: 0pt)
 
       node((0.5,0.5), [$=_mu$])
@@ -303,7 +301,6 @@
   ]
 ]
 
-#set text(size: 15pt)
 #slide(title: [Büchi Automata Coalgebraically, Urabe, Shimizu, Hasuo 2016])[
   // #only((1, 2))[
   $
@@ -325,19 +322,11 @@
     $
   ]
   #uncover("3-")[
-    *Definition*: The _solution_ to this _equational system_ is calculated as follows:
-    - Intermediate solution $l^((1))_1 := mu u_1. f_1(u_1,u_2)$
-    - $l^(sol):= nu u_2. f_2(l^((1))_1(u_2), u_2)$
-    - $l^sol_1 = l^((1))_1(l^sol_2)$
-  ]
-  #uncover("4-")[
-    Concretely:
-    - $l^((1))_1 := mu u_1. diamond_delta ([u_1, u_2]) harpoon.tr S_1$
-    - $l^(sol)_2:= nu u_2. u_2 diamond_delta ([mu u_1. diamond_delta ([u_1, u_2]) harpoon.tr S_1,u_2]) harpoon.tr S_2, u_2)$
-    - $l^sol_1 = mu u_1. diamond_delta ([u_1, nu u_2. u_2 =^nu diamond_delta ([mu u_1^'. diamond_delta ([u_1^', u_2]) harpoon.tr S_1,u_2]) harpoon.tr S_2, u_2)]) harpoon.tr S_1$
+    The _solution_ to this _equational system_ is (informally):
+    - Take the _least_ fixed point at $beh_1 =^mu diamond_delta ([beh_1, beh_2]) harpoon.tr S_1$
+    - Take the _greatest_ fixed point at $beh_2 =^nu diamond_delta ([beh_1, beh_2]) harpoon.tr S_2 $
   ]
 ]
-#set text(size: 18pt)
 
 #set text(size: 16pt)
 #slide(title: "Büchi Automata Coalgebraically, Urabe, Shimizu, Hasuo. 2016")[
@@ -388,6 +377,7 @@
 ]
 
 
+#set text(size: 18pt)
 #slide(title: "Alternate Proof of Coincidence Result")[
   Problem: system of fixed point equations is convoluted.
 
@@ -402,9 +392,10 @@
   ]
 ]
 
+#set text(size: 16pt)
 #slide(title: "Proof Outline")[
   #[Converting formula:
-    $ l_sol^2 = nu u_2. diamond^2_delta [(mu u_1^'. diamond^1_delta [u_1^', u_2]), u_2] $
+    $ l_sol^2 = nu u_2. diamond_delta [(mu u_1^'. diamond_delta [u_1^', u_2]), u_2] $
 
     $
       overline(phi_2)=nu u_2. (p_2 and diamond((mu u_1^'.p_1 and diamond((p_1 and u_1^') or (p_2 and u_2))) or (p_2 and u_2))))
@@ -423,7 +414,7 @@
   ]
 
   #uncover("4-")[
-    *Lemma*: Verifier has a winning strategy in $cal(G)(phi,T_A)$ from state iff the Büchi automaton accepts $w$ from $s$.
+    *Lemma*: Verifier has a winning strategy in $cal(G)(phi,T_A)$ from state $(s,w)$ iff the Büchi automaton accepts $w$ from $s$.
   ]
 ]
 #set text(size: 18pt)
