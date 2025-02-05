@@ -45,7 +45,11 @@
 
 // Title row.
 #align(center)[
-  #text(20pt, weight: 700, "Alternate Derivation of Coalgebraic Representation of Büchi Automata Using Game Semantics")
+  #text(
+    20pt,
+    weight: 700,
+    "Alternate Derivation of the Coalgebraic Representation of Büchi Automata Using Game Semantics",
+  )
 
   #text(14pt, weight: 600, "Research Internship Report")
 
@@ -60,20 +64,20 @@
   #set par(justify: false)
   // #set text(style: "italic")
   *Abstract.*
-  _We provide an explanation of existing literature for describing Büchi automata coalgebraically using trace semantics. To do this we also explain the modal mu-calculus and a coalgebraic model of nondeterministic systems. Finally, we present an alternate derivation of the coalgebraic model for Büchi automata using game semantics, which we believe is more intuitive than the one given in the original paper.  _
+  _We provide a review of existing literature for describing Büchi automata coalgebraically using trace semantics. To do this we also explain the modal $mu$-calculus and a coalgebraic model of nondeterministic systems. Finally, we present an alternate derivation of the coalgebraic model for Büchi automata using game semantics, which gives a new conceptual perspective on the existing coalgebraic framework.  _
 ]
 
 = Introduction
 
-_Büchi automata_ and _nondeterministic systems_ are crucial in theoretical computer science for modeling and verifying systems with infinite behaviors @gradel2003automata@Vardi1996. Nondeterministic systems capture uncertainty and multiple outcomes, and are used in models like concurrent processes and nondeterministic Turing machines @martin1991introduction. Büchi automata, which are in general also nondeterministic, handle infinite sequences of events, crucial for verifying systems that run indefinitely, such as operating systems or network protocols.
+_Büchi automata_ are crucial in theoretical computer science for modeling and verifying systems with infinite behaviors @gradel2003automata@Vardi1996. Büchi automata are generally nondeterminstic, allowing them to capture uncertainty and multiple outcomes @martin1991introduction. Because of their ability to capture nondeterminstism and handle infinite sequences of events, Büchi automata are crucial for verifying systems that run indefinitely, such as operating systems or network protocols.
 
-_Coalgebra_ provides an effective framework for modeling state-based, dynamic systems. Techniques such as _coinduction_ allow for reasoning about infinite structures, while _bisimulation_ offers a formal way to establish behavioral equivalence between systems @rutten2000universal. By modeling Büchi automata coalgebraically, these powerful tools can be applied for reasoning about infinite behaviors and nondeterminism.
+_Coalgebra_ provides an abstract framework for modeling state-based, dynamic systems @rutten2000universal. Techniques such as _coinduction_ allow for reasoning about infinite structures, while _bisimulation_ offers a formal way to establish behavioral equivalence between systems. By modeling Büchi automata coalgebraically, these powerful tools can be applied for reasoning about infinite behaviors and nondeterminism.
 
-The first goal of this report is to provide an understanding of the coalgebraic semantics using _trace semantics_ of Büchi automata described in @urabe2016coalgebraic. To do so we also explain the _modal mu-calculus_, a system for verifying properties of transition systems, and provide a coalgebraic model of nondeterministic systems, upon which the construction for the Büchi automata builds. By outlining these concepts we advance our first goal of the research internship, which is to gain an understanding of the current research into this topic.
+The first goal of this report is to provide an understanding of the coalgebraic semantics using _trace semantics_ of Büchi automata described in @urabe2016coalgebraic. To do so we also explain the _modal $mu$-calculus_ @arnold2001rudiments, a system for verifying properties of transition systems, and a coalgebraic model of nondeterministic systems from @hasuo2007generic, upon which the construction for the Büchi automata builds. By outlining these concepts we advance our first goal of the research internship, which is to gain an understanding of the current research into this topic.
 
-Secondly, we provide an alternate derivation of this coalgebraic representation using _game semantics_. Game semantics is a framework of describing a system in terms of a two-player game between a _verifier_ and a _refuter_ who want to verify, respectively refute, a statement @gradel2003automata. By interpreting the modal mu calculus formulas which occur in the coalgebraic representation to a game we are able to use established theorems from game semantics to derive the coincidence between the coalgebraic model and the traces of the Büchi automata. We think that our approach provides a more intuitive proof of the results than the cumbersome proof given in @urabe2016coalgebraic. Additionally, this formulation using game semantics might reveal connections to coalgebra automata which is based on game theoretic techniques @kupke2008coalgebraic.
+Secondly, we provide an alternate derivation of this coalgebraic representation using _game semantics_ #cite(<gradel2003automata>, supplement: "Chapter 10"). Game semantics is a framework for describing a system in terms of a two-player game between a _verifier_ and a _refuter_ who want to verify, respectively refute, a statement. We interpret a system of equations occuring in the coalgebraic representation as a game, to which we then apply established theorems from game semantics to derive the coincidence between the coalgebraic model and the traces of the Büchi automaton. Our game theoretic proof contrasts the algebraic proof given in @urabe2016coalgebraic. This formulation using game semantics might reveal connections to coalgebra automata which is based on game theoretic techniques @kupke2008coalgebraic.
 
-The document is outlined as follows. In @sec:background we provide some background and relevant definitions for the rest of the report, which includes the modal mu-calculus and game semantics. In @chap:results we provide the coalgebraic representations of nondeterministic systems and Büchi automata from @hasuo2007generic and @urabe2016coalgebraic, respectively. In @sec:new we present our alternate derivation of the coincidence result given in the section before. Finally, in @sec:conclusion we summarize the results and suggest directions for future work.
+The document is outlined as follows. In @sec:background we provide some background and relevant definitions for the rest of the report. In @chap:results we provide the coalgebraic representations of nondeterministic systems and Büchi automata from @hasuo2007generic and @urabe2016coalgebraic, respectively. In @sec:new we present our alternate derivation of the coincidence result given in the section before. Finally, in @sec:conclusion we summarize the results and suggest directions for future work.
 
 #pagebreak()
 
@@ -103,29 +107,29 @@ Let us consider a very simple motivating example of a Büchi automaton, shown in
 
 This system represents some machine that takes requests, processes them, and returns some result. One might want to verify that this machine does not get stuck. In terms of the system shown, this would mean that the machine always ends up in the `idle` state again.
 
-This behavior can be modeled using a Büchi automaton. A Büchi automaton, namely, is an automaton which models infinite behavior, and accepts those words for which there is a path through the automaton where the transitions are labeled by the letters of the word, an there is an accepting state that the path moves through infinitely many times. In this example, we make the `idle` state accepting, so the automaton accepts those words that always take the `return` transition again, and thus do not process indefinitely.
+This behavior can be modeled using a Büchi automaton. A Büchi automaton, namely, is an automaton which models infinite behavior, and accepts those infinite words for which there is a path through the automaton where the transitions are labeled by the letters of the word, an there is an accepting state that the path moves through infinitely many times. In this example, we make the `idle` state accepting, so the automaton accepts those words that always take the `return` transition again, and thus do not process indefinitely.
 
 We can now give a formal definition of a Büchi automaton, and its _accepted language_:
 
 #definition[
-  A (nondeterministic) Büchi Automaton @gradel2003automata is a tuple $A=angle.l S, Sigma, delta, s_0, F angle.r$, with $S$ a finite set of states, $Sigma$ the alphabet, $s_0 in S$ the initial state, $delta : S times Sigma -> cal(P)(S)$ the transition function, $F subset.eq S$ the set of _final_ (or _accepting_) states.
+  A (nondeterministic) Büchi Automaton is a tuple $A=angle.l S, Sigma, delta, s_0, F angle.r$, with $S$ a finite set of states, $Sigma$ the finite alphabet, $s_0 in S$ the initial state, $delta : S times Sigma -> cal(P)(S)$ the transition function, $F subset.eq S$ the set of _final_ (or _accepting_) states.
 ]
 
-A _run_ of a Büchi Automaton $A$ on an $omega$-word $w=sigma_0 sigma_1 dots in Sigma^omega$ is an infinite sequence of states $s_0,s_1,... in S^omega$, such that $s_0$ is the initial state and for every $n in omega$, $s_(n+1) in delta(s_n,sigma_n)$. A run is _accepting_ if it passes through an accepting state infinitely many times. Equivalently (because $F$ is finite), a run $rho=s_0,s_1,...$ is accepted if ${i | s_i in F}$ is an infinite set. A word $w$ is accepted by a a Büchi automaton $A$ if there is an acccepting run of $A$ on $w$. Finally, the accepted language $L(A)$ of a Büchi automaton, is the set of words accepted by $A$, and $L(A)(s)$ is the set of words accepted by $A$ starting in state $s$.
+A _run_ of a Büchi Automaton $A$ on an $omega$-word $w=sigma_0 sigma_1 dots in Sigma^omega$ is an infinite sequence of states $s_0,s_1,... in S^omega$, such that $s_0$ is the initial state and for every $n in omega$, $s_(n+1) in delta(s_n,sigma_n)$. A run is _accepting_ if it passes through an accepting state infinitely many times. Equivalently (because $F$ is finite), a run $rho=s_0,s_1,...$ is accepted if ${i | s_i in F}$ is an infinite set. A word $w$ is _accepted_ by a Büchi automaton $A$ if there is an acccepting run of $A$ on $w$. Finally, the _accepted language_ $L(A)$ of a Büchi automaton, is the set of words accepted by $A$, and $L(A)(s)$ is the set of words accepted by $A$ starting in state $s$.
 
 Indeed we now see that the accepted language for the example automaton is $(mono("request") dot mono("process")^*dot mono("return"))^omega$, where $*$ indicates repeating some set of letters/transitions some finite number of times (including zero) and $omega$ indicates repeating indefinitely. That is, the machine gets a request, processes for at most some _finite_ number of transitions and then returns some result. It does not get stuck processing indefinitely.
 
 == Parity Tree Automata <sec:tree>
-Büchi automata are actually a specific instance of parity tree automata. In this section we introduce this more general automaton. Although we mainly discuss Büchi automata in the report, we mention parity tree automata because the coincidence results presented in @results:buchi also hold for parity tree automata, as discuss further in @results:buchi.
+Büchi automata are actually a specific instance of _parity tree automata_. In this section we introduce this more general automaton. Although we mainly discuss Büchi automata in the report, we mention parity tree automata because the coincidence results presented in @results:buchi also hold for parity tree automata, as discussed further in @results:buchi.
 
 Instead of the acceptence criterion for Büchi automaton, we can use the parity acceptence condition. In this case, the states are not divided into accepting and non-accepting. Instead, every state has a priority, determined by $Omega: S -> omega$. A run $rho=s_0,s_1,dots$ of an automaton $A$ on a word $w$ is then accepting if the maximum priority that occurs infinitely often is even. I.e., $max{Omega(s) | s "occurs infinitely often in" rho}$ is even. The Büchi acceptence criterion is the special case where non-accepting states have parity $1$ and accepting states have parity $2$.
 
-Secondly, instead of words we can run our automaton on trees. In this case the alphabet $Sigma$ is _ranked_ and has an arity function function $|\_\_|:Sigma -> omega$ indicating the number of branches a letter has. We denote the set of trees whose nodes are labeled with letters $sigma in Sigma$ and whose branching is consistent with the arity of the letters as $Tree_Sigma$. For example, if $|sigma|=2$ for all $sigma in Sigma$, a tree $tau in Tree_Sigma$ is binary tree with labels $sigma in Sigma$. If $|sigma|=1$ for all $sigma in Sigma$, $Tree_Sigma$ is just the set of infinite words over $Sigma$.
+Secondly, instead of words we can have a tree automaton. In this case the alphabet $Sigma$ is _ranked_ and has an arity function function $|\_\_|:Sigma -> omega$ indicating the number of successors a letter has. We let $Tree_Sigma$ be the set of trees whose nodes are labeled with letters $sigma in Sigma$ and whose branching is consistent with the arity of the letters. For example, if $|sigma|=2$ for all $sigma in Sigma$, a tree $tau in Tree_Sigma$ is a binary tree with labels $sigma in Sigma$. If $|sigma|=1$ for all $sigma in Sigma$, $Tree_Sigma$ is just the set of infinite words over $Sigma$.
 
 We can now define a parity tree automaton:
 
 #definition[
-  A (nondeterministic) Parity Tree Automaton @gradel2003automata@urabe2016coalgebraic is a tuple $A=angle.l S, Sigma, delta, s_0, Omega angle.r$, with $S$ a finite set of states, $Sigma$ a ranked alphabet with arity function $|\_\_|: Sigma -> omega$, $s_0 in S$ the initial state, $delta : S times Sigma -> cal(P)(S^*)$ the transition function where for each $sigma in Sigma$ if $|sigma|=n$ then $delta(s)(sigma)subset.eq S^n$, and $Omega: S -> omega$ that assigns a parity to each state.
+  A (nondeterministic) Parity Tree Automaton is a tuple $A=angle.l S, Sigma, delta, s_0, Omega angle.r$, with $S$ a finite set of states, $Sigma$ a ranked alphabet with arity function $|\_\_|: Sigma -> omega$, $s_0 in S$ the initial state, $delta : S times Sigma -> cal(P)(S^*)$ the transition function where for each $sigma in Sigma$ if $|sigma|=n$ then $delta(s)(sigma)subset.eq S^n$, and $Omega: S -> omega$ assigns a parity to each state.
 
   A run $rho$ of the automaton $A$ on a tree $tau in Tree_Sigma$ is the tree $tau$ where the labels are replaced from letters $sigma in Sigma$ to states $s in S$ such that the root of the tree $rho_0=s_0$ is the initial state, and for a node in $tau$ with label $sigma in Sigma$ the associated node in $rho$ with label $s in S$ has children $s_1,dots,s_(|sigma|)$ such that $(s_1,dots,s_(|sigma|)) in delta(s)(sigma)$. A run is accepted if for every branch of the tree, the maximum priority that occurs infinitely is even. A tree $tau in Tree_Sigma$ is accepted by $A$ if there is an accepting run of $A$ on $tau$. The accepted language of $A$ is the set of accepted trees.
 ]
@@ -133,16 +137,15 @@ We can now define a parity tree automaton:
 
 
 == Fixed Points
-// maybe iets over dat we niet in heel veel detail gaan?
 Crucial for the next section, @sec:modal about modal mu-calculus, is reasoning about _fixed points_ of _monotone_ functions. We briefly recall the important definitions and theorems.
 
 #definition[
   A _complete lattice_ is a partially ordered set $angle.l L, <= angle.r$ such that every subset $M subset.eq L$ has a least upper bound $or.big M$ and greatest lower bound $and.big M$. Specifically, the whole set $L$ has a least and greatest element, which we denote $and.big L = bot$ and $or.big L = top$, respectively.
 ]
 
-In this report we usually deal with the powerset of some set where subsets are ordered by inclusion. Indeed, for a set $S$, $angle.l cal(P)(S), subset.eq angle.r$ is a complete lattice. For $U subset.eq cal(P)(S)$, $or.big U = union.big U$, and $and.big U = sect.big U$. The least and greatest elements are $emptyset$ and $S$, respectively.
+In this report we usually deal with the powerset of some set where subsets are ordered by inclusion. For a set $S$, $angle.l cal(P)(S), subset.eq angle.r$ is a complete lattice. For $U subset.eq cal(P)(S)$, $or.big U := union.big U$, and $and.big U := sect.big U$. The least and greatest elements are $emptyset$ and $S$, respectively. The following is known as the Knaster-Tarski Fixed Point Theorem #cite(<arnold2001rudiments>, supplement: "Theorem 1.2.8"):
 
-#theorem([Knaster-Tarski Fixed Point Theorem #cite(<arnold2001rudiments>, supplement: "Theorem 1.2.8")])[
+#theorem()[
   Let $angle.l L, <= angle.r $ a complete lattice and $f:L->L$ monotone ($f(x) <= f(y)$ when $x<=y$). Then, the set of fixed points ${x in L|f(x)=x}$, is a complete lattice. Particularly, the function has a _least fixed point_ (lfp) and a _greatest fixed point_ (gfp).
 ] <th:knaster-tarski>
 
@@ -164,7 +167,7 @@ which eventually stabilizes, giving the least fixed point, as stated by the foll
   The dual process, beginning from $top$ and moving downward, constructs the greatest fixed point of $f$.
 ] <th:knaster-tarski2>
 
-== Modal Mu-Calculus <sec:modal>
+== Modal $mu$-Calculus <sec:modal>
 The modal mu-calculus is a powerful logic, used to verify properties of transition systems @gradel2003automata@arnold2001rudiments. We use it in @results:buchi to select the right accepting trees for our coalgebraic system. In this section we give a concrete definition of modal mu-calculus formulas and provide intuition on how to use the modal mu-calculus to verify certain properties. We verify these properties over _transition systems_, which we define first:
 
 #definition[
@@ -527,7 +530,7 @@ $
   u_2 &=_nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
 $ <eq:traces>
 
-At this point we note that this construction works for the more general parity tree automata from @sec:tree. A parity tree automata can be modeled by the lifted functor of the functor $F S = union.sq_(sigma in Sigma) S^(|sigma|)$ (where $union.sq$ is the coproduct). The final coalgebra of $F$ in *Sets* is $d: Tree_Sigma -> union.sq_(sigma in Sigma) Tree_Sigma^(|sigma|)$ where $d((sigma,(tau_1,dots,tau_(|sigma|))))=(tau_1,dots,tau_(|sigma|))$. We model the different parities by splitting the states into $S=S_1 union dots union S_n$ where for every $S_i$ we have $s in S_i -> Omega(s)=i$ and we have a seperate commuting diagram like in @eq:diagram for every parity, where the $mu$ and $nu$ alternate. We then get the following equations for a parity tree automata with $n$ parities:
+At this point we note that this construction works for the more general parity tree automata from @sec:tree. A parity tree automata can be modeled by the lifted functor of the functor $F S = union.sq_(sigma in Sigma) S^(|sigma|)$ (where $union.sq$ is the coproduct). The final coalgebra of $F$ in *Sets* is $d: Tree_Sigma -> union.sq_(sigma in Sigma) Tree_Sigma^(|sigma|)$ where $d((sigma,(tau_1,dots,tau_(|sigma|))))=(tau_1,dots,tau_(|sigma|))$. We model the different parities by splitting the states into $S=S_1 union dots union S_n$ where for every $S_i$ we have $s in S_i -> Omega(s)=i$ and we have a seperate commuting diagram like in @eq:diagram for every parity, where the $mu$ and $nu$ alternate. We then get the following equations for a parity tree automaton with $n$ parities:
 
 $
   u_1 &=_mu (eta_(Tree_Sigma) compose d)^(-1) dot.circle overline(F)[u_1,dots,u_n] dot.circle c_1 \
