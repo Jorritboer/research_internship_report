@@ -37,6 +37,7 @@
 #let Klp = $cal("Kl")(cal(P))$
 #let tr = beh
 #let lfp = text("lfp")
+#let gfp = text("gfp")
 #let Var = math.italic("Var")
 #let Prop = math.italic("Prop")
 #let cons = math.sans("cons")
@@ -124,7 +125,7 @@ Büchi automata are actually a specific instance of _parity tree automata_. In t
 
 Instead of the acceptence criterion for Büchi automaton, we can use the parity acceptence condition. In this case, the states are not divided into accepting and non-accepting. Instead, every state has a priority, determined by $Omega: S -> omega$. A run $rho=s_0,s_1,dots$ of an automaton $A$ on a word $w$ is then accepting if the maximum priority that occurs infinitely often is even. I.e., $max{Omega(s) | s "occurs infinitely often in" rho}$ is even. The Büchi acceptence criterion is the special case where non-accepting states have parity $1$ and accepting states have parity $2$.
 
-Secondly, instead of words we can have a tree automaton. In this case the alphabet $Sigma$ is _ranked_ and has an arity function function $|\_\_|:Sigma -> omega$ indicating the number of successors a letter has. We let $Tree_Sigma$ be the set of trees whose nodes are labeled with letters $sigma in Sigma$ and whose branching is consistent with the arity of the letters. For example, if $|sigma|=2$ for all $sigma in Sigma$, a tree $tau in Tree_Sigma$ is a binary tree with labels $sigma in Sigma$. If $|sigma|=1$ for all $sigma in Sigma$, $Tree_Sigma$ is just the set of infinite words over $Sigma$.
+Secondly, instead of words we can have a tree automaton. In this case the alphabet $Sigma$ is _ranked_ and has an arity function function $|\_\_|:Sigma -> omega$ indicating the number of successors a letter has. Let $Tree_Sigma$ be the set of trees whose nodes are labeled with letters $sigma in Sigma$ and whose branching is consistent with the arity of the letters. For example, if $|sigma|=2$ for all $sigma in Sigma$, a tree $tau in Tree_Sigma$ is a binary tree with labels $sigma in Sigma$. If $|sigma|=1$ for all $sigma in Sigma$, $Tree_Sigma$ is just the set of infinite words over $Sigma$.
 
 We can now define a parity tree automaton:
 
@@ -146,7 +147,7 @@ Crucial for the next section, @sec:modal about modal mu-calculus, is reasoning a
 In this report we usually deal with the powerset of some set where subsets are ordered by inclusion. For a set $S$, $angle.l cal(P)(S), subset.eq angle.r$ is a complete lattice. For $U subset.eq cal(P)(S)$, $or.big U := union.big U$, and $and.big U := sect.big U$. The least and greatest elements are $emptyset$ and $S$, respectively. The following is known as the Knaster-Tarski Fixed Point Theorem #cite(<arnold2001rudiments>, supplement: "Theorem 1.2.8"):
 
 #theorem()[
-  Let $angle.l L, <= angle.r $ a complete lattice and $f:L->L$ monotone ($f(x) <= f(y)$ when $x<=y$). Then, the set of fixed points ${x in L|f(x)=x}$, is a complete lattice. Particularly, the function has a _least fixed point_ (lfp) and a _greatest fixed point_ (gfp).
+  Let $angle.l L, <= angle.r $ a complete lattice and $f:L->L$ monotone ($f(x) <= f(y)$ when $x<=y$). Then, the set of fixed points ${x in L|f(x)=x}$, is a complete lattice. Particularly, the function has a _least fixed point_ (lfp), denoted $lfp(f)$, and a _greatest fixed point_ (gfp), denoted $gfp(f)$.
 ] <th:knaster-tarski>
 
 There is a useful way of constructing these least and greatest fixed points. This is done by repeated function application on $bot$ for the least fixed point, and $top$ for the greatest fixed point. Concretely, we define for a monotone $f:L->L$, for $alpha$ an ordinal, and $beta$ a limit ordinal:
@@ -162,33 +163,34 @@ $ bot = f^0 <= f^1 <= f^2 <= ... $
 
 which eventually stabilizes, giving the least fixed point, as stated by the following theorem:
 
-#theorem([#cite(<arnold2001rudiments>, supplement: "Theorem 1.2.11")])[
-  There exists an ordinal $kappa$, such that $f^kappa=f^(kappa+1)$, which implies that $f^kappa$ is a fixed point of $f$. Furthermore, $f^kappa$ is the least fixed point of $f$.
+#theorem()[
+  There exists an ordinal $kappa$, such that $f^kappa=f^(kappa+1)$, which implies that $f^kappa$ is a fixed point of $f$. Furthermore, $f^kappa=lfp(f)$ is the least fixed point of $f$.
   The dual process, beginning from $top$ and moving downward, constructs the greatest fixed point of $f$.
 ] <th:knaster-tarski2>
 
 == Modal $mu$-Calculus <sec:modal>
-The modal mu-calculus is a powerful logic, used to verify properties of transition systems @gradel2003automata@arnold2001rudiments. We use it in @results:buchi to select the right accepting trees for our coalgebraic system. In this section we give a concrete definition of modal mu-calculus formulas and provide intuition on how to use the modal mu-calculus to verify certain properties. We verify these properties over _transition systems_, which we define first:
+The modal $mu$-calculus is a powerful logic, used to verify properties of transition systems @gradel2003automata@arnold2001rudiments. We use it in @results:buchi to select the right accepting trees for the coalgebraic system. In this section we give a concrete definition of modal $mu$-calculus formulas and provide intuition on how to use the modal $mu$-calculus to verify certain properties. We verify these properties over _transition systems_, which we define first:
 
 #definition[
-  A transition system (TS) is a tuple $T=angle.l S, delta, italic("Prop"), lambda angle.r$ where $S$ is the set of states, $delta subset.eq S times S$ the transition relation (we sometimes write $s -> s'$ if $(s,s') in R$), $italic("Prop")$ the set of atomic propositions, and $lambda:italic("Prop")->cal(P)(S)$ which interprets the atomic propositions.
+  A transition system (TS) is a tuple $T=angle.l S, delta, italic("Prop"), lambda angle.r$ where $S$ is the set of states, $delta subset.eq S times S$ the transition relation (we sometimes write $s -> s'$ if $(s,s') in R$), $italic("Prop")$ the set of atomic propositions, and $lambda:italic("Prop")->cal(P)(S)$ interprets the atomic propositions.
 ]
 
-You can see a TS as a directed graph where the vertices are labeled by atomic propositions $cal(P)(Prop)$. Note that usually the modal mu-calculus is defined on _labeled_ transition systems, but to simplify things slightly, and because we only need transition systems in the rest of the report we stick to transition systems.
+A TS can be seen as a directed graph where the vertices are labeled by atomic propositions $cal(P)(Prop)$. Note that usually the modal $mu$-calculus is defined on _labeled_ transition systems, but to simplify things slightly, and because we only need unlabeled transition systems in the rest of the report we stick to transition systems.
 
-Next we define the syntax of the modal mu-calculus:
+Next we define the syntax of the modal $mu$-calculus:
 
 #definition[
-  A modal mu-calculus formula is defined by the grammar:
+  A modal $mu$-calculus formula is defined by the grammar:
   $
-    phi := P | not P | Z | phi_1 and phi_2 | phi_1 or phi_2 | box phi | diamond phi | mu Z. phi | nu Z.phi
+    phi := P | Z | not phi | phi_1 and phi_2 | phi_1 or phi_2 | box phi | diamond phi | mu Z. phi | nu Z.phi
   $
-  where $P in italic("Prop")$ is an atomic proposition, $a in Sigma$ a label, and $Z in italic("Var")$ a _fixed point variable_.
+  where $P in italic("Prop")$ is an atomic proposition and $Z in italic("Var")$ a _fixed point variable_.
 ] <def:modal>
 
-Note that you could define the modal mu-calculus without the $or$, $angle.l a angle.r$, and $nu$ operators, and define these instead in terms of the other operators, but we include them in the definition for legibility.
+Note that we could define the modal $mu$-calculus without the $or$, $diamond$, and $nu$ operators, and define these instead in terms of the other operators, but we include them in the definition for legibility.
 
-#definition[The semantics of a modal mu-calculus formula on a TS is a set of states where the formula holds, i.e. $|phi|subset.eq S$. For a modal mu-calculus formula $phi$, a transition system T, and an assignment $V: italic("Var")->cal(P)(S)$ we define:
+#definition[
+  For a modal $mu$-calculus formula $phi$, a transition system $T=angle.l S, delta, Prop, lambda angle.r$, and an assignment $V: italic("Var")->cal(P)(S)$ we define the semantics of the formula $||phi||_V^T subset.eq S$ as follows:
   $
     ||P||^T_V & := lambda(P)\
     ||not P||^T_V & := S backslash lambda(P)\
@@ -196,16 +198,16 @@ Note that you could define the modal mu-calculus without the $or$, $angle.l a an
     || phi_1 and phi_2 ||^T_V & := ||phi_1||^T_V sect ||phi_2||^T_V \
     || phi_1 or phi_2 ||^T_V & := ||phi_1||^T_V union ||phi_2||^T_V \
     || box phi ||^T_V &:= {s | forall t in S. "if" s-> t "then" t in ||phi||^T_V} \
-    || diamond phi ||^T_V &:= {s | exists t in S. "if" s-> t "then" t in ||phi||^T_V} \
-    || mu Z.phi ||^T_V &:= italic("lfp")(lambda U. ||phi||^T_(V[Z |-> U])) = sect.big { U subset.eq X | U subset.eq ||phi||^T_(V[Z |-> U]) }\
-    || nu Z.phi ||^T_V &:= italic("gfp")(lambda U. ||phi||^T_(V[Z |-> U])) = union.big { U subset.eq X | ||phi||^T_(V[Z |-> U])subset.eq U }
+    || diamond phi ||^T_V &:= {s | exists t in S. s-> t "and" t in ||phi||^T_V} \
+    || mu Z.phi ||^T_V &:= italic("lfp")(lambda U. ||phi||^T_(V[Z |-> U]))\
+    || nu Z.phi ||^T_V &:= italic("gfp")(lambda U. ||phi||^T_(V[Z |-> U]))
   $
   where $V[Z|->U]$ is the valuation $V$ except that $Z$ maps to $U$.
 
-  We write $s scripts(tack.r.double)^T phi$ if $s in |phi|^T_V$ for an empty valuation $V$, or just $s tack.r.double phi$ if $T$ is clear.
+  We write $s scripts(tack.r.double)^(T)#h(-.1em) phi$ if $s in |phi|^T_V$ for an empty valuation $V$, or just $s tack.r.double phi$ if $T$ is clear.
 ]
 
-Let us briefly look at some intuition behind these definitions. We have $s scripts(tack.double)^T p$ if in $T$ at state $s$ the propositional variable $p$ holds. Conversely,$s scripts(tack.double)^T not p$ holds if $p$ does not hold in $s$. The $diamond$ and $box$ operators look at states reachable from $s$. For example, $s scripts(tack.double)^T diamond p$ is true if there is some state $s'$ such that $s -> s'$ and $s' scripts(tack.double)^T p$. Analagously, $s scripts(tack.double)^T box p$ is true if $p$ is true in all succesor states from $s$. Less intuitive are the $mu$ and $nu$ operators. Concretely, they identify least and greatest fixed points on functions from states to states. More intuitively, they can be used to define looping properties on transition systems, where $mu$ can be used for finite looping, and $nu$ for infinite looping. This will hopefully become more clear when looking at some examples:
+Let us briefly look at some intuition behind these definitions. We have $s scripts(tack.double)^T p$ if in $T$ at state $s$ the propositional variable $p$ holds. Conversely,$s scripts(tack.double)^T#h(-.1em) not p$ holds if $p$ does not hold in $s$. The $diamond$ and $box$ operators look at states reachable from $s$. For example, $s scripts(tack.double)^T#h(-.1em) diamond p$ is true if there is some state $s'$ such that $s -> s'$ and $s' scripts(tack.double)^T p$. Analagously, $s scripts(tack.double)^T#h(-.1em) box p$ is true if $p$ is true in all succesor states from $s$. Less intuitive are the $mu$ and $nu$ operators. Concretely, they identify least and greatest fixed points on functions from states to states. More intuitively, they can be used to define looping properties on transition systems, where $mu$ can be used for finite looping, and $nu$ for infinite looping. This will hopefully become more clear when looking at some examples:
 
 #figure(
   diagram({
@@ -226,19 +228,19 @@ Let us briefly look at some intuition behind these definitions. We have $s scrip
 
 #let holds = $tack.r.double$
 
-Consider the transition system given in @img:lts. We have $s_0 tack.r.double diamond p$, because there is a transition from $s_0$ to a state where $p$ holds, namely $s_0 -> s_1$, because $s_1 tack.r.double p$. We, however, do not have $x_0 holds box p$, because $s_0 -> s_2$ and $s_2 tack.r.double.not p$.
+Consider the transition system given in @img:lts. We have $s_0 tack.r.double diamond p$, because there is a transition from $s_0$ to a state where $p$ holds, namely $s_0 -> s_1$, because $s_1 tack.r.double p$. We, however, do not have $s_0 holds box p$, because $s_0 -> s_2$ and $s_2 tack.r.double.not p$.
 
-To observe that $mu$ is associated with finite looping, we look at the fact that $s_0 holds mu Z.q or box Z$. This means that all finite paths from $s_0$ either reach a state with no outgoing transitions, or reach a state where $q$ is true. We can see in @img:lts that from $s_0$ every path reaches a state where $q$ is true in finitely many steps. To more formally show that this holds, we make use of the method of constructing least and greatest fixed points in @th:knaster-tarski2. The function we are calculating the lfp for is $f:= lambda U. ||q|| union ||box U||$. The first iteration yields $f^1=f(emptyset)={s_2}$, because $s_2 holds q$. Continuing, $f^2={s_1,s_2}$ and $f^3={s_0,s_1,s_2}=f^4$. So the lfp is the entire set of states $S$, and thus $s_0 holds mu Z. q or box Z$.
+To observe that $mu$ is associated with finite looping, we look at the fact that $s_0 holds mu Z.q or box Z$. This means that all finite paths from $s_0$ either eventually reach a state with no outgoing transitions, or reach a state where $q$ is true. We can see in @img:lts that from $s_0$ every path reaches a state where $q$ is true in finitely many steps. To more formally show that this holds, we make use of the method of constructing least and greatest fixed points in @th:knaster-tarski2. The function we are calculating the lfp for is $f:= lambda U. ||q|| union ||box U||$. The first iteration yields $f^1=f(emptyset)={s_2}$, because $s_2 holds q$. Continuing, $f^2={s_1,s_2}$ and $f^3={s_0,s_1,s_2}=f^4$. So the lfp is the entire set of states $S$, and thus $s_0 holds mu Z. q or box Z$.
 
 Next we look at $nu$, which can be used for infinite looping. We show that $s_0 holds nu Z. diamond Z$. This intuitively means that there exists an infinite path from $s_0$. Indeed, we observe there are multiple infinite paths starting from $s_0$. We confirm by computing the gfp: $f^1=f(S)=diamond S=S$. Dually, observe that the lfp of this formula is $f^1(emptyset)=emptyset$. So we do not have $s_0 holds mu Z. diamond Z$. This confirms the intuition that $mu$ is for finite looping: there has to be some end point of the loop.
 
 
 === System of Equations
 
-Next we introduce systems of equations with alternating fixed points. We only show how such a system works for two equations to save space and because that is all we use in the rest of the report. For more detail into this specific topic see @arnold2001rudiments@urabe2016coalgebraic.
+Next we introduce systems of equations with alternating fixed points. We demonstrate the system using only two equations for brevity and because they are the only ones needed in the rest of the report. For more detail into this specific topic see @arnold2001rudiments@urabe2016coalgebraic.
 
 #definition[
-  Let $L_1,L_2$ be partially ordered sets. An _equational system_ is a system of two equations
+  Let $L_1,L_2$ be complete lattices. An _equational system_ is a system of two equations
 
   $
     u_1 =_eta_1 f_1(u_1,u_2) #h(3em) u_2 =_eta_2 f_2(u_1,u_2)
@@ -251,35 +253,35 @@ Next we introduce systems of equations with alternating fixed points. We only sh
 ] <def:eq>
 
 == Parity Games
-Next we introduce parity game and show how they can be used to give intuitive semantics for modal mu-calculus formulas. We use these semantics to prove the coincidence results in @sec:new.
+Next we introduce parity games and show how they provide both an intuitive and formal semantics for modal $mu$-calculus formulas. We use these semantics to prove the coincidence results in @sec:new.
 
-A parity game is a two player game between $V$ (verifier) and $R$ (refuter), who want to verify, respectively refute, a statement. In our case, this statement is $s scripts(tack.double)^T phi$, i.e. that a modal mu-calculus formula holds in a state $s$ in LTS $T$. So $V$ wants to show $s scripts(tack.double)^T phi$ and $R$ wants to show $s scripts(tack.double.not)^T phi$. The game consists of states and transitions between these states. Every state 'belongs' to either $V$ or $R$, which determines what player picks the next transition is taken and thus the next state. A play of the game is then a (possibly infinite) sequence of states, and is won by either $V$ or $R$. Concretely we define:
+A parity game is a two player game between $V$ (verifier) and $R$ (refuter), who want to verify, respectively refute, a statement. In our case, this statement is $s scripts(tack.double)^T#h(-.1em) phi$, i.e. that a modal $mu$-calculus formula holds in a state $s$ in LTS $T$. So $V$ wants to show $s scripts(tack.double)^T #h(-.1em)phi$ and $R$ wants to show $s scripts(tack.double.not)^T#h(-.1em) phi$. The game consists of states and transitions between these states. Every state 'belongs' to either $V$ or $R$, which determines which player picks the next transition and thus the next state. A play of the game is then a (possibly infinite) sequence of states, and is won by either $V$ or $R$. Concretely we define:
 
-#definition([Parity Game @gradel2003automata])[
-  A parity game is a tuple $((S_V,S_R),E,Omega)$, where $S=S_V union.sq S_R$ is the set of states. From the states $S_V$ player $V$ picks the transition and for $S_R$ player $R$ does. $E subset.eq S times S$ are transitions between the states. $Omega:S->omega$ is the parity function, which determines the winner for infinite plays.
+#definition()[
+  A _parity game_ is a tuple $((S_V,S_R),E,Omega)$, where $S=S_V union.sq S_R$ is the set of states, partitioned between player $V$ ($S_V$) and player $R$ ($S_R$) who choose transitions from their repsective states, $E subset.eq S times S$ are transitions between the states, and $Omega:S->omega$ is the parity function, which determines the winner for infinite plays.
 
-  A play of the game is a (possibly infinite) sequence of states $s_1,s_2, dots$ such that $(s_i,s_(i+1)) in E$. A finite play is won by a player if the other player gets stuck, i.e. has no moves from a position. An infinite play $pi=s_1,s_2,dots$ is won by $V$ if $max{Omega(s) | s "occurs infinitely often in" pi}$ is even, and won by $R$ if it is odd.
+  A play of the game is a (possibly infinite) sequence of states $s_1,s_2, dots$ such that $(s_i,s_(i+1)) in E$. A finite play $s_1,s_2,dots,s_n$ is won by $V$ if $s_n in S_R$ and there is no $s_(n+1)$ such that $(s_n,s_(n+1)) in E$, i.e. player $R$ has no moves. Analagously, $R$ wins if player $V$ gets stuck. An infinite play $pi=s_1,s_2,dots$ is won by $V$ if $max{Omega(s) | s "occurs infinitely often in" pi}$ is even, and won by $R$ if it is odd.
 ]
 
-Next, we introduce the parity game for the modal mu-calculus. Consider the formula $phi=phi_1 or phi_2$. $V$ wants to verify $s scripts(tack.double)^T phi$, and to do so it suffices to show for either $phi_i$ that $s scripts(tack.double)^T phi_i$. Analagously for the formula $phi=phi_1 and phi_2$, $R$ can 'pick' the $phi_i$ such that $s scripts(tack.double.not)^T phi_i$, because if either $phi_1$ or $phi_2$ does not hold, $phi$ does not hold. This same duality is seen in $diamond phi$ and $box phi$ where for $diamond$ $V$ can show there is a transition for which $phi$ holds, and for $box phi$, $R$ can pick a transition such that $phi$ does not hold. This way the game arises between $V$ and $R$ to determine whether $s scripts(tack.double)^T phi_i$:
+Next, we introduce the parity game for the modal $mu$-calculus. Consider the formula $phi=phi_1 or phi_2$. $V$ wants to verify $s scripts(tack.double)^T#h(-.1em) phi$, and to do so it suffices to show for either $phi_i$ that $s scripts(tack.double)^T#h(-.1em) phi_i$. Analagously for the formula $phi=phi_1 and phi_2$, $R$ can 'pick' the $phi_i$ such that $s scripts(tack.double.not)^T#h(-.1em) phi_i$, because if either $phi_1$ or $phi_2$ does not hold, $phi$ does not hold. This same duality is seen in $diamond phi$ and $box phi$ where for $diamond$ $V$ can show there is a transition for which $phi$ holds, and for $box phi$, $R$ can pick a transition such that $phi$ does not hold. This way the game arises between $V$ and $R$ to determine whether $s scripts(tack.double)^T#h(-.1em) phi_i$:
 
 
 #definition([Parity Game for Modal mu-Calculus@gradel2003automata])[
-  For a transition system $T=(S,->,lambda)$ and a modal mu-calculus formula $phi$, we define the game $cal(G)(phi,T)=((S_V,S_R),E,Omega)$ where:
-  - #[The states of the game $S_V union.sq S_R= {phi' | phi' " is a subformula of " phi} times S$ are pairs of a subformula of $phi$ and a state in the LTS. The subformula determines to what player the state belongs to. For a subformula $psi$ and a state $s$ of the LTS:
+  For a transition system $T=(S,delta,Prop,lambda)$ and a modal $mu$-calculus formula $phi$, we define the game $cal(G)(phi,T)=((S_V,S_R),E,Omega)$ where:
+  - #[The states of the game $S_V union.sq S_R= {phi' | phi' " is a subformula of " phi} times S$ are pairs of a subformula of $phi$ and a state in the TS. The subformula determines to which player the state belongs to. For a subformula $psi$ and a state $s$ of the TS:
       - #[$(psi,s) in S_V$ if
           - $psi= psi_1 or psi_2$
           - $psi= diamond psi'$
           - $psi= eta Z. psi'$ for $eta in {mu,nu}$
           - $psi=Z$ for $Z$ a fixed point variable
-          - $psi = p$ for $p$ a propositional variable with $p in lambda(s)$.
-          - $psi = not p$ for $p$ a propositional variable with $p in.not lambda(s)$.
+          - $psi = p$ for $p$ a propositional variable with $s in.not lambda(p)$.
+          - $psi = not p$ for $p$ a propositional variable with $s in lambda(p)$.
         ]
       - #[$(psi,s) in S_R$, if
           - $psi=psi_1 and psi_2$
           - $psi = box psi'$
-          - $psi = p$ for $p$ a propositional variable with $p in.not lambda(s)$.
-          - $psi = not p$ for $p$ a propositional variable with $p in lambda(s)$.
+          - $psi = p$ for $p$ a propositional variable with $s in lambda(p)$.
+          - $psi = not p$ for $p$ a propositional variable with $s in.not lambda(p)$.
         ]
     ]
   - Edges $E$:
@@ -292,19 +294,20 @@ Next, we introduce the parity game for the modal mu-calculus. Consider the formu
     - $alpha(p)=alpha(not p)=0$ for $p$ a propositional variable
     - $alpha(psi_1 and psi_2)=alpha(psi_1 or psi_2)=max{alpha(psi_1),alpha(psi_2)}$
     - $alpha(diamond psi)=alpha(box psi)=alpha(psi)$
-    - $alpha(mu Z.psi)=max({1,alpha(psi)} union {alpha(nu Z'.psi' +1) | nu Z'. psi' "is a subformula of" psi "and" Z "occurs free in " psi'} )$
-    - $alpha(nu Z.psi)=max({1,alpha(psi)} union {alpha(mu Z'.psi' +1) | mu Z'. psi' "is a subformula of" psi "and" Z "occurs free in " psi'} )$
+    - $alpha(mu Z.psi)=max({1,alpha(psi)} union {alpha(nu Z'.psi') +1 | nu Z'. psi' "is a subformula of" psi "and" Z "occurs free in " psi'} )$
+    - $alpha(nu Z.psi)=max({1,alpha(psi)} union {alpha(mu Z'.psi') +1 | mu Z'. psi' "is a subformula of" psi "and" Z "occurs free in " psi'} )$
     Intuitively, the alternation depth of a formula is the maximum number of alternating $mu slash nu$ operators, where we only count those alternations where the free variable actually occurs freely in the subformula, meaning the fixed point operators are actually interdependent. $Omega$ is then:
     - $Omega((mu Z.psi,s))= $ the smallest odd number greater or equal than $alpha(psi)-1$
-    - $Omega((mu Z.psi,s))= $ the smallest even number greater or equal than $alpha(psi)-1$
+    - $Omega((nu Z.psi,s))= $ the smallest even number greater or equal than $alpha(psi)-1$
     - $Omega((psi,s))=0$ iff $psi$ is not a $mu$ or $nu$ formula.
 ] <def:paritygame>
 
-Where the intuition for operators like $or,and,box,diamond$ is quite straightforward, for the $mu slash nu$ operators it is less so. Briefly put, it follows from what was explained in @sec:modal that $mu$ incites finite looping, and $nu$ infinite looping. It can be seen from the definition for $Omega$ using the alternation depth, that outer $mu slash nu$ operators have higher priority than inner ones, and $mu$ is always even and $nu$ odd. Thus the highest priority occuring infinitely often in an infinite play indicates the outermost fixed point operator that is visited infinitely often. Thus, if this is even, we have an infinite loop through a $nu$ operator, which satisfies the formula. For a $mu$ operator, however, an infinite loop is undesired, and thus if the outermost fixed point operator which is visited infinitely often is $mu$, it is not a least fixed point, and $R$ has refuted the formula.
+Whereas the intuition for operators like $or,and,box,diamond$ is quite straightforward, for the $mu slash nu$ operators it is less so. Briefly put, it follows from what was explained in @sec:modal that $mu$ incites finite looping, and $nu$ infinite looping. It can be seen from the definition for $Omega$ using the alternation depth, that outer $mu slash nu$ operators have higher priority than inner ones, and $mu$ is always even and $nu$ odd. Thus the highest priority occuring infinitely often in an infinite play indicates the outermost fixed point operator that is visited infinitely often. Thus, if this is even, we have an infinite loop through a $nu$ operator, which satisfies the formula. For a $mu$ operator, however, an infinite loop is undesired, and thus if the outermost fixed point operator which is visited infinitely often is $mu$, $R$ has refuted the formula.
 
-Now, to use this game to give alternative semantics for the modal mu-calculus we need that if $s scripts(tack.double)^T phi$ then $V$ can verify this in the game $cal(G)(phi,T)$ by winning the game, and $R$ can not win. We call this that $V$ has a winning strategy: $V$ can always play (i.e. take the right transition if it is their turn) such that regardless of what $R$ plays, $V$ wins the play. We then have the crucial theorem for our derivation of the concidence results in @sec:new:
+Now, to use this game to give alternative semantics for the modal $mu$-calculus we need that $s scripts(tack.double)^T#h(-.1em) phi$ if and only if $V$ can verify this in the game $cal(G)(phi,T)$ by winning the game, and $R$ can not win. We say that $V$ has a winning strategy: $V$ can always play (i.e. take the right transition if it is their turn) such that regardless of how $R$ plays, $V$ wins the play. We then have the crucial theorem (for the proof see #cite(<gradel2003automata>,supplement: "Theorem 10.18" )) for our derivation of the concidence results in @sec:new:
 
-#theorem([Theorem 10.18 #cite(<gradel2003automata>)])[
+#theorem()[
+  For a transition system $T=angle.l S, delta, Prop, lambda angle.r$, a state $s in S$, and a modal $mu$-calculus formula $phi$, we have:
   $
     s scripts(tack.double.r)^T phi <=> "V has a winning strategy in" cal(G)(phi,T) "starting in state" (phi,s)
   $
@@ -313,7 +316,7 @@ Now, to use this game to give alternative semantics for the modal mu-calculus we
 
 
 = Coalgebraic Representation of Büchi Automata <chap:results>
-== Finite Behavior of Nondeterministic Systems <sec:nd>
+== Finite Behavior of Nondeterministic Automata <sec:nd>
 In this section we present a coalgebraic representation of nondeterministic systems. The next section for Büchi automata builds upon this construction.
 
 === Deterministic Automata <sec:d>
@@ -347,7 +350,7 @@ for $s in S$, $sigma in Sigma$, $w in Sigma^*$. So $beh(s)$ contains the empty w
 
 === Nondeterministic Automata <sec:finite>
 
-Unfortunately, extending this approach to nondeterministic automata is not possible, as we will illustrate by the following system, which we will use as a running example:
+Unfortunately, extending this approach to nondeterministic automata is not possible, as we will illustrate by the following automaton, which we will use as a running example:
 
 // #align(center)[
 #figure(
@@ -368,22 +371,25 @@ Unfortunately, extending this approach to nondeterministic automata is not possi
 ) <img:nd>
 // ]
 
-The automaton given in @img:nd is nondeterministic because in $s_0$ there are two transitions for $a$. Intuitively, the finite words accepted by the system from state $s_0$ should be
+The automaton given in @img:nd is nondeterministic because in $s_0$ there are two transitions for $a$. Intuitively, the finite words accepted by the automaton from state $s_0$ should be
 $ tr(s_0) = {a, a b, a b b, ...} union {a, a c, a c c, ...}. $
 
-This transitions system might be modeled by a coalgebra $c: S -> 2 times cal(P)(Sigma times S)$, i.e., for every state whether it is final, and a set of pairs $(sigma,s) in Sigma times S$ denoting a transition by taking letter $sigma$ and transitioning to state $s$. The problem is that this functor $F S = 2 times cal(P)(Sigma times S)$ does not have a final coalgebra, as Lambek's lemma implies that such a final coalgebra $z: Z -> 2 times cal(P)(Sigma times Z)$ for some carrier $Z$, would have to be an isomorphism @awodey2010category. But an isomorphism $Z tilde.equiv 2 times cal(P)(Sigma times Z)$ would imply a bijection between $Z$ and $cal(P)(Z)$, which cannot exist.
+This transitions system might be modeled by a coalgebra $c: S -> 2 times cal(P)(Sigma times S)$, i.e., for every state whether it is final, and a set of pairs $(sigma,s) in Sigma times S$ denoting a transition by taking letter $sigma$ and transitioning to state $s$. The problem is that this functor $F S = 2 times cal(P)(Sigma times S)$ does not have a final coalgebra, as Lambek's lemma implies that such a final coalgebra structure $z: Z -> 2 times cal(P)(Sigma times Z)$ for some carrier $Z$, would have to be an isomorphism @awodey2010category. But an isomorphism $Z tilde.equiv 2 times cal(P)(Sigma times Z)$ would imply a bijection between $Z$ and $cal(P)(Z)$, which cannot exist.
 
 The solution, as given by Hasuo et al. @hasuo2007generic, is to work in the Kleisli category for the monad $cal(P)$. Recall that a map $f: X -> Y$ in the Kleisli category is a map $f: X -> cal(P)(Y)$ in *Sets*. Briefly put, this will solve our problem because we can have a final coalgebra $z: Z -> F Z$ that is a map $z: Z -> cal(P)(F Z)$ in *Sets*. Next, we will review the definition of the Kleisli category and define the appropriate functor, enabling us to construct the desired final coalgebra that characterizes the accepting finite words.
 
 The powerset monad $cal(P)$ is defined by the unit $eta_X : X -> cal(P)(X)$ which sends an element of $X$ to the singleton set, $eta_X (x)={x}$ for $x in X$, and the multiplication $mu_X: cal(P)(cal(P)(X)) -> cal(P)(X)$ which takes the union of the sets, i.e. $mu_X (A) = union.big_(a in A) a$. For a function $f: X -> Y$ we get $cal(P)(f): cal(P)(X) -> cal(P)(Y)$ by $cal(P)(f)(A)= {f(a) | a in A}$. The Kleisli category for this monad is defined as follows:
 - *objects*: the same as for *Sets*, sets
-- *morphisms*: a morphism $f$ from $X$ to $Y$ in $Klp$ is a map $f:X-> cal(P)(Y)$ in *Sets*. For morphisms $f: X -> Y$ and $g: Y -> Z$ in $Klp$ (so $f: X-> cal(P)(Y)$ and $g: Y -> cal(P)(Z)$ in *Sets*) we define $(g compose f)$ in $Klp$ as $(mu_Z compose cal(P)(g) compose f)$ in *Sets*. Indeed $(mu_Z compose cal(P)(g) compose f): X -> cal(P)(Z)$, so $(g compose f): X -> Z$ in $Klp$.
+- *morphisms*: #[a morphism $f$ from $X$ to $Y$ in $Klp$ is a map $f:X-> cal(P)(Y)$ in *Sets*.
+
+The identity morphism $id_X:X -> X$ is defined by $id_X(x)={x}$, which is indeed a mapping from $X$ to $cal(P)(X)$ in *Sets*. Composition $(g compose f)$ in $Klp$ for morphisms $f: X -> Y$ and $g: Y -> Z$ in $Klp$ (so $f: X-> cal(P)(Y)$ and $g: Y -> cal(P)(Z)$ in *Sets*) is defined as $(mu_Z compose cal(P)(g) compose f)$ in *Sets*. Again we see that that this definition is of the right type as $(mu_Z compose cal(P)(g) compose f): X -> cal(P)(Z)$ in *Sets*, so $(g compose f): X -> Z$ in $Klp$.
+]
 
 Next, we construct our functor in $Klp$, which we call the lifting of $F$ in $Klp$, and denote $overline(F)$. The key here is that because we are working in the Kleisli category, if we use the functor $overline(F) S = Sigma times S$, the coalgebra map $c: S -> Sigma times S$, will be a map $c: S -> cal(P)(Sigma times S)$ in *Sets*, which models nondeterministic transitions. In the previous section we used the functor $F S -> 2 times S ^ Sigma$ where $o: S -> 2$ denoted whether the state was final. Combining this with the functor $overline(F) S = Sigma times S$ in the Kleisli category we would get the functor $overline(F) S = 2 times Sigma times S$ and the coalgebra $c: S -> 2times Sigma times S$ which is $c: S -> cal(P)(2 times Sigma times S)$ in *Sets*, which would mean that every transition can be final or not, which is not what we want. For this reason we use the functor $overline(F) S = 1 + Sigma times S$ such that the coalgebra $c: S -> 1 + Sigma times S$ is the map $c: S -> cal(P)(1 + Sigma times S)$ where $s in S$ is final iff $* in c(s)$ (note that we use $1={*}$).
 
-This works easily on objects, $overline(F)X=F X$, because in the Kleisli category, the objects are the same. But for morphisms we have to do a little bit more work. Observe that because a map $f:X-> Y$ in $Klp$ is a map $f: X->cal(P)(X)$ in *Sets*, applying the functor $F$ on the map itself would yield $F f: F X -> F cal(P) (Y)$. So what we need is a natural transformation $lambda: F cal(P) => cal(P) F$, i.e., a distributive law @hasuo2007generic, such that $1+Sigma times (cal(P)(S)) ->^lambda cal(P)(1+Sigma times S)$. We define this as $* arrow.r.bar {*}$, and $(sigma,S)={(sigma,x)|x in S}$ for $sigma in Sigma$ and $S subset.eq S$. This follows intuitively if you observe that if from state $s$ taking transition $sigma$ takes you to ${x,y,z}$ ($(sigma,{x,y,z}) in c(s)$, or ${x,y,z} in delta(s)(sigma)$), you can also see this as transitions ${(sigma,x),(sigma,y),(sigma,z)}$.
+This works easily on objects, $overline(F)X=F X$, because in the Kleisli category, the objects are the same. But for morphisms we have to do a little bit more work. Observe that because a map $f:X-> Y$ in $Klp$ is a map $f: X->cal(P)(X)$ in *Sets*, applying the functor $F$ on the map itself would yield $F f: F X -> F cal(P) (Y)$. So what we need is a natural transformation $lambda: F cal(P) => cal(P) F$ (this is a distributive law, for more details see for example @hasuo2007generic) such that $1+Sigma times (cal(P)(S)) ->^lambda cal(P)(1+Sigma times S)$. We define this as $* arrow.r.bar {*}$, and $(sigma,U)={(sigma,s)|s in U}$ for $sigma in Sigma$ and $U subset.eq S$. We see that this definition makes sense if we observe that if taking transition $sigma$ from state $s$ takes you to ${x,y,z}$, i.e. $(sigma,{x,y,z}) in c(s)$, or ${x,y,z} in delta(s)(sigma)$, you can also see this as a set of transitions ${(sigma,x),(sigma,y),(sigma,z)}$.
 
-Finally, the main theorem from @hasuo2007generic (Theorem 3.3), and the last ingredient to make the construction work is that the initial algebra for the functor $F$ in *Sets*, gives us the final coalgebra for the lifted functor $overline(F)$ in $Klp$. Specifically, for this functor $F S= 1 + Sigma times S$ and its lifting as described above, the initial $F$-algebra $alpha: F A -> A$ in *Sets* yields a final $overline(F)$-coalgebra in $cal("Kl")(cal(P))$ by:
+Finally, the main theorem from @hasuo2007generic (Theorem 3.3), and the last ingredient to make the construction work, is that the initial algebra for the functor $F$ in *Sets* gives us the final coalgebra for the lifted functor $overline(F)$ in $Klp$. Specifically, for this functor $F S= 1 + Sigma times S$ and its lifting as described above, the initial $F$-algebra $alpha: F A -> A$ in *Sets* yields a final $overline(F)$-coalgebra in $cal("Kl")(cal(P))$ by:
 
 $ (eta_(F A) alpha)^(-1) = eta_(F A) alpha^(-1) : A -> overline(F)A italic("in") cal("Kl")(cal(P)) $
 
@@ -425,7 +431,7 @@ Explained in words, a state accepts the empty word iff the state is accepting, a
 // ]
 
 === Possibly Infinite Behavior <sec:infinite>
-As a step towards infinite words in Büchi automata let us consider infinite words in @img:nd. We can slightly alter our previous construction to additionally obtain infinite words through this system. Concretely, the infinite words for the system in @img:nd for $x_0$ are $a b^omega$ and $a c^omega$.
+As a step towards infinite words in Büchi automata let us consider infinite words in @img:nd. We can slightly alter our previous construction to additionally obtain infinite words through this system @jacobs2004trace@hasuo2007generic. Concretely, the infinite words for the system in @img:nd for $x_0$ are $a b^omega$ and $a c^omega$.
 
 The intuition for this new construction is as follows. In the previous section we constructed the final coalgebra for the lifted functor $overline(F)$ using the initial $F$-algebra in *Sets*. In the example of the LTS with termination the initial algebra was carried by $Sigma^*$. The final coalgebra in *Sets* for $F$ is carried by $Sigma^infinity$ (where the $infinity$ operators means some finite number of times or indefinitely so $Sigma^infinity = Sigma^* union Sigma^omega$) the set of finite and infinite words. So if we use this final coalgebra instead of the initial algebra, do we obtain both the finite and infinite words?
 
@@ -479,7 +485,7 @@ $
   sigma w in tr^infinity (s) <==> exists t. (s ->^sigma t and w in tr^infinity (t)).
 $ <eq:infinite>
 
-Which is the same as in @eq:finite. However, because the domain is $Sigma^infinity$, we obtain different words when we take the maximal function satisfying these equations. Namely the finite words, in addition to the infinite ones! For the system in @img:nd we get the same words as before, but additionally ${a b^infinity, a c^infinity} subset.eq tr^infinity_c (s_0)$. Interestingly, taking the minimum morphism we again obtain just the finite words @hasuo2007generic@jacobs2004trace.
+Which is the same as in @eq:finite. However, because the domain is $Sigma^infinity$, we obtain different words when we take the maximal function satisfying these equations. Namely the infinite words, in addition to the finite ones! For the system in @img:nd we get the same words as before, but additionally ${a b^infinity, a c^infinity} subset.eq tr^infinity_c (s_0)$. Interestingly, taking the minimum morphism we again obtain just the finite words @hasuo2007generic@jacobs2004trace.
 
 == Coalgebraic Representation of Büchi Automata <results:buchi>
 We can apply the previous framework for possibly infinite words to our initial example for a Büchi automaton, in @img:buchi. This would yield all infinite words through the automaton, so also for example $mono("request") dot mono("process")^omega$), it does not take into account accepting states, only for ending finite words. How do we eliminate those words that process indefinitely? That is, only accept those words under the Büchi acceptance criterion of passing through an accepting state infinitely many times.
