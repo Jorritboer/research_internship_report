@@ -190,7 +190,7 @@ Next we define the syntax of the modal $mu$-calculus:
 Note that we could define the modal $mu$-calculus without the $or$, $diamond$, and $nu$ operators, and define these instead in terms of the other operators, but we include them in the definition for legibility.
 
 #definition[
-  For a modal $mu$-calculus formula $phi$, a transition system $T=angle.l S, delta, Prop, lambda angle.r$, and an assignment $V: italic("Var")->cal(P)(S)$ we define the semantics of the formula $||phi||_V^T subset.eq S$ as follows:
+  For a modal $mu$-calculus formula $phi$, a transition system $T=angle.l S, delta, Prop, lambda angle.r$ and an assignment $V: italic("Var")->cal(P)(S)$ we define the semantics $||phi||_V^T subset.eq S$ of the formula $phi$ as follows:
   $
     ||P||^T_V & := lambda(P)\
     ||not P||^T_V & := S backslash lambda(P)\
@@ -199,15 +199,15 @@ Note that we could define the modal $mu$-calculus without the $or$, $diamond$, a
     || phi_1 or phi_2 ||^T_V & := ||phi_1||^T_V union ||phi_2||^T_V \
     || box phi ||^T_V &:= {s | forall t in S. "if" s-> t "then" t in ||phi||^T_V} \
     || diamond phi ||^T_V &:= {s | exists t in S. s-> t "and" t in ||phi||^T_V} \
-    || mu Z.phi ||^T_V &:= italic("lfp")(lambda U. ||phi||^T_(V[Z |-> U]))\
-    || nu Z.phi ||^T_V &:= italic("gfp")(lambda U. ||phi||^T_(V[Z |-> U]))
+    || mu Z.phi ||^T_V &:= lfp(lambda U. ||phi||^T_(V[Z |-> U]))\
+    || nu Z.phi ||^T_V &:= gfp(lambda U. ||phi||^T_(V[Z |-> U]))
   $
   where $V[Z|->U]$ is the valuation $V$ except that $Z$ maps to $U$.
 
-  We write $s scripts(tack.r.double)^(T)#h(-.1em) phi$ if $s in |phi|^T_V$ for an empty valuation $V$, or just $s tack.r.double phi$ if $T$ is clear.
+  We write $s scripts(tack.r.double)^(T)#h(-.1em) phi$ if $s in ||phi||^T_V$ for an empty valuation $V$, or just $s tack.r.double phi$ if $T$ is clear.
 ]
 
-Let us briefly look at some intuition behind these definitions. We have $s scripts(tack.double)^T p$ if in $T$ at state $s$ the propositional variable $p$ holds. Conversely,$s scripts(tack.double)^T#h(-.1em) not p$ holds if $p$ does not hold in $s$. The $diamond$ and $box$ operators look at states reachable from $s$. For example, $s scripts(tack.double)^T#h(-.1em) diamond p$ is true if there is some state $s'$ such that $s -> s'$ and $s' scripts(tack.double)^T p$. Analagously, $s scripts(tack.double)^T#h(-.1em) box p$ is true if $p$ is true in all succesor states from $s$. Less intuitive are the $mu$ and $nu$ operators. Concretely, they identify least and greatest fixed points on functions from states to states. More intuitively, they can be used to define looping properties on transition systems, where $mu$ can be used for finite looping, and $nu$ for infinite looping. This will hopefully become more clear when looking at some examples:
+Let us briefly look at some intuition behind these definitions. We have $s scripts(tack.double)^T p$ if in $T$ at state $s$ the propositional variable $p$ holds. Conversely,$s scripts(tack.double)^T#h(-.1em) not p$ holds if $p$ does not hold in $s$. The $diamond$ and $box$ operators look at states reachable from $s$. For example, $s scripts(tack.double)^T#h(-.1em) diamond p$ is true if there is some state $s'$ such that $s -> s'$ and $s' scripts(tack.double)^T#h(-.1em) p$. Analagously, $s scripts(tack.double)^T#h(-.1em) box p$ is true if $p$ is true in all succesor states from $s$. Less intuitive are the $mu$ and $nu$ operators. Concretely, they identify least and greatest fixed points on functions from states to states. More intuitively, they can be used to define looping properties on transition systems, where $mu$ can be used for finite looping, and $nu$ for infinite looping. This will hopefully become more clear when looking at some examples:
 
 #figure(
   diagram({
@@ -266,7 +266,7 @@ A parity game is a two player game between $V$ (verifier) and $R$ (refuter), who
 Next, we introduce the parity game for the modal $mu$-calculus. Consider the formula $phi=phi_1 or phi_2$. $V$ wants to verify $s scripts(tack.double)^T#h(-.1em) phi$, and to do so it suffices to show for either $phi_i$ that $s scripts(tack.double)^T#h(-.1em) phi_i$. Analagously for the formula $phi=phi_1 and phi_2$, $R$ can 'pick' the $phi_i$ such that $s scripts(tack.double.not)^T#h(-.1em) phi_i$, because if either $phi_1$ or $phi_2$ does not hold, $phi$ does not hold. This same duality is seen in $diamond phi$ and $box phi$ where for $diamond$ $V$ can show there is a transition for which $phi$ holds, and for $box phi$, $R$ can pick a transition such that $phi$ does not hold. This way the game arises between $V$ and $R$ to determine whether $s scripts(tack.double)^T#h(-.1em) phi_i$:
 
 
-#definition([Parity Game for Modal mu-Calculus@gradel2003automata])[
+#definition()[
   For a transition system $T=(S,delta,Prop,lambda)$ and a modal $mu$-calculus formula $phi$, we define the game $cal(G)(phi,T)=((S_V,S_R),E,Omega)$ where:
   - #[The states of the game $S_V union.sq S_R= {phi' | phi' " is a subformula of " phi} times S$ are pairs of a subformula of $phi$ and a state in the TS. The subformula determines to which player the state belongs to. For a subformula $psi$ and a state $s$ of the TS:
       - #[$(psi,s) in S_V$ if
@@ -488,11 +488,11 @@ $ <eq:infinite>
 Which is the same as in @eq:finite. However, because the domain is $Sigma^infinity$, we obtain different words when we take the maximal function satisfying these equations. Namely the infinite words, in addition to the finite ones! For the system in @img:nd we get the same words as before, but additionally ${a b^infinity, a c^infinity} subset.eq tr^infinity_c (s_0)$. Interestingly, taking the minimum morphism we again obtain just the finite words @hasuo2007generic@jacobs2004trace.
 
 == Coalgebraic Representation of Büchi Automata <results:buchi>
-We can apply the previous framework for possibly infinite words to our initial example for a Büchi automaton, in @img:buchi. This would yield all infinite words through the automaton, so also for example $mono("request") dot mono("process")^omega$), it does not take into account accepting states, only for ending finite words. How do we eliminate those words that process indefinitely? That is, only accept those words under the Büchi acceptance criterion of passing through an accepting state infinitely many times.
+We can apply the previous framework for possibly infinite words to our initial example for a Büchi automaton, in @img:buchi. This would yield all infinite words through the automaton, so also for example $mono("request") dot mono("process")^omega$. Meaning, it only takes into account accepting states for ending finite words. How do we eliminate those words that process indefinitely? That is, only accept those words under the Büchi acceptance criterion of passing through an accepting state infinitely many times.
 
-A way of solving this is given by @urabe2016coalgebraic. In short, the main idea of this paper is to divide the states into accepting and non-accepting states. Then, applying the previous construction using the final $F$-coalgebra in *Sets* we obtain two separate commuting diagrams for these disjoint sets of states. And finally, using greatest and least fixed points we can precisely pick exactly the accepting words for the Büchi automaton.
+A way of solving this is given by @urabe2016coalgebraic. In short, the main idea of this paper is to divide the states into accepting and non-accepting states and applying the previous construction using the final $F$-coalgebra in *Sets* to obtain two seperate commuting diagrams. Then, by using greatest and least fixed points we can precisely pick exactly the accepting words for the Büchi automaton.
 
-We first give the commuting diagrams which govern the behavior mappings. We are now considering Büchi automata, so the functor we consider is $F S = Sigma times S$, the final coalgebra for this functor is $d: Sigma^omega -> Sigma times Sigma^omega$, defined by $d(sigma dot w) = (sigma,w)$, and the monad is still $cal(P)$. The lifting $overline(F)$ is effectively the same, just without a case for $*in 1$. We now consider the state space as a disjoint union $S=S_1 union S_2$ of non-accepting and accepting states, respectively. This gives rise to two separate coalgebras $c_i: S_i -> overline(F)X$, defined by the restriction $c compose kappa_i : S_i -> overline(F)X $ along the coprojection $kappa_i : S_i arrow.r.hook S$ for $i in {1,2}$. We then get the two commuting diagrams:
+We first give the commuting diagrams which govern the behavior mappings. We now consider the functor $F S = Sigma times S$. Because, the final coalgebra for this functor is $(Sigma^oo,d)$ where $d$ is defined by $d(sigma dot w)=(sigma,w)$, we consider only the infinite words. The lifting $overline(F)$ is effectively the same, just without a case for $*in 1$. We now consider the state space as a disjoint union $S=S_1 union S_2$ of non-accepting and accepting states, respectively. This gives rise to two separate coalgebras $c_i: S_i -> overline(F)X$, defined by the restriction $c compose kappa_i : S_i -> overline(F)X $ along the coprojection $kappa_i : S_i arrow.r.hook S$ for $i in {1,2}$. We then get the two commuting diagrams:
 
 $
   #diagram(
@@ -536,7 +536,7 @@ $
   u_2 &=_nu (eta_(Sigma^omega)compose d)^(-1) dot.circle overline(F)[u_1,u_2] dot.circle c_2
 $ <eq:traces>
 
-At this point we note that this construction works for the more general parity tree automata from @sec:tree. A parity tree automata can be modeled by the lifted functor of the functor $F S = union.sq_(sigma in Sigma) S^(|sigma|)$ (where $union.sq$ is the coproduct). The final coalgebra of $F$ in *Sets* is $d: Tree_Sigma -> union.sq_(sigma in Sigma) Tree_Sigma^(|sigma|)$ where $d((sigma,(tau_1,dots,tau_(|sigma|))))=(tau_1,dots,tau_(|sigma|))$. We model the different parities by splitting the states into $S=S_1 union dots union S_n$ where for every $S_i$ we have $s in S_i -> Omega(s)=i$ and we have a seperate commuting diagram like in @eq:diagram for every parity, where the $mu$ and $nu$ alternate. We then get the following equations for a parity tree automaton with $n$ parities:
+At this point we note that this construction works for the more general parity tree automata from @sec:tree. A parity tree automata can be modeled by the lifted functor of the functor $F S = union.sq.big_(sigma in Sigma) S^(|sigma|)$ (where $union.sq$ is the coproduct). The final coalgebra of $F$ in *Sets* is $d: Tree_Sigma -> union.sq.big_(sigma in Sigma) Tree_Sigma^(|sigma|)$ where $d((sigma,(tau_1,dots,tau_(|sigma|))))=(tau_1,dots,tau_(|sigma|)) in S^(|sigma|)$. We model the different parities by splitting the states into $S=S_1 union dots union S_n$ where for every $S_i$ we have $s in S_i -> Omega(s)=i$ and we have a seperate commuting diagram like in @eq:diagram for every parity, where the $mu$ and $nu$ alternate. We then get the following equations for a parity tree automaton with $n$ parities:
 
 $
   u_1 &=_mu (eta_(Tree_Sigma) compose d)^(-1) dot.circle overline(F)[u_1,dots,u_n] dot.circle c_1 \
@@ -548,61 +548,59 @@ $ <eq:traces-parity>
 where $eta_i=mu$ if $i$ is odd and $eta_i=nu$ if $i$ is even. We confirm here that the Büchi case is a specific instance of the parity acceptence criterion by letting $n=2$ and just having one $mu$ and one $nu$ equation. Before continuing, we rewrite the equations to be more clear and usable:
 
 #lemma()[
-  The traces in @eq:traces-parity coincide with:
+  The equations in @eq:traces-parity coincide with:
 
   $
     u_1 =^mu diamond_delta ([u_1,dots, u_n]) harpoon.tr S_1, #h(1em) dots,  #h(1em) u_n =^(eta_n) diamond_delta ([u_1,dots,u_n]) harpoon.tr S_n
   $
 
-  Where $diamond_delta: (cal(P)(Tree_Sigma))^(S)->(cal(P)(Tree_Sigma))^(S)$ is given by
+  where $eta_i=mu$ if $i$ is odd and $eta_i=nu$ if $i$ is even and $diamond_delta: (cal(P)(Tree_Sigma))^(S)->(cal(P)(Tree_Sigma))^(S)$ is given by
   $
-    diamond_delta (beh)(s) = { (sigma,(tau_1,dots,tau_(|sigma|))) | (s^'_1,dots,s^'_(|sigma|)) in delta(s)(sigma), tau_i in beh(s^'_i)}.
+    diamond_delta (beh)(s) = { (sigma,(tau_1,dots,tau_(|sigma|))) | sigma in Sigma, (s^'_1,dots,s^'_(|sigma|)) in delta(s)(sigma), tau_i in beh(s^'_i)}.
   $ <eq:diamond>
 ] <lemma:0>
 
 The proof can be found in @appendix:lemma:0.
 
-By taking exactly those behavior mappings which are the solution to this system of equation, we take exactly those words that the parity tree automaton accepts:
+By taking exactly those behavior mappings which are the solution to this system of equation, we take exactly those words that the parity tree automaton accepts. This is given by the following lemma, which is Lemma 4.5 in @urabe2016coalgebraic:
 
-#lemma([#cite(<urabe2016coalgebraic>, supplement: "Lemma 4.5")])[
-  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton, where we let $S=S_1 union dots union S_n$ the disjunct union of states with parity $1, dots, n$, respectively. Let $l^sol_i$ be the solutions to the following equational system, where the variables $u_1,dots,u_n$ range over $(cal(P)(Tree_Sigma))^(S_i)$
+#lemma()[
+  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton, where we let $S=S_1 union dots union S_n$ the disjoint union of states with parity $1, dots, n$, respectively. Let $l^sol_i$ be the solutions to the following equational system, where the variables $u_1,dots,u_n$ range over $(cal(P)(Tree_Sigma))^(S_i)$
 
   $
     u_1 =^mu diamond_delta ([u_1,dots, u_n]) harpoon.tr S_1, #h(1em) dots,  #h(1em) u_n =^(eta_n) diamond_delta ([u_1,dots,u_n]) harpoon.tr S_n
   $ <eq:traces2>
 
-  Where $diamond_delta: (cal(P)(Tree_Sigma))^(S)->(cal(P)(Tree_Sigma))^(S)$ is given by
-  $
-    diamond_delta (beh)(s) = { (sigma,(tau_1,dots,tau_(|sigma|))) | sigma in Sigma, (s^'_1,dots,s^'_(|sigma|)) in delta(s)(sigma), tau_i in beh(s^'_i)}.
-  $
-  Then the solutions $l^sol_i : S_i -> cal(P)(Tree_Sigma)$ map $S_i$ to the accepted language from that state, that is, $l^sol_i (s) = L(A)(s)$ for $s in S_i$.
+  where $eta_i=mu$ if $i$ is odd and $eta_i=nu$ if $i$ is even and $diamond_delta: (cal(P)(Tree_Sigma))^(S)->(cal(P)(Tree_Sigma))^(S)$ is as in @eq:diamond.
+  Then the solutions $l^sol_i : S_i -> cal(P)(Tree_Sigma)$ map each state in $S_i$ to the accepted language from that state, that is, $l^sol_i (s) = L(A)(s)$ for $s in S_i$.
 ] <lemma:4.5>
 
-We provide a brief intuition here, utilizing what was observed in @sec:modal. Namely, that $mu$ is associated with finite looping, and $nu$ with infinite. So the even equation makes sure the run passes through even parities infinitely many times. Note that it can still move states with odd parities, but it has to move through those with even parities infinitely many times. Those odd equations make sure there is a finite loop back to an even equation.
+We provide a brief intuition here, utilizing what was observed in @sec:modal. Namely, that $mu$ is associated with finite looping, and $nu$ with infinite. So the odd equations make sure that when a run passes through odd parities it has to move back to a state with an even parity within a finite number of steps.
 
-Regardless of this intuition, the proof of this lemma given in @urabe2016coalgebraic is rather complex. In the next section we provide our proof using game semantics, which we believe is a lot more comprehensive.
+The equations do not just have to make sure that states with even parities are passed infinitely many times, but that the maximum parity occuring infinitely often is even. The proof presented in @urabe2016coalgebraic is highly technical, focusing on algebraically analyzing the solutions of the system of equations. In the next section, we present an alternative proof using game semantics, providing a different perspective on the problem which we believe is more conceptual.
 
-Combining @lemma:0 and @lemma:4.5 we obtain the coincidence result:
+Combining @lemma:0 and @lemma:4.5 we obtain the coincidence result #cite(<urabe2016coalgebraic>, supplement: "Theorem 4.6"):
 
-#theorem([#cite(<urabe2016coalgebraic>, supplement: "Theorem 4.6")])[
-  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton. Then the behavior mappings $tr_1,dots,tr_n$, which are the solution to the system of equations in @eq:traces2 coincide with the accepted language of $A$: $beh(s_0)=[tr_1,dots,tr_n](s_0) = L(A)$.
+#theorem()[
+  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton. Then the behavior mappings $tr_1,dots,tr_n$, which are the solution to the #ref(<eq:traces2>, supplement: "system of equations") coincide with the accepted language of $A$: $beh(s_0)=[tr_1,dots,tr_n](s_0) = L(A)$.
 ] <th>
 
 = Derivation of Coincidence Using Game Semantics <sec:new>
-In this section we provide our derivation of the coincidence result @lemma:4.5. At the core of the derivation is @th:game, which relates a modal mu calculus formula on a transition system and a parity game. We can apply @th:game to derive the coincidence result with the following strategy:
+In this section we provide our derivation of the coincidence result @th. At the core of the derivation is @th:game, which relates a modal $mu$-calculus formula on a transition system and a parity game. We can apply @th:game to derive the coincidence result with the following strategy:
 
-1. Derive from a formula $phi$ from the system of equations in @eq:traces2 a closed modal mu-calculus formula $overline(phi)$ and define a transition system $T_A$ from the parity tree automaton $A$ such that the $overline(phi)$ holds on a state in $T_A$ if and only if $phi$ holds in a related state on $A$.
+1. #[Derive a closed $mu$-calculus formula from system of equations in @eq:traces2. Concretely, derive from a formula $phi$ from the equations in @eq:traces2 a closed modal $mu$-calculus formula $overline(phi)$ and define a transition system $T_A$ from the parity tree automaton $A$ such that we have $tau in ||phi||(s)$, a tree is in the semantics of $phi$ in state $s$, if and only if $(s,tau) in ||phi||^(T_A)$, the formula $overline(phi)$ holds in the state $(s,tau)$ in the transition system $T_A$.
+  ]
 2. Apply @th:game to conclude that $overline(phi)$ holds in a state $s$ if and only if there exists a winning strategy for $V$ on $cal(G)(T_A,overline(phi))$ from state $s$.
 3. Prove that there exists a winning strategy for $V$ from state $(s,w)$ in $cal(G)(T_A,overline(phi))$ if and only if $w in L(A)(s)$
 
-Unfortunately, we have not been able to prove step 3 for the parity acceptance criterion, just for the Büchi case. We do solve steps 1 and 2 for the general case, and then provide the proof of step 3 for the Büchi automaton on trees. // We discuss this further below and in @sec:conclusion.
+Unfortunately, we have not been able to prove step 3 for the parity acceptance criterion, just for the Büchi case. We do solve steps 1 and 2 for the general case (parity tree automata), and then provide the proof of step 3 for Büchi automata on trees (parity tree automata with two parities). // We discuss this further below and in @sec:conclusion.
 
 So the first step is defining the transition system from the parity tree automaton.
 
 #definition[
-  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton, where we let $S=S_1 union dots union S_n$ the disjunct union of states with parity $1, dots, n$, respectively, $Sigma$ is the alphabet, and $delta: S times Sigma -> cal(P)(S^*)$ the transition function. We define a Transition System (TS) over the set of propositional variables ${p_1,dots,p_n}$ for this automaton, denoted as $T_A$, as follows:
-  - States are either $(s,tau)$ for $s in S$ and $tau in Tree$ or $((s_1,dots,s_(|sigma|)), (tau_1,...,tau_(|sigma|)))$ for $s_i in S$, $tau_i in Tree$
-  - Transitions from state $(s,tau)$, for $s,s'in S, sigma in Sigma, tau in Tree_Sigma$:
+  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton, where we let $S=S_1 union dots union S_n$ the disjoint union of states with parity $1, dots, n$, respectively, $Sigma$ be the alphabet, and $delta: S times Sigma -> cal(P)(S^*)$ the transition function. We define a Transition System (TS) over the set of propositional variables ${p_1,dots,p_n}$ for this automaton, denoted as $T_A$, as follows:
+  - States are either $(s,tau)$ for $s in S$ and $tau in Tree_Sigma$ or $((s_1,dots,s_(|sigma|)), (tau_1,...,tau_(|sigma|)))$ for $s_i in S$, $tau_i in Tree_Sigma$
+  - Transitions from state $(s,tau)$, for $s in S, sigma in Sigma, tau in Tree_Sigma$:
   $
     (s,(sigma,(tau_1,dots,tau_(|sigma|)))) -> ((s_1^',dots, s_(|sigma|)^'), (tau_1,dots,tau_(|sigma|))) "for all" (s_(1)^',dots,s_(|sigma|)^') in delta(s)(sigma)
   $ <eq:transition1>
@@ -615,29 +613,36 @@ So the first step is defining the transition system from the parity tree automat
 
 By defining the states of the transition system as state-tree pairs on the parity tree automaton, we ensure that step 3 of the strategy succeeds: this setup allows for a clear correspondence between an infinite play in the parity game and an accepting run through the parity tree automaton.
 
-Next, we derive a closed modal mu-calculus formula from the system of equations. Deriving the solution from the system of equations, as explained in @def:eq, obtains a closed formula. For example, for the Büchi case (two parities) the closed formula for $beh_1: S_1 -> cal(P)(Tree_Sigma)$ from @eq:traces2 is $beh_1=nu u_2. diamond_delta [mu u_1. [u_1,u_2] arrow.t S_1, u_2] arrow.t S_2$. We observe that the formula is bult up inductively. If $phi$ is a solution to @eq:traces2, then:
+
+Next, we derive a closed modal $mu$-calculus formula from the system of equations. Deriving the solution from the system of equations, as explained in @def:eq, obtains a closed formula. For example, for the Büchi case (two parities) the closed formula for $beh_1: S_1 -> cal(P)(Tree_Sigma)$ from @eq:traces2 is $beh_1=nu u_2. diamond_delta [mu u_1. [u_1,u_2] harpoon.tr S_1, u_2] harpoon.tr S_2$.
+
+Note that this is not a modal $mu$-calculus formula, but a fixed point of an equation on the complete lattice $S -> cal(P)(Sigma^omega)$. We want to define a modal $mu$-calculus formula $overline(phi)$ and prove that the semantics of $phi$ coincide with those of $overline(phi)$ in the right way. To do so, we first observe how the closed formula $phi$ is built up. Next, because the semantics of the formula $phi$ are not explicitly given in @urabe2016coalgebraic, we define them concretely here.
+
+We observe that the formula is built up inductively. If $phi$ is a closed formula derived from the system of equations in @eq:traces2, then:
 - $phi=U$ a free variable, or
 - $phi=diamond_delta phi'$, or
 - $phi=eta U. phi'$ where $eta in {mu,nu}$, or
-- $phi = phi' arrow.t S_i $, or
+- $phi = phi' harpoon.tr S_i $, or
 - $phi=[phi_1,dots,phi_n]$
 
-We also observe how the semantics of $phi$ are defined. For a valuation $V: Var -> (S -> Sigma^omega)$, the semantics of a formula $||phi||_V: S -> cal(P)(Tree_Sigma)$ are:
+
+Next, we define the semantics for $phi$. For a valuation $V: Var -> (S -> Sigma^omega)$, the semantics of a formula $||phi||_V: S -> cal(P)(Tree_Sigma)$ are:
 
 - $||U||_V= V(U)$ for $u$ a free variable,
 - $||diamond_delta phi||(s)={(sigma,(tau_1,dots,tau_(|sigma|))) | exists (s_1,dots,s_(|sigma|)) in delta(s)(sigma)[ forall i[ tau_i in ||phi'||_(V)(s_i)]] }$,
-- $||nu U. phi|| = lfp(lambda u. ||phi||_(V[U |-> u]))$,
+- $||nu U. phi|| = lfp(lambda u. ||phi||_(V[U |-> u]))$ (note that the fixed points exists because $S->cal(P)(Tree_Sigma)$ is a complete lattice),
 - $||mu U. phi|| = text("gfp")(lambda u. ||phi||_(V[U |-> u]))$,
-- $||phi arrow.t S_i||_V=||phi||_V arrow.t S_i$ (function restriction),
+- $||phi harpoon.tr S_i||_V=||phi||_V harpoon.tr S_i$ (function restriction),
 - $||phi||_(V)(s) = cases(||phi_1||_(V)(s) "if " s in S_1, dots.v, ||phi_n||_(V)(s) "if " s in S_n)$
 
-So we convert the closed formula from the system of equations to a modal mu-calculus formula and prove that the semantics coincide:
 
-#definition[For a closed formula $phi$ solution to @eq:traces2, we define the closed modal mu calculus formula (@def:modal) $overline(phi)$:
+So we convert the closed formula from the system of equations to a modal $mu$-calculus formula and prove that the semantics coincide:
+
+#definition[For a closed formula $phi$ solution to @eq:traces2, we define the closed modal mu calculus formula $overline(phi)$:
   - $phi=u$ a free variable then $overline(phi)=u$ also a free variable
-  - $phi=diamond_delta phi'$ then $overline(phi)=diamond overline(phi')$
+  - $phi=diamond_delta phi'$ then $overline(phi)=diamond box overline(phi')$
   - $phi=eta u. phi'$ for $eta in {mu,nu}$ then $overline(phi)=eta u . overline(phi')$
-  - $phi = phi' arrow.t S_i $ then $overline(phi)=p_i and overline(phi')$
+  - $phi = phi' harpoon.tr S_i $ then $overline(phi)=p_i and overline(phi')$
   - $phi=[phi_1,dots,phi_n]$ then $overline(phi)=(p_1 and overline(phi_1)) or ... or (p_n and overline(phi_n))$
 ]
 
@@ -660,16 +665,16 @@ Next, we apply @th:game to obtain a winning strategy for $V$ on $cal(G)(T_A, ove
   For a closed formula $phi$ solution to @eq:traces2, V has a winning strategy in the game $cal(G)(overline(phi),T_A)$ from $(overline(phi_i),(s,tau))$ iff the Büchi automaton $A$ accepts the tree $tau$ from $s$, i.e. $tau in L(A)(s)$.
 ] <lemma:3>
 
-The proof follows from a couple of key observations: the observation that the choices $V$ makes when $phi=diamond phi' $ correspond to what state to pick for the run $rho$ of $A$ on $tau$; the transition $R$ can pick when $phi= box phi'$ correspond to checking whether every infinite branch in the run has the maximum occuring priority even; and finally that the even priorities in the game correspond to the accepting states in the automaton. The concrete proof can be found in @appendix:lemma:3. However, as noted before, the proof of this lemma is only for the Büchi case (two parities). The hard step for higher priorities is reasoning about parity of the subformulas of the closed formula from the system of equations because they get big and convoluted quickly. The parity then depends on the alternation depth of these formulas (see @def:paritygame) which is hard for these large and complicated formulas.
+The proof follows from a couple of key observations: the observation that the choices $V$ makes when $phi=diamond phi' $ correspond to what transition to pick for the run $rho$ of $A$ on $tau$; the transition $R$ can pick when $phi= box phi'$ corresponds to checking that the maximum priority occuring infinitely often in every infinite branch is even. The concrete proof can be found in @appendix:lemma:3. However, as noted before, the proof of this lemma is only for the Büchi case (two parities). The hard step for higher priorities is reasoning about parity of the subformulas of the closed formula from the system of equations because they get big and convoluted quickly. The parity then depends on the alternation depth of these formulas (see @def:paritygame) which is hard for these large and complicated formulas.
 
 The proof of @th (for Büchi automata on trees) now follows from @lemma:0, @lemma:1, @th:game and @lemma:3.
 
 = Conclusion and Future Work <sec:conclusion>
-In this report we have shown a coalgebraic representation of Büchi automata, and more generally, parity tree automata. The construction relies upon two key ideas: working in the Kleisli category for the monad $cal(P)$ and deriving separate commuting diagrams for states with different parities and then utilizing fixed point equations for these different mappings for each parity.
+In this report we have shown a coalgebraic representation of Büchi automata, and more generally, parity tree automata @urabe2016coalgebraic. The construction relies upon two key ideas: working in the Kleisli category for the monad $cal(P)$ and deriving separate commuting diagrams for states with different parities and then utilizing fixed point equations for these different mappings for each parity.
 
 We explained the model in the Kleisli category in @sec:nd by showing how to construct a final coalgebra for finite words for a nondeterministic automaton. Subsequently we constructed a weakly final coalgebra to additionally obtain the infinite words within such a system. Building upon these ideas we derived the coalgebraic construction for parity tree automata in @results:buchi, making use of the modal mu-calculus explained in @sec:modal.
 
-In @sec:new we presented our alternate derivation of the coincidence results in @results:buchi. By applying game semantics we were able to give a more comprehensive proof of the results. Additionally, looking at this result through this alternate angle of game semantics can provide new insights.
+In @sec:new we presented our alternate derivation of the coincidence results in @results:buchi. By applying game semantics we were able to give a more conceptual proof of the results. Additionally, looking at this result through this alternate angle of game semantics coul provide new insights.
 
 Seeing if this alternate derivation can shed new light onto the topic, for example connections to coalgebra automata which are based on game theoretic techniques @kupke2008coalgebraic, is one direction of future work that could build upon this report. Secondly, future work could look into proving @lemma:3 for parity automata. As explained in @sec:new, we were unable to prove this lemma for the most general case due to the complicated nature of the system of equations. Bridging this gap would complete the alternate derivation of the coincidence result for all parity tree automata.
 
