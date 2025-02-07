@@ -138,7 +138,7 @@ We can now define a parity tree automaton:
 
 
 == Fixed Points
-Crucial for the next section, @sec:modal about modal mu-calculus, is reasoning about _fixed points_ of _monotone_ functions. We briefly recall the important definitions and theorems.
+Crucial for the next section, @sec:modal about modal $mu$-calculus, is reasoning about _fixed points_ of _monotone_ functions. We briefly recall the important definitions and theorems.
 
 #definition[
   A _complete lattice_ is a partially ordered set $angle.l L, <= angle.r$ such that every subset $M subset.eq L$ has a least upper bound $or.big M$ and greatest lower bound $and.big M$. Specifically, the whole set $L$ has a least and greatest element, which we denote $and.big L = bot$ and $or.big L = top$, respectively.
@@ -582,7 +582,7 @@ The equations do not just have to make sure that states with even parities are p
 Combining @lemma:0 and @lemma:4.5 we obtain the coincidence result #cite(<urabe2016coalgebraic>, supplement: "Theorem 4.6"):
 
 #theorem()[
-  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton. Then the behavior mappings $tr_1,dots,tr_n$, which are the solution to the #ref(<eq:traces2>, supplement: "system of equations") coincide with the accepted language of $A$: $beh(s_0)=[tr_1,dots,tr_n](s_0) = L(A)$.
+  Let $A=(S, Sigma, delta, s_0, Sigma)$ be a parity tree automaton. Then the behavior mappings $tr_1,dots,tr_n$, which are the solution to the system of equations in @eq:traces2 coincide with the accepted language of $A$: $beh(s_0)=[tr_1,dots,tr_n](s_0) = L(A)$.
 ] <th>
 
 = Derivation of Coincidence Using Game Semantics <sec:new>
@@ -672,7 +672,7 @@ The proof of @th (for Büchi automata on trees) now follows from @lemma:0, @lemm
 = Conclusion and Future Work <sec:conclusion>
 In this report we have shown a coalgebraic representation of Büchi automata, and more generally, parity tree automata @urabe2016coalgebraic. The construction relies upon two key ideas: working in the Kleisli category for the monad $cal(P)$ and deriving separate commuting diagrams for states with different parities and then utilizing fixed point equations for these different mappings for each parity.
 
-We explained the model in the Kleisli category in @sec:nd by showing how to construct a final coalgebra for finite words for a nondeterministic automaton. Subsequently we constructed a weakly final coalgebra to additionally obtain the infinite words within such a system. Building upon these ideas we derived the coalgebraic construction for parity tree automata in @results:buchi, making use of the modal mu-calculus explained in @sec:modal.
+We explained the model in the Kleisli category in @sec:nd by showing how to construct a final coalgebra for finite words for a nondeterministic automaton. Subsequently we constructed a weakly final coalgebra to additionally obtain the infinite words within such a system. Building upon these ideas we derived the coalgebraic construction for parity tree automata in @results:buchi, making use of the modal $mu$-calculus explained in @sec:modal.
 
 In @sec:new we presented our alternate derivation of the coincidence results in @results:buchi. By applying game semantics we were able to give a more conceptual proof of the results. Additionally, looking at this result through this alternate angle of game semantics coul provide new insights.
 
