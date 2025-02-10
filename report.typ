@@ -350,7 +350,7 @@ for $s in S$, $sigma in Sigma$, $w in Sigma^*$. So $beh(s)$ contains the empty w
 
 === Nondeterministic Automata <sec:finite>
 
-Unfortunately, extending this approach to nondeterministic automata is not possible, as we will illustrate by the following automaton, which we will use as a running example:
+Unfortunately, extending this approach to nondeterministic automata leads to some problems, as we will illustrate by the following automaton, which we will use as a running example:
 
 // #align(center)[
 #figure(
@@ -374,7 +374,33 @@ Unfortunately, extending this approach to nondeterministic automata is not possi
 The automaton given in @img:nd is nondeterministic because in $s_0$ there are two transitions for $a$. Intuitively, the finite words accepted by the automaton from state $s_0$ should be
 $ tr(s_0) = {a, a b, a b b, ...} union {a, a c, a c c, ...}. $
 
-This transitions system might be modeled by a coalgebra $c: S -> 2 times cal(P)(Sigma times S)$, i.e., for every state whether it is final, and a set of pairs $(sigma,s) in Sigma times S$ denoting a transition by taking letter $sigma$ and transitioning to state $s$. The problem is that this functor $F S = 2 times cal(P)(Sigma times S)$ does not have a final coalgebra, as Lambek's lemma implies that such a final coalgebra structure $z: Z -> 2 times cal(P)(Sigma times Z)$ for some carrier $Z$, would have to be an isomorphism @awodey2010category. But an isomorphism $Z tilde.equiv 2 times cal(P)(Sigma times Z)$ would imply a bijection between $Z$ and $cal(P)(Z)$, which cannot exist.
+This transitions system might be modeled by a coalgebra $c: S -> 2 times cal(P)(Sigma times S)$, i.e., for every state whether it is final, and a set of pairs $(sigma,s) in Sigma times S$ denoting a transition by taking letter $sigma$ and transitioning to state $s$.
+
+The first problem we run into is that this functor $F S = 2 times cal(P)(Sigma times S)$ does not have a final coalgebra in *Sets*. Because, by Lambek's lemma, such a final coalgebra structure $z: Z -> 2 times cal(P)(Sigma times Z)$ for some carrier $Z$, would have to be an isomorphism @awodey2010category. But an isomorphism $Z tilde.equiv 2 times cal(P)(Sigma times Z)$ would imply a bijection between $Z$ and $cal(P)(Z)$, which cannot exist.
+
+This cardinality problem is easily fixed by working with finite powersets $cal(P)_f$, i.e., the functor $F S = 2 times cal(P)_f (Sigma times S)$. This functor does have a final coalgebra in *Sets*. However, the unique coalgebra homomorphism to this final coalgebra does not capture language equivalence, but bisimulation @rutten2000universal. Consider for example the following nondeterministic automaton:
+
+#figure(
+  diagram(
+    spacing: 2em,
+    node((0, 0), [$t_0$], name: <x0>, shape: circle, stroke: .5pt),
+    node((1, 0), [$t_1$], name: <x1>, stroke: .5pt, shape: circle, extrude: (0, -5)),
+    node((2, -0.5), [$t_2$], name: <x2>, stroke: .5pt, shape: circle, extrude: (0, -5)),
+    node((2, 0.5), [$t_3$], name: <x3>, stroke: .5pt, shape: circle, extrude: (0, -5)),
+    // node((1, 1), [$checkmark$], name: <check>, stroke: .5pt),
+    edge(<x0>, <x1>, [$a$], "->"),
+    edge(<x1>, <x2>, [$b$], "->"),
+    edge(<x1>, <x3>, [$c$], "->", right),
+    edge(<x2>, <x2>, [$b$], "->", bend: -130deg, loop-angle: 180deg),
+    edge(<x3>, <x3>, [$c$], "->", bend: -130deg, loop-angle: 180deg),
+    // edge(<x1>, <check>, "->"),
+    // edge(<x2>, <check>, "->"),
+  ),
+  caption: [Another example of a nondeterministic automaton.],
+) <img:nd2>
+
+Clearly $s_0$ in @img:nd and $t_0$ in @img:nd2 accept the same language. But, they are not bisimilar, so they will be mapped to different states in the final coalgebra of $F S = 2 times cal(P)_f (Sigma times S)$. This means that the coalgebraic approach, when using finite powersets, distinguishes between states that should be considered equivalent based on language acceptance. Consequently, we need a different approach that captures language equivalence rather than bisimulation.
+
 
 The solution, as given by Hasuo et al. @hasuo2007generic, is to work in the Kleisli category for the monad $cal(P)$. Recall that a map $f: X -> Y$ in the Kleisli category is a map $f: X -> cal(P)(Y)$ in *Sets*. Briefly put, this will solve our problem because we can have a final coalgebra $z: Z -> F Z$ that is a map $z: Z -> cal(P)(F Z)$ in *Sets*. Next, we will review the definition of the Kleisli category and define the appropriate functor, enabling us to construct the desired final coalgebra that characterizes the accepting finite words.
 
